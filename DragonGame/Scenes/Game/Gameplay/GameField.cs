@@ -14,7 +14,7 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         private readonly Texture _backgroundTexture;
 
-        private readonly Platforms _platforms;
+        public readonly Platforms Platforms;
         private readonly Player _player;
 
         private int _yOffset;
@@ -24,7 +24,7 @@ namespace DragonGame.Scenes.Game.Gameplay
             Texture platformTexture)
         {
             _player = new Player(random, playerTexture);
-            _platforms = new Platforms(_player, random, platformTexture);
+            Platforms = new Platforms(_player, random, platformTexture);
 
 
             _backgroundTexture = backgroundTexture;
@@ -49,24 +49,24 @@ namespace DragonGame.Scenes.Game.Gameplay
         public void Save(StateBuffer stateBuffer)
         {
             _player.Save(stateBuffer);
-            _platforms.Save(stateBuffer);
+            Platforms.Save(stateBuffer);
         }
 
         public void Rollback(StateBuffer stateBuffer)
         {
             _player.Rollback(stateBuffer);
-            _platforms.Rollback(stateBuffer);
+            Platforms.Rollback(stateBuffer);
         }
 
         public void GetReadyUpdate()
         {
-            _player.Update(_platforms, GameInput.None);
+            _player.Update(Platforms, GameInput.None);
         }
 
         public void GameUpdate(GameInput input)
         {
-            _player.Update(_platforms, input);
-            _platforms.Update();
+            _player.Update(Platforms, input);
+            Platforms.Update();
             UpdateOffset();
         }
 
@@ -77,15 +77,15 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public void Draw()
         {
-            Engine.Game.Instance.Renderer.SetTarget(OutputTexture);
-
-            Engine.Game.Instance.Renderer.Copy(_backgroundTexture,
+            var renderer = Engine.Game.Instance.Renderer;
+            renderer.SetTarget(OutputTexture);
+            
+            renderer.Copy(_backgroundTexture,
                 new Rectangle(0, 0, _backgroundTexture.Width, _backgroundTexture.Height + _yOffset), null);
             _player.Draw(_yOffset);
-            _platforms.Draw(_yOffset);
-            Engine.Game.Instance.Renderer.Present();
+            Platforms.Draw(_yOffset);
 
-            Engine.Game.Instance.Renderer.SetTarget(null);
+            renderer.SetTarget(null);
         }
 
         public static int TransformY(int y, int yScroll)

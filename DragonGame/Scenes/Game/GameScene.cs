@@ -96,6 +96,9 @@ namespace DragonGame.Scenes.Game
             switch (_state)
             {
                 case GameState.GetReady:
+                    P1Field.Platforms.CanCollide = true;
+                    P2Field.Platforms.CanCollide = true;
+                    _state = GameState.InGame;
                     break;
                 case GameState.InGame:
                     break;
@@ -120,6 +123,9 @@ namespace DragonGame.Scenes.Game
             var p1Dest = new Rectangle(GameBorder / 2, GameBorder / 2, GameField.Width, GameField.Height);
             var p2Dest = new Rectangle(Width / 2 + GameBorder / 2, GameBorder / 2, GameField.Width, GameField.Height);
 
+
+            renderer.SetDrawColor(0, 0, 0, 0);
+            renderer.Clear();
             renderer.Copy(_gameBorder, null, null);
             renderer.Copy(P1Field.OutputTexture, null, p1Dest);
             renderer.Copy(P2Field.OutputTexture, null, p2Dest);
