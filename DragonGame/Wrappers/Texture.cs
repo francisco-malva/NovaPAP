@@ -1,0 +1,65 @@
+﻿using System;
+using SDL2;
+
+namespace DragonGame.Wrappers
+{
+    internal class Texture : IDisposable
+    {
+        private int _access;
+        private uint _format;
+
+        private int _height;
+
+        private int _width;
+
+        public Texture(Renderer renderer, uint format, int access, int w, int h)
+        {
+            Handle = SDL.SDL_CreateTexture(renderer.Handle, format, access, w, h);
+            UpdateInformation();
+        }
+
+        public Texture(Renderer renderer, Surface surface)
+        {
+            Handle = SDL.SDL_CreateTextureFromSurface(renderer.Handle, surface.Handle);
+            UpdateInformation();
+        }
+
+        public uint Format => _format;
+        public int Access => _access;
+        public int Width => _width;
+        public int Height => _height;
+
+        public IntPtr Handle { get; private set; }
+
+        public void Dispose()
+        {
+            ReleaseUnmanagedResources();
+            GC.SuppressFinalize(this);
+        }
+
+        private void UpdateInformation()
+        {
+            var _ = SDL.SDL_QueryTexture(Handle, out _format, out _access, out _width, out _height);
+        }
+
+        private void ReleaseUnmanagedResources()
+        {
+            if (Handle == IntPtr.Zero) return;
+
+            SDL.SDL_DestroyTexture(Handle);
+            Handle = IntPtr.Zero;
+        }
+
+        ~Texture()
+        {
+            ReleaseUnmanagedResources();
+        }
+
+
+        public static Texture FromBmp(string bmpPath, Renderer renderer)
+        {
+            using var surface = new Surface(bmpPath);
+            return new Texture(renderer, surface);
+        }
+    }
+}
