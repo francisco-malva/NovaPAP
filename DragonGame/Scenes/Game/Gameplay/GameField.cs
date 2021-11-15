@@ -1,6 +1,10 @@
 ﻿using System;
 using DragonGame.Engine.Rollback;
 using DragonGame.Engine.Utilities;
+using DragonGame.Scenes.Game.Gameplay.AI;
+using DragonGame.Scenes.Game.Gameplay.Human;
+using DragonGame.Scenes.Game.Gameplay.Platforming;
+using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Scenes.Game.Input;
 using DragonGame.Wrappers;
 using SDL2;
@@ -15,17 +19,24 @@ namespace DragonGame.Scenes.Game.Gameplay
         private readonly Texture _backgroundTexture;
 
         public readonly Platforms Platforms;
-        private readonly Player _player;
+        public Player Player { get; private set; }
 
         private int _yOffset;
 
-        public GameField(DeterministicRandom random, Texture backgroundTexture,
+        private byte _roundsWon;
+        private byte _roundsToWin;
+        private byte _wonTimer;
+
+        public bool AiControlled { get; private set; }
+
+        public GameField(byte roundsToWin, bool ai, AiDifficulty difficulty, DeterministicRandom random, Texture backgroundTexture,
             Texture playerTexture,
             Texture platformTexture)
         {
-            _player = new Player(random, playerTexture);
-            Platforms = new Platforms(_player, random, platformTexture);
-
+            _roundsToWin = roundsToWin;
+            AiControlled = ai;
+            Player = ai ? new AIPlayer(difficulty, random, playerTexture) : new HumanPlayer(random, playerTexture);
+            Platforms = new Platforms(Player, random, platformTexture);
 
             _backgroundTexture = backgroundTexture;
 
@@ -35,11 +46,29 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public Texture OutputTexture { get; }
 
-        public bool AiControlled
+        public void Reset()
         {
-            get => _player.AiControlled;
-            set => _player.AiControlled = value;
+            Platforms.Reset();
+            Player.Reset();
+            UpdateOffset();
         }
+
+        public void WinRound()
+        {
+            Player.SetState(PlayerState.Won);
+            if (_roundsWon < _roundsToWin)
+            {
+                _roundsWon++;
+                _wonTimer = 60;
+            }
+        }
+
+        public void LoseRound()
+        {
+            Player.SetState(PlayerState.Lost);
+        }
+
+        public bool PlayerWonGame => _roundsWon == _roundsToWin;
 
         public void Dispose()
         {
@@ -48,41 +77,57 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public void Save(StateBuffer stateBuffer)
         {
-            _player.Save(stateBuffer);
+            stateBuffer.Write(_roundsWon);
+            stateBuffer.Write(_roundsToWin);
+            stateBuffer.Write(_wonTimer);
+
+            Player.Save(stateBuffer);
             Platforms.Save(stateBuffer);
         }
 
         public void Rollback(StateBuffer stateBuffer)
         {
-            _player.Rollback(stateBuffer);
+            _roundsWon = stateBuffer.Read<byte>();
+            _roundsToWin = stateBuffer.Read<byte>();
+            _wonTimer = stateBuffer.Read<byte>();
+            
+            Player.Rollback(stateBuffer);
             Platforms.Rollback(stateBuffer);
         }
 
-        public void GetReadyUpdate()
+        public void Update(GameInput input)
         {
-            _player.Update(Platforms, GameInput.None);
+            Player.Update(Platforms, input);
+            Platforms.Update();
+
+            WinUpdate();
+            if (Player.State == PlayerState.InGame)
+            {
+                UpdateOffset();
+            }
         }
 
-        public void GameUpdate(GameInput input)
+        private void WinUpdate()
         {
-            _player.Update(Platforms, input);
-            Platforms.Update();
-            UpdateOffset();
+            if (_wonTimer > 0)
+            {
+                --_wonTimer;
+            }
         }
 
         private void UpdateOffset()
         {
-            _yOffset = Math.Max(0, _player.Position.Y - Height / 2);
+            _yOffset = Math.Max(0, Player.Position.Y - Height / 2);
         }
 
         public void Draw()
         {
             var renderer = Engine.Game.Instance.Renderer;
             renderer.SetTarget(OutputTexture);
-            
+
             renderer.Copy(_backgroundTexture,
                 new Rectangle(0, 0, _backgroundTexture.Width, _backgroundTexture.Height + _yOffset), null);
-            _player.Draw(_yOffset);
+            Player.Draw(_yOffset);
             Platforms.Draw(_yOffset);
 
             renderer.SetTarget(null);
@@ -92,5 +137,7 @@ namespace DragonGame.Scenes.Game.Gameplay
         {
             return Height - y + yScroll;
         }
+
+        public bool PlayerWonRound => Platforms.PlayerFinishedCourse;
     }
 }

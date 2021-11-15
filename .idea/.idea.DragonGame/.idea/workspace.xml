@@ -5,7 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d705ecf4-ecb3-4e46-a5d9-08a7e16203bb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.DragonGame/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DragonGame/Scenes/Game/GameState.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.DragonGame/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DragonGame/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DragonGame/Engine/Game.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DragonGame/Engine/Game.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DragonGame/Scenes/Game/GameScene.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DragonGame/Scenes/Game/GameScene.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DragonGame/Scenes/Game/Gameplay/GameField.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DragonGame/Scenes/Game/Gameplay/GameField.cs" afterDir="false" />
     </list>
@@ -27,6 +29,8 @@
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.3501355" />
+    <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.0" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -60,7 +64,9 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1636918646537</updated>
-      <workItem from="1636918661281" duration="338000" />
+      <workItem from="1636918661281" duration="580000" />
+      <workItem from="1636965124983" duration="794000" />
+      <workItem from="1636966267796" duration="211000" />
     </task>
     <servers />
   </component>
@@ -68,7 +74,7 @@
     <option name="version" value="3" />
   </component>
   <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
-  <component name="UnityProjectConfiguration" hasMinimizedUI="null" />
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -80,6 +86,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />

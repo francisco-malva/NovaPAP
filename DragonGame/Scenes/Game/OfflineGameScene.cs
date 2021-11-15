@@ -1,4 +1,7 @@
-﻿using DragonGame.Scenes.Game.Input;
+﻿using System.IO;
+using DragonGame.Engine.Input;
+using DragonGame.Scenes.Game.Gameplay;
+using DragonGame.Scenes.Game.Input;
 using SDL2;
 
 namespace DragonGame.Scenes.Game
@@ -9,12 +12,9 @@ namespace DragonGame.Scenes.Game
         private GameInput _p1PreviousInput, _p1CurrentInput;
         private GameInput _p2PreviousInput, _p2CurrentInput;
 
-        public OfflineGameScene(byte roundsToWin, bool p1Ai, bool p2Ai) : base(roundsToWin)
+        public OfflineGameScene(byte roundsToWin, bool p1Ai, bool p2Ai, AiDifficulty difficulty) : base(roundsToWin, p1Ai, p2Ai, difficulty)
         {
             _replay = new Replay.Replay(this, Random);
-
-            P1Field.AiControlled = p1Ai;
-            P2Field.AiControlled = p2Ai;
         }
 
         protected override void RunFrame()
@@ -40,16 +40,20 @@ namespace DragonGame.Scenes.Game
             previousInput = nextInput;
             unsafe
             {
-                var keys = (bool*)SDL.SDL_GetKeyboardState(out _);
-
                 nextInput = GameInput.None;
 
-                nextInput |= keys[(int)leftScanCode] ? GameInput.Left : GameInput.None;
-                nextInput |= keys[(int)rightScanCode] ? GameInput.Right : GameInput.None;
-                nextInput |= keys[(int)specialScanCode] ? GameInput.Special : GameInput.None;
+                nextInput |= Keyboard.KeyDown(leftScanCode) ? GameInput.Left : GameInput.None;
+                nextInput |= Keyboard.KeyDown(rightScanCode) ? GameInput.Right : GameInput.None;
+                nextInput |= Keyboard.KeyDown(specialScanCode) ? GameInput.Special : GameInput.None;
             }
 
             if (nextInput != previousInput) _replay.RegisterInput(FrameCount, _p1CurrentInput, _p2CurrentInput);
+        }
+
+        protected override void OnGameEnd()
+        {
+            using var writer = new BinaryWriter(File.OpenWrite("replay.rpy"));
+            _replay.Write(writer);
         }
     }
 }

@@ -1,23 +1,25 @@
 ﻿using DragonGame.Engine.Rollback;
 using DragonGame.Engine.Utilities;
+using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Wrappers;
 
-namespace DragonGame.Scenes.Game.Gameplay
+namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
     internal class Platforms : IRollbackable
     {
-        public bool CanCollide;
+        public const short PlatformCount = 10;
+        public const int InitialPlatformHeight = 100;
+        public const int PlatformYStep = 150;
 
-        private const short PlatformCount = 10;
-        private const int InitialPlatformHeight = 100;
-        private const int PlatformYStep = 150;
-
-        private readonly int _finishingY;
         private readonly Platform[] _platforms;
 
         private readonly Player _player;
 
         private readonly Texture _texture;
+
+        private DeterministicRandom _random;
+
+        private const int FinishingY = InitialPlatformHeight + PlatformCount * PlatformYStep;
 
         public Platforms(Player player, DeterministicRandom random, Texture texture)
         {
@@ -25,40 +27,47 @@ namespace DragonGame.Scenes.Game.Gameplay
             _texture = texture;
 
             _platforms = new Platform[PlatformCount];
+            _random = random;
 
-            for (short i = 0; i < _platforms.Length; i++)
-                _platforms[i] = new Platform(i, new Point(
-                    random.GetInteger(Platform.PlatformWidth / 2, GameField.Width - Platform.PlatformWidth / 2),
-                    InitialPlatformHeight + i * PlatformYStep), random);
-
-            _finishingY = InitialPlatformHeight + PlatformCount * PlatformYStep;
+            for(var i = (short)0; i < PlatformCount; i++){
+                _platforms[i] = new Platform(i, _random);
+            }
         }
 
-        public bool PlayerFinishedCourse => _player.Position.Y + Player.PlatformCollisionHeight > _finishingY;
+        public void Reset()
+        {
+            for (short i = 0; i < _platforms.Length; i++)
+                _platforms[i].Reset();
+        }
+
+        public bool PlayerFinishedCourse => _player.Position.Y + Player.PlatformCollisionHeight > FinishingY;
 
         public Platform this[short id] => _platforms[id];
 
         public void Save(StateBuffer stateBuffer)
         {
-            stateBuffer.Write(CanCollide);
             foreach (var platform in _platforms) platform.Save(stateBuffer);
         }
 
         public void Rollback(StateBuffer stateBuffer)
         {
-            CanCollide = stateBuffer.Read<bool>();
             foreach (var platform in _platforms) platform.Rollback(stateBuffer);
         }
 
         public void Update()
         {
-            foreach (var platform in _platforms) platform.Update(CanCollide, _player);
+            foreach (var platform in _platforms) platform.Update(_player);
         }
 
         public void Draw(int yScroll)
         {
             DrawPlatforms(yScroll);
-            DrawFinishingLine(yScroll);
+
+            if (_player.State == PlayerState.InGame)
+            {
+                DrawFinishingLine(yScroll);
+            }
+
         }
 
         private void DrawPlatforms(int yScroll)
@@ -68,12 +77,14 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         private void DrawFinishingLine(int yScroll)
         {
-            var a = new Point(0, GameField.TransformY(_finishingY, yScroll));
+            var a = new Point(0, GameField.TransformY(FinishingY, yScroll));
 
             if (a.Y > GameField.Height) //Cull test
                 return;
 
-            var b = new Point(GameField.Width, GameField.TransformY(_finishingY, yScroll));
+            var b = new Point(
+                GameField.Width,
+                GameField.TransformY(FinishingY, yScroll));
 
             Engine.Game.Instance.Renderer.SetDrawColor(255, 0, 0, 255);
             Engine.Game.Instance.Renderer.DrawLine(ref a, ref b);

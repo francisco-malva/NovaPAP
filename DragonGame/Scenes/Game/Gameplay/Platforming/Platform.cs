@@ -1,6 +1,8 @@
 ﻿using System;
 using DragonGame.Engine.Rollback;
 using DragonGame.Engine.Utilities;
+using DragonGame.Scenes.Game.Gameplay.Platforming;
+using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Wrappers;
 
 namespace DragonGame.Scenes.Game.Gameplay
@@ -14,17 +16,25 @@ namespace DragonGame.Scenes.Game.Gameplay
         private bool _moveLeft;
         private bool _moving;
 
+        private DeterministicRandom _random;
 
         private bool _onScreen;
         public Point Position;
 
 
-        public Platform(short id, Point position, DeterministicRandom random)
+        public Platform(short id, DeterministicRandom random)
         {
             ID = id;
-            Position = position;
+            _random = random;
 
-            _moving = random.GetFloat() <= 0.25;
+            Reset();
+        }
+
+        public void Reset()
+        {
+            _moving = _random.GetFloat() <= 0.25f;
+            Position.X = _random.GetInteger(Platform.PlatformWidth / 2, GameField.Width - Platform.PlatformWidth / 2);
+            Position.Y = Platforms.InitialPlatformHeight + ID * Platforms.PlatformYStep;
         }
 
         public void Save(StateBuffer stateBuffer)
@@ -45,22 +55,16 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public void Draw(Texture texture, int yScroll)
         {
-            if (!_onScreen)
-                return;
-
             var dst = new Rectangle(Position.X - texture.Width / 2,
                 GameField.TransformY(Position.Y + texture.Height, yScroll), texture.Width,
                 texture.Height);
             Engine.Game.Instance.Renderer.Copy(texture, null, dst);
         }
 
-        public void Update(bool canCollide, Player player)
+        public void Update(Player player)
         {
             if (_moving) UpdateMove();
-
-            UpdateScreenState(player);
-
-            if (_onScreen && canCollide) PlayerCollision(player);
+            PlayerCollision(player);
         }
 
         private void UpdateScreenState(Player player)
@@ -86,7 +90,7 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         private void PlayerCollision(Player player)
         {
-            if (player.Descending && CollidingWithPlatform(player)) player.Jump(this);
+            if (player.State == PlayerState.InGame && player.Descending && CollidingWithPlatform(player)) player.Jump(this);
         }
 
         private bool CollidingWithPlatform(Player player)

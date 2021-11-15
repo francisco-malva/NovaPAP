@@ -9,12 +9,23 @@ namespace DragonGame.Scenes.Game.Replay
 {
     internal class Replay
     {
+
+        public bool P1Ai { get; private set; }
+        public bool P2Ai { get; private set; }
+
         private readonly SortedDictionary<ulong, ReplayInput> _inputs = new();
         private byte[] _initialState;
         private byte[] _randomBytes;
 
         public Replay(GameScene scene, DeterministicRandom random)
         {
+            bool p1Ai, p2Ai;
+
+            scene.QueryAi(out p1Ai, out p2Ai);
+
+            P1Ai = p1Ai;
+            P2Ai = p2Ai;
+
             SaveInitialState(scene);
 
             _randomBytes = random.GetInternalArray();
@@ -22,8 +33,11 @@ namespace DragonGame.Scenes.Game.Replay
 
         public Replay(BinaryReader reader)
         {
-            _randomBytes = reader.ReadBytes(reader.Read());
-            _initialState = reader.ReadBytes(reader.Read());
+            P1Ai = reader.ReadBoolean();
+            P2Ai = reader.ReadBoolean();
+
+            _randomBytes = reader.ReadBytes(reader.ReadInt32());
+            _initialState = reader.ReadBytes(reader.ReadInt32());
             for (var i = 0; i < reader.ReadInt32(); i++) _inputs.Add(reader.ReadUInt64(), new ReplayInput(reader));
         }
 
@@ -33,12 +47,18 @@ namespace DragonGame.Scenes.Game.Replay
 
             using var initialState = new StateBuffer(new Span<byte>(_initialState));
             scene.Rollback(initialState);
+
+            _initialState = null; //We don't need the initial state anymore
         }
 
         public void Write(BinaryWriter writer)
         {
+            writer.Write(P1Ai);
+            writer.Write(P2Ai);
+
             writer.Write(_randomBytes.Length);
             writer.Write(_randomBytes);
+
             writer.Write(_initialState.Length);
             writer.Write(_initialState);
 

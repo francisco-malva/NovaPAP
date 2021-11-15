@@ -7,10 +7,14 @@ namespace DragonGame.Scenes.Game.Replay
         private readonly Replay _replay;
         private GameInput _p1Input, _p2Input;
 
-        public ReplayGameScene(Replay replay) : base(0)
+        public ReplayGameScene(Replay replay) : base(0,replay.P1Ai, replay.P2Ai, Gameplay.AiDifficulty.Easy)
         {
             _replay = replay;
             _replay.Setup(Random, this);
+        }
+
+        protected override void OnGameEnd()
+        {
         }
 
         protected override void RunFrame()

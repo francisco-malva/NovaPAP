@@ -2,6 +2,8 @@
 using DragonGame.Engine.Events;
 using DragonGame.Engine.Scenes;
 using DragonGame.Scenes.Game;
+using DragonGame.Scenes.Game.Gameplay;
+using DragonGame.Scenes.MainMenu;
 using DragonGame.Wrappers;
 using SDL2;
 
@@ -47,9 +49,8 @@ namespace DragonGame.Engine
             EventPump.Subscribe(SDL.SDL_EventType.SDL_QUIT, _ => Exit());
 
             SceneManager = new SceneManager();
-            SceneManager.Set(new OfflineGameScene(3, false, true));
+            SceneManager.Set(new MainMenuScene());
         }
-
 
         public void Run(uint fps)
         {
