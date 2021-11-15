@@ -1,4 +1,4 @@
-﻿namespace DragonGame.Scenes.Game.Gameplay
+﻿namespace DragonGame.Scenes.Game.Gameplay.Players.AI
 {
     internal enum AiDifficulty : byte
     {

@@ -1,20 +1,15 @@
-
-
-
 using System;
-using DragonGame.Engine.Rollback;
 using DragonGame.Engine.Utilities;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
-using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Scenes.Game.Input;
 using DragonGame.Wrappers;
 
-namespace DragonGame.Scenes.Game.Gameplay.AI
+namespace DragonGame.Scenes.Game.Gameplay.Players.AI
 {
     internal class AIPlayer : Player
     {
+        private readonly AiDifficulty _difficulty;
         private bool _canFailTarget = true;
-        private AiDifficulty _difficulty = AiDifficulty.Easy;
 
         private byte _failTimer;
         private short _platformTarget = -1;
@@ -81,22 +76,6 @@ namespace DragonGame.Scenes.Game.Gameplay.AI
             _selectTarget = true;
             _failTimer = 0;
             _prevXDiff = 0;
-        }
-
-        protected override void RollbackSpecialFields(StateBuffer stateBuffer)
-        {
-            _selectTarget = stateBuffer.Read<bool>();
-            _platformTarget = stateBuffer.Read<short>();
-            _difficulty = stateBuffer.Read<AiDifficulty>();
-            _failTimer = stateBuffer.Read<byte>();
-        }
-
-        protected override void SaveSpecialFields(StateBuffer stateBuffer)
-        {
-            stateBuffer.Write(_selectTarget);
-            stateBuffer.Write(_platformTarget);
-            stateBuffer.Write(_difficulty);
-            stateBuffer.Write(_failTimer);
         }
 
         private void UpdateTargetSelection(Platforms platforms)

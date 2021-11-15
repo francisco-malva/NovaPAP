@@ -1,13 +1,15 @@
-﻿using DragonGame.Engine.Rollback;
-using DragonGame.Engine.Scenes;
+﻿using DragonGame.Engine.Scenes;
 using DragonGame.Engine.Utilities;
 using DragonGame.Scenes.Game.Gameplay;
+using DragonGame.Scenes.Game.Gameplay.Players;
+using DragonGame.Scenes.Game.Gameplay.Players.AI;
 using DragonGame.Scenes.Game.Input;
+using DragonGame.Scenes.MainMenu;
 using DragonGame.Wrappers;
 
 namespace DragonGame.Scenes.Game
 {
-    internal abstract class GameScene : Scene, IRollbackable
+    internal abstract class GameScene : Scene
     {
         public const int GameBorder = 32;
         public const int Width = 640;
@@ -23,17 +25,14 @@ namespace DragonGame.Scenes.Game
 
         protected readonly DeterministicRandom Random;
 
-        private byte _roundsToWin;
-
         private GameState _state = GameState.GetReady;
         private byte _stateTimer;
         private Winner _winner;
 
-        protected GameScene(byte roundsToWin, bool p1Ai = false, bool p2Ai = false, AiDifficulty difficulty = AiDifficulty.Easy)
+        protected GameScene(byte roundsToWin, bool p1Ai = false, bool p2Ai = false,
+            AiDifficulty difficulty = AiDifficulty.Easy)
         {
             FrameCount = 0;
-
-            _roundsToWin = roundsToWin;
 
             _gameBorder = Texture.FromBmp("Assets/Textures/UI/game-border.bmp", Engine.Game.Instance.Renderer);
             _gameBackground = Texture.FromBmp("Assets/Textures/Game/background.bmp", Engine.Game.Instance.Renderer);
@@ -41,8 +40,10 @@ namespace DragonGame.Scenes.Game
             _platformTexture = Texture.FromBmp("Assets/Textures/Game/platform.bmp", Engine.Game.Instance.Renderer);
             Random = new DeterministicRandom();
 
-            P1Field = new GameField(roundsToWin, p1Ai, difficulty, Random, _gameBackground, _playerTexture, _platformTexture);
-            P2Field = new GameField(roundsToWin, p2Ai, difficulty, Random, _gameBackground, _playerTexture, _platformTexture);
+            P1Field = new GameField(roundsToWin, p1Ai, difficulty, Random, _gameBackground, _playerTexture,
+                _platformTexture);
+            P2Field = new GameField(roundsToWin, p2Ai, difficulty, Random, _gameBackground, _playerTexture,
+                _platformTexture);
         }
 
         protected ulong FrameCount { get; private set; }
@@ -51,36 +52,6 @@ namespace DragonGame.Scenes.Game
         {
             _winner = winner;
             ChangeState(GameState.PlayerWon);
-        }
-
-        public void Save(StateBuffer stateBuffer)
-        {
-            stateBuffer.Write(_roundsToWin);
-            stateBuffer.Write(FrameCount);
-
-            stateBuffer.Write(_state);
-            stateBuffer.Write(_stateTimer);
-
-            stateBuffer.Write(_winner);
-
-            Random.Save(stateBuffer);
-            P1Field.Save(stateBuffer);
-            P2Field.Save(stateBuffer);
-        }
-
-        public void Rollback(StateBuffer stateBuffer)
-        {
-            _roundsToWin = stateBuffer.Read<byte>();
-            FrameCount = stateBuffer.Read<ulong>();
-
-            _state = stateBuffer.Read<GameState>();
-            _stateTimer = stateBuffer.Read<byte>();
-
-            _winner = stateBuffer.Read<Winner>();
-
-            Random.Rollback(stateBuffer);
-            P1Field.Rollback(stateBuffer);
-            P2Field.Rollback(stateBuffer);
         }
 
         public override void OnTick()
@@ -128,8 +99,6 @@ namespace DragonGame.Scenes.Game
                     break;
                 case GameState.GameOver:
                     break;
-                default:
-                    break;
             }
         }
 
@@ -144,6 +113,7 @@ namespace DragonGame.Scenes.Game
                         ChangeState(GameState.InGame);
                         return;
                     }
+
                     P1Field.Update(p1Input);
                     P2Field.Update(p2Input);
                     break;
@@ -152,17 +122,10 @@ namespace DragonGame.Scenes.Game
                     P2Field.Update(p2Input);
 
                     if (P1Field.PlayerWonRound && P2Field.PlayerWonRound)
-                    {
                         EndRound(Winner.Both);
-                    }
                     else if (P1Field.PlayerWonRound)
-                    {
                         EndRound(Winner.P1);
-                    }
-                    else if (P2Field.PlayerWonRound)
-                    {
-                        EndRound(Winner.P2);
-                    }
+                    else if (P2Field.PlayerWonRound) EndRound(Winner.P2);
                     break;
                 case GameState.PlayerWon:
                     P1Field.Update(p1Input);
@@ -171,15 +134,12 @@ namespace DragonGame.Scenes.Game
                     if (_stateTimer == 60)
                     {
                         if (P1Field.PlayerWonGame || P2Field.PlayerWonGame)
-                        {
-                            Engine.Game.Instance.SceneManager.Set(new MainMenu.MainMenuScene());
-                        }
+                            Engine.Game.Instance.SceneManager.Set(new MainMenuScene());
                         ChangeState(GameState.GetReady);
                     }
+
                     break;
                 case GameState.GameOver:
-                    break;
-                default:
                     break;
             }
         }

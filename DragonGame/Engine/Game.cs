@@ -1,8 +1,6 @@
 ﻿using System;
 using DragonGame.Engine.Events;
 using DragonGame.Engine.Scenes;
-using DragonGame.Scenes.Game;
-using DragonGame.Scenes.Game.Gameplay;
 using DragonGame.Scenes.MainMenu;
 using DragonGame.Wrappers;
 using SDL2;

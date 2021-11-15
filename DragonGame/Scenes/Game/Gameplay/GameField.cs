@@ -1,35 +1,31 @@
 ﻿using System;
-using DragonGame.Engine.Rollback;
 using DragonGame.Engine.Utilities;
-using DragonGame.Scenes.Game.Gameplay.AI;
-using DragonGame.Scenes.Game.Gameplay.Human;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
 using DragonGame.Scenes.Game.Gameplay.Players;
+using DragonGame.Scenes.Game.Gameplay.Players.AI;
 using DragonGame.Scenes.Game.Input;
 using DragonGame.Wrappers;
 using SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay
 {
-    internal class GameField : IDisposable, IRollbackable
+    internal class GameField : IDisposable
     {
         public const int Width = GameScene.Width / 2 - GameScene.GameBorder;
         public const int Height = GameScene.Height - GameScene.GameBorder;
 
         private readonly Texture _backgroundTexture;
+        private readonly byte _roundsToWin;
 
         public readonly Platforms Platforms;
-        public Player Player { get; private set; }
+
+        private byte _roundsWon;
+        private byte _wonTimer;
 
         private int _yOffset;
 
-        private byte _roundsWon;
-        private byte _roundsToWin;
-        private byte _wonTimer;
-
-        public bool AiControlled { get; private set; }
-
-        public GameField(byte roundsToWin, bool ai, AiDifficulty difficulty, DeterministicRandom random, Texture backgroundTexture,
+        public GameField(byte roundsToWin, bool ai, AiDifficulty difficulty, DeterministicRandom random,
+            Texture backgroundTexture,
             Texture playerTexture,
             Texture platformTexture)
         {
@@ -44,7 +40,20 @@ namespace DragonGame.Scenes.Game.Gameplay
                 (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
         }
 
+        public Player Player { get; }
+
+        public bool AiControlled { get; }
+
         public Texture OutputTexture { get; }
+
+        public bool PlayerWonGame => _roundsWon == _roundsToWin;
+
+        public bool PlayerWonRound => Platforms.PlayerFinishedCourse;
+
+        public void Dispose()
+        {
+            OutputTexture?.Dispose();
+        }
 
         public void Reset()
         {
@@ -68,51 +77,18 @@ namespace DragonGame.Scenes.Game.Gameplay
             Player.SetState(PlayerState.Lost);
         }
 
-        public bool PlayerWonGame => _roundsWon == _roundsToWin;
-
-        public void Dispose()
-        {
-            OutputTexture?.Dispose();
-        }
-
-        public void Save(StateBuffer stateBuffer)
-        {
-            stateBuffer.Write(_roundsWon);
-            stateBuffer.Write(_roundsToWin);
-            stateBuffer.Write(_wonTimer);
-
-            Player.Save(stateBuffer);
-            Platforms.Save(stateBuffer);
-        }
-
-        public void Rollback(StateBuffer stateBuffer)
-        {
-            _roundsWon = stateBuffer.Read<byte>();
-            _roundsToWin = stateBuffer.Read<byte>();
-            _wonTimer = stateBuffer.Read<byte>();
-            
-            Player.Rollback(stateBuffer);
-            Platforms.Rollback(stateBuffer);
-        }
-
         public void Update(GameInput input)
         {
             Player.Update(Platforms, input);
             Platforms.Update();
 
             WinUpdate();
-            if (Player.State == PlayerState.InGame)
-            {
-                UpdateOffset();
-            }
+            if (Player.State == PlayerState.InGame) UpdateOffset();
         }
 
         private void WinUpdate()
         {
-            if (_wonTimer > 0)
-            {
-                --_wonTimer;
-            }
+            if (_wonTimer > 0) --_wonTimer;
         }
 
         private void UpdateOffset()
@@ -137,7 +113,5 @@ namespace DragonGame.Scenes.Game.Gameplay
         {
             return Height - y + yScroll;
         }
-
-        public bool PlayerWonRound => Platforms.PlayerFinishedCourse;
     }
 }

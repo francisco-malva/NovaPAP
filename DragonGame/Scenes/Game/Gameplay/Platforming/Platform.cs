@@ -1,24 +1,19 @@
-﻿using System;
-using DragonGame.Engine.Rollback;
-using DragonGame.Engine.Utilities;
-using DragonGame.Scenes.Game.Gameplay.Platforming;
+﻿using DragonGame.Engine.Utilities;
 using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Wrappers;
 
-namespace DragonGame.Scenes.Game.Gameplay
+namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
-    internal class Platform : IRollbackable
+    internal class Platform
     {
         public const int PlatformWidth = 68;
         public const int PlatformHeight = 14;
         private const int PlatformMoveSpeed = 2;
+
+        private readonly DeterministicRandom _random;
         public readonly short ID;
         private bool _moveLeft;
         private bool _moving;
-
-        private DeterministicRandom _random;
-
-        private bool _onScreen;
         public Point Position;
 
 
@@ -33,24 +28,8 @@ namespace DragonGame.Scenes.Game.Gameplay
         public void Reset()
         {
             _moving = _random.GetFloat() <= 0.25f;
-            Position.X = _random.GetInteger(Platform.PlatformWidth / 2, GameField.Width - Platform.PlatformWidth / 2);
+            Position.X = _random.GetInteger(PlatformWidth / 2, GameField.Width - PlatformWidth / 2);
             Position.Y = Platforms.InitialPlatformHeight + ID * Platforms.PlatformYStep;
-        }
-
-        public void Save(StateBuffer stateBuffer)
-        {
-            stateBuffer.Write(Position.X);
-            stateBuffer.Write(Position.Y);
-            stateBuffer.Write(_moving);
-            stateBuffer.Write(_moveLeft);
-        }
-
-        public void Rollback(StateBuffer stateBuffer)
-        {
-            Position.X = stateBuffer.Read<int>();
-            Position.Y = stateBuffer.Read<int>();
-            _moving = stateBuffer.Read<bool>();
-            _moveLeft = stateBuffer.Read<bool>();
         }
 
         public void Draw(Texture texture, int yScroll)
@@ -65,11 +44,6 @@ namespace DragonGame.Scenes.Game.Gameplay
         {
             if (_moving) UpdateMove();
             PlayerCollision(player);
-        }
-
-        private void UpdateScreenState(Player player)
-        {
-            _onScreen = Math.Abs(Position.Y - player.Position.Y) <= GameField.Height;
         }
 
         private void UpdateMove()
@@ -90,7 +64,8 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         private void PlayerCollision(Player player)
         {
-            if (player.State == PlayerState.InGame && player.Descending && CollidingWithPlatform(player)) player.Jump(this);
+            if (player.State == PlayerState.InGame && player.Descending && CollidingWithPlatform(player))
+                player.Jump(this);
         }
 
         private bool CollidingWithPlatform(Player player)

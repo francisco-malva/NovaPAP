@@ -1,5 +1,4 @@
 ﻿using System;
-using DragonGame.Engine.Rollback;
 using DragonGame.Engine.Utilities;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
 using DragonGame.Scenes.Game.Input;
@@ -7,7 +6,7 @@ using DragonGame.Wrappers;
 
 namespace DragonGame.Scenes.Game.Gameplay.Players
 {
-    internal abstract class Player : IRollbackable
+    internal abstract class Player
     {
         public const int PlatformCollisionWidth = 16;
         public const int PlatformCollisionHeight = 16;
@@ -16,14 +15,12 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
         private const int YDrag = 1;
         protected const int XMoveSpeed = 8;
 
-        protected readonly DeterministicRandom Random;
-
         private readonly Texture _texture;
 
-        protected int XSpeed, YSpeed;
+        protected readonly DeterministicRandom Random;
         public Point Position;
 
-        public PlayerState State { get; private set; }
+        protected int XSpeed, YSpeed;
 
         public Player(DeterministicRandom random, Texture texture)
         {
@@ -33,42 +30,21 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
             Reset();
         }
 
+        public PlayerState State { get; private set; }
+
+        public bool Descending => YSpeed < 0;
+
         public void Reset()
         {
             XSpeed = 0;
             YSpeed = 0;
             Position = new Point(GameField.Width / 2, 0);
             ResetSpecialFields();
-            
+
             SetState(PlayerState.GetReady);
         }
 
         protected abstract void ResetSpecialFields();
-
-        public bool Descending => YSpeed < 0;
-
-        public void Save(StateBuffer stateBuffer)
-        {
-            stateBuffer.Write(Position.X);
-            stateBuffer.Write(Position.Y);
-            stateBuffer.Write(XSpeed);
-            stateBuffer.Write(YSpeed);
-
-            SaveSpecialFields(stateBuffer);
-        }
-
-        protected abstract void SaveSpecialFields(StateBuffer stateBuffer);
-
-        public void Rollback(StateBuffer stateBuffer)
-        {
-            Position.X = stateBuffer.Read<int>();
-            Position.Y = stateBuffer.Read<int>();
-            XSpeed = stateBuffer.Read<int>();
-            YSpeed = stateBuffer.Read<int>();
-            RollbackSpecialFields(stateBuffer);
-        }
-
-        protected abstract void RollbackSpecialFields(StateBuffer stateBuffer);
 
         public void Update(Platforms platforms, GameInput input)
         {
@@ -119,6 +95,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
         }
 
         protected abstract void OnJump(Platform platform);
+
         public void SetState(PlayerState state)
         {
             State = state;

@@ -1,15 +1,12 @@
-using DragonGame.Engine.Rollback;
 using DragonGame.Engine.Utilities;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
-using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Scenes.Game.Input;
 using DragonGame.Wrappers;
 
-namespace DragonGame.Scenes.Game.Gameplay.Human
+namespace DragonGame.Scenes.Game.Gameplay.Players
 {
     internal class HumanPlayer : Player
     {
-
         public HumanPlayer(DeterministicRandom random, Texture texture) : base(random, texture)
         {
         }
@@ -29,14 +26,6 @@ namespace DragonGame.Scenes.Game.Gameplay.Human
         }
 
         protected override void ResetSpecialFields()
-        {
-        }
-
-        protected override void RollbackSpecialFields(StateBuffer stateBuffer)
-        {
-        }
-
-        protected override void SaveSpecialFields(StateBuffer stateBuffer)
         {
         }
     }

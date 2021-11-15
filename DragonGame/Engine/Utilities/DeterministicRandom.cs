@@ -1,9 +1,8 @@
 ﻿using System;
-using DragonGame.Engine.Rollback;
 
 namespace DragonGame.Engine.Utilities
 {
-    internal class DeterministicRandom : IRollbackable
+    internal class DeterministicRandom
     {
         private byte[] _randomBytes = new byte[2048];
         private int _randomPtr;
@@ -12,16 +11,6 @@ namespace DragonGame.Engine.Utilities
         {
             var random = new Random();
             random.NextBytes(_randomBytes);
-        }
-
-        public void Save(StateBuffer buffer)
-        {
-            buffer.Write(_randomPtr);
-        }
-
-        public void Rollback(StateBuffer buffer)
-        {
-            _randomPtr = buffer.Read<int>();
         }
 
         /// <summary>
