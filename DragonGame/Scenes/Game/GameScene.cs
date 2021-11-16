@@ -29,6 +29,9 @@ namespace DragonGame.Scenes.Game
         private byte _stateTimer;
         private Winner _winner;
 
+        private const byte GetReadyTime = 120;
+        private const byte RoundEndTime = 120;
+
         protected GameScene(byte roundsToWin, bool p1Ai = false, bool p2Ai = false,
             AiDifficulty difficulty = AiDifficulty.Easy)
         {
@@ -110,7 +113,7 @@ namespace DragonGame.Scenes.Game
             switch (_state)
             {
                 case GameState.GetReady:
-                    if (_stateTimer == 120)
+                    if (_stateTimer == GetReadyTime)
                     {
                         ChangeState(GameState.InGame);
                         return;
@@ -133,7 +136,7 @@ namespace DragonGame.Scenes.Game
                     P1Field.Update(p1Input);
                     P2Field.Update(p2Input);
 
-                    if (_stateTimer == 60)
+                    if (_stateTimer == RoundEndTime)
                     {
                         if (P1Field.PlayerWonGame || P2Field.PlayerWonGame)
                             Engine.Game.Instance.SceneManager.Set(new MainMenuScene());
