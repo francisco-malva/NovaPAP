@@ -22,6 +22,10 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
 
         protected int XSpeed, YSpeed;
 
+        private double _angle = 0.0f;
+
+        private SDL2.SDL.SDL_RendererFlip _flip;
+
         public Player(DeterministicRandom random, Texture texture)
         {
             Random = random;
@@ -48,6 +52,13 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
 
         public void Update(Platforms platforms, GameInput input)
         {
+            UpdateMovement(platforms, input);
+            UpdateAngle();
+            UpdateFlip();
+        }
+
+        private void UpdateMovement(Platforms platforms, GameInput input)
+        {
             switch (State)
             {
                 case PlayerState.GetReady:
@@ -62,6 +73,60 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
                     break;
                 case PlayerState.Won:
                     Position.Y += 10;
+                    break;
+            }
+        }
+
+        private void UpdateAngle()
+        {
+            switch (State)
+            {
+                case PlayerState.GetReady:
+                    _angle = 0.0;
+                    break;
+                case PlayerState.InGame:
+                    if (XSpeed > 0)
+                    {
+                        _angle = Math.Min(_angle + 3.0f, 25.0);
+                    }
+                    else if (XSpeed < 0)
+                    {
+                        _angle = Math.Max(_angle - 3.0f, -25.0);
+                    }
+                    else
+                    {
+                        _angle = 0;
+                    }
+                    break;
+                case PlayerState.Won:
+                    _angle = 0.0;
+                    break;
+                case PlayerState.Lost:
+                    _angle += 15.0;
+                    break;
+            }
+        }
+
+        private void UpdateFlip()
+        {
+            switch (State)
+            {
+                case PlayerState.GetReady:
+                    _flip = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_NONE;
+                    break;
+                case PlayerState.InGame:
+                    if (XSpeed != 0)
+                    {
+                        if (XSpeed < 0)
+                        {
+                            _flip = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+                        }
+                        else
+                        {
+                            _flip = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_NONE;
+                        }
+                    }
+
                     break;
             }
         }
@@ -81,7 +146,8 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
             var dst = new Rectangle(Position.X - _texture.Width / 2,
                 GameField.TransformY(Position.Y + _texture.Height, yScroll), _texture.Width,
                 _texture.Height);
-            renderer.Copy(_texture, null, dst);
+
+            renderer.CopyEx(_texture, null, dst, _angle, null, _flip);
         }
 
         protected abstract void MoveX(Platforms platforms, GameInput input);

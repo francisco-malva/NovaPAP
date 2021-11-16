@@ -9,9 +9,9 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         private DeterministicRandom _random;
 
-        private const ushort StaticTime = 120;
-        private const ushort DissapearingTime = 60;
-        private const ushort AppearingTime = 60;
+        private const ushort StaticTime = 180;
+        private const ushort DissapearingTime = 30;
+        private const ushort AppearingTime = 30;
 
 
         private ushort _stateTimer;
