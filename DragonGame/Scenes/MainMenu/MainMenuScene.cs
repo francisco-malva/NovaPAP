@@ -11,7 +11,7 @@ namespace DragonGame.Scenes.MainMenu
         public override void OnTick()
         {
             if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_A))
-                Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(3, false, true, AiDifficulty.Easy));
+                Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(3, false, false, AiDifficulty.Easy));
 
             Engine.Game.Instance.Renderer.SetDrawColor(255, 0, 0, 255);
             Engine.Game.Instance.Renderer.Clear();

@@ -57,7 +57,7 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public void Reset()
         {
-            Platforms.Reset();
+            Platforms.GeneratePlatforms();
             Player.Reset();
             UpdateOffset();
         }

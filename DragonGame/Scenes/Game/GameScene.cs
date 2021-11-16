@@ -38,6 +38,8 @@ namespace DragonGame.Scenes.Game
             _gameBackground = Texture.FromBmp("Assets/Textures/Game/background.bmp", Engine.Game.Instance.Renderer);
             _playerTexture = Texture.FromBmp("Assets/Textures/Game/player.bmp", Engine.Game.Instance.Renderer);
             _platformTexture = Texture.FromBmp("Assets/Textures/Game/platform.bmp", Engine.Game.Instance.Renderer);
+            _platformTexture.SetBlendMode(SDL2.SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+
             Random = new DeterministicRandom();
 
             P1Field = new GameField(roundsToWin, p1Ai, difficulty, Random, _gameBackground, _playerTexture,

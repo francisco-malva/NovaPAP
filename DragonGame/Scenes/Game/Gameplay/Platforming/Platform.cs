@@ -4,69 +4,58 @@ using DragonGame.Wrappers;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
-    internal class Platform
+    internal abstract class Platform
     {
         public const int PlatformWidth = 68;
         public const int PlatformHeight = 14;
         private const int PlatformMoveSpeed = 2;
 
-        private readonly DeterministicRandom _random;
         public readonly short ID;
-        private bool _moveLeft;
-        private bool _moving;
+        protected byte _alpha = 255;
+
         public Point Position;
 
-
-        public Platform(short id, DeterministicRandom random)
+        public Platform(short id, Point position)
         {
             ID = id;
-            _random = random;
-
-            Reset();
-        }
-
-        public void Reset()
-        {
-            _moving = _random.GetFloat() <= 0.25f;
-            Position.X = _random.GetInteger(PlatformWidth / 2, GameField.Width - PlatformWidth / 2);
-            Position.Y = Platforms.InitialPlatformHeight + ID * Platforms.PlatformYStep;
+            Position = position;
         }
 
         public void Draw(Texture texture, int yScroll)
         {
+            var renderer = Engine.Game.Instance.Renderer;
+
             var dst = new Rectangle(Position.X - texture.Width / 2,
                 GameField.TransformY(Position.Y + texture.Height, yScroll), texture.Width,
                 texture.Height);
-            Engine.Game.Instance.Renderer.Copy(texture, null, dst);
+            texture.SetAlphaMod(_alpha);
+
+            renderer.Copy(texture, null, dst);
         }
 
         public void Update(Player player)
         {
-            if (_moving) UpdateMove();
+            OnUpdate(player);
             PlayerCollision(player);
         }
 
-        private void UpdateMove()
+        protected abstract void OnUpdate(Player player);
+
+        protected virtual bool CanJumpOnPlatform(Player player)
         {
-            if (_moveLeft)
-            {
-                Position.X -= PlatformMoveSpeed;
-
-                if (Position.X <= PlatformWidth / 2) _moveLeft = false;
-            }
-            else
-            {
-                Position.X += PlatformMoveSpeed;
-
-                if (Position.X >= GameField.Width - PlatformWidth / 2) _moveLeft = true;
-            }
+            return player.State == PlayerState.InGame && player.Descending && CollidingWithPlatform(player);
         }
-
         private void PlayerCollision(Player player)
         {
-            if (player.State == PlayerState.InGame && player.Descending && CollidingWithPlatform(player))
+            if (CanJumpOnPlatform(player))
+            {
+                OnPlayerJump(player);
                 player.Jump(this);
+            }
+
         }
+
+        protected abstract void OnPlayerJump(Player player);
 
         private bool CollidingWithPlatform(Player player)
         {

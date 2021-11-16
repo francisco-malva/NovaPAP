@@ -28,17 +28,36 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
             _platforms = new Platform[PlatformCount];
             _random = random;
 
-            for (var i = (short)0; i < PlatformCount; i++) _platforms[i] = new Platform(i, _random);
+            GeneratePlatforms();
         }
 
         public bool PlayerFinishedCourse => _player.Position.Y + Player.PlatformCollisionHeight > FinishingY;
 
         public Platform this[short id] => _platforms[id];
 
-        public void Reset()
+
+        private Platform GetRandomPlatform(short id, Point position)
         {
-            for (short i = 0; i < _platforms.Length; i++)
-                _platforms[i].Reset();
+            var randomNum = _random.GetFloat();
+
+            if (randomNum <= 0.25f)
+                return new MovingPlatform(id, position);
+            if (randomNum > 0.25f && randomNum < 0.5f)
+            {
+                return new TeleportingPlatform(id, position, _random);
+            }
+            else
+                return new SimplePlatform(id, position);
+        }
+
+        public void GeneratePlatforms()
+        {
+            for (short i = 0; i < PlatformCount; i++)
+            {
+                _platforms[i] = GetRandomPlatform(i,
+                                new Point(_random.GetInteger(Platform.PlatformWidth / 2,
+                                 GameField.Width - Platform.PlatformWidth / 2), InitialPlatformHeight + PlatformYStep * i));
+            }
         }
 
         public void Update()
@@ -49,8 +68,8 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         public void Draw(int yScroll)
         {
             DrawPlatforms(yScroll);
-
-            if (_player.State == PlayerState.InGame) DrawFinishingLine(yScroll);
+            if (_player.State == PlayerState.InGame)
+                DrawFinishingLine(yScroll);
         }
 
         private void DrawPlatforms(int yScroll)

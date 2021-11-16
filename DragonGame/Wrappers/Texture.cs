@@ -9,7 +9,6 @@ namespace DragonGame.Wrappers
         private uint _format;
 
         private int _height;
-
         private int _width;
 
         public Texture(Renderer renderer, uint format, int access, int w, int h)
@@ -22,6 +21,24 @@ namespace DragonGame.Wrappers
         {
             Handle = SDL.SDL_CreateTextureFromSurface(renderer.Handle, surface.Handle);
             UpdateInformation();
+        }
+
+        public void SetBlendMode(SDL.SDL_BlendMode blendMode)
+        {
+            SDL.SDL_SetTextureBlendMode(Handle, blendMode);
+        }
+        
+        public void SetAlphaMod(byte alpha)
+        {
+            SDL.SDL_SetTextureAlphaMod(Handle, alpha);
+        }
+
+        public byte GetAlphaMod(byte alpha)
+        {
+            byte al;
+            SDL.SDL_GetTextureAlphaMod(Handle, out al);
+
+            return al;
         }
 
         public uint Format => _format;

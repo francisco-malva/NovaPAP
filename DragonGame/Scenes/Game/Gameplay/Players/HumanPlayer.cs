@@ -9,6 +9,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
     {
         public HumanPlayer(DeterministicRandom random, Texture texture) : base(random, texture)
         {
+            
         }
 
         protected override void MoveX(Platforms platforms, GameInput input)
