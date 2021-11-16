@@ -3,6 +3,7 @@ using DragonGame.Engine.Utilities;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
 using DragonGame.Scenes.Game.Input;
 using DragonGame.Wrappers;
+using SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Players
 {
@@ -18,27 +19,25 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
         private readonly Texture _texture;
 
         protected readonly DeterministicRandom Random;
+
+        private double _angle;
+
+        private SDL.SDL_RendererFlip _flip;
         public Point Position;
 
         protected int XSpeed, YSpeed;
 
-        private double _angle = 0.0f;
-
-        private SDL2.SDL.SDL_RendererFlip _flip;
-
-        public Player(DeterministicRandom random, Texture texture)
+        protected Player(DeterministicRandom random, Texture texture)
         {
             Random = random;
             _texture = texture;
-
-            Reset();
         }
 
         public PlayerState State { get; private set; }
 
         public bool Descending => YSpeed < 0;
 
-        public void Reset()
+        public void GetReady()
         {
             XSpeed = 0;
             YSpeed = 0;
@@ -74,6 +73,8 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
                 case PlayerState.Won:
                     Position.Y += 10;
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -85,18 +86,12 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
                     _angle = 0.0;
                     break;
                 case PlayerState.InGame:
-                    if (XSpeed > 0)
+                    _angle = XSpeed switch
                     {
-                        _angle = Math.Min(_angle + 3.0f, 25.0);
-                    }
-                    else if (XSpeed < 0)
-                    {
-                        _angle = Math.Max(_angle - 3.0f, -25.0);
-                    }
-                    else
-                    {
-                        _angle = 0;
-                    }
+                        > 0 => Math.Min(_angle + 3.0f, 25.0),
+                        < 0 => Math.Max(_angle - 3.0f, -25.0),
+                        _ => 0
+                    };
                     break;
                 case PlayerState.Won:
                     _angle = 0.0;
@@ -104,6 +99,8 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
                 case PlayerState.Lost:
                     _angle += 15.0;
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -112,22 +109,21 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
             switch (State)
             {
                 case PlayerState.GetReady:
-                    _flip = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_NONE;
+                    _flip = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
                     break;
                 case PlayerState.InGame:
                     if (XSpeed != 0)
                     {
-                        if (XSpeed < 0)
-                        {
-                            _flip = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
-                        }
-                        else
-                        {
-                            _flip = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_NONE;
-                        }
+                        _flip = XSpeed < 0 ? SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL : SDL.SDL_RendererFlip.SDL_FLIP_NONE;
                     }
 
                     break;
+                case PlayerState.Won:
+                    break;
+                case PlayerState.Lost:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 

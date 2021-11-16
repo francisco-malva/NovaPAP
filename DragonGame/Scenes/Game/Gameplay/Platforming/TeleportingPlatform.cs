@@ -6,16 +6,15 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
     internal class TeleportingPlatform : Platform
     {
-
-        private DeterministicRandom _random;
-
         private const ushort StaticTime = 180;
         private const ushort DissapearingTime = 30;
         private const ushort AppearingTime = 30;
 
+        private readonly DeterministicRandom _random;
+        private TeleportingPlatformState _state;
+
 
         private ushort _stateTimer;
-        private TeleportingPlatformState _state;
 
         public TeleportingPlatform(short id, Point position, DeterministicRandom random) : base(id, position)
         {
@@ -39,31 +38,24 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
             {
                 case TeleportingPlatformState.Static:
                     _alpha = byte.MaxValue;
-                    if (_stateTimer == 0)
-                    {
-                        SetState(TeleportingPlatformState.Dissapearing);
-                    }
+                    if (_stateTimer == 0) SetState(TeleportingPlatformState.Dissapearing);
                     break;
                 case TeleportingPlatformState.Dissapearing:
-                    _alpha = (byte)((float)_stateTimer / (float)DissapearingTime * 255.0f);
+                    _alpha = (byte)(_stateTimer / (float)DissapearingTime * 255.0f);
                     if (_stateTimer == 0)
                     {
                         Position.X = _random.GetInteger(PlatformWidth / 2, GameField.Width - PlatformWidth / 2);
                         SetState(TeleportingPlatformState.Appearing);
                     }
+
                     break;
                 case TeleportingPlatformState.Appearing:
-                    _alpha = (byte)((1.0f - ((float)_stateTimer / DissapearingTime)) * 255);
-                    if (_stateTimer == 0)
-                    {
-                        SetState(TeleportingPlatformState.Static);
-                    }
+                    _alpha = (byte)((1.0f - (float)_stateTimer / DissapearingTime) * 255);
+                    if (_stateTimer == 0) SetState(TeleportingPlatformState.Static);
                     break;
             }
-            if (_stateTimer > 0)
-            {
-                --_stateTimer;
-            }
+
+            if (_stateTimer > 0) --_stateTimer;
         }
 
         private void SetState(TeleportingPlatformState state)

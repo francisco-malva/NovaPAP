@@ -1,11 +1,12 @@
 ﻿using DragonGame.Engine.Input;
 using DragonGame.Scenes.Game.Gameplay.Players.AI;
 using DragonGame.Scenes.Game.Input;
+using DragonGame.Wrappers;
 using SDL2;
 
 namespace DragonGame.Scenes.Game
 {
-    internal class OfflineGameScene : GameScene
+    internal sealed class OfflineGameScene : GameScene
     {
         private GameInput _p1PreviousInput, _p1CurrentInput;
         private GameInput _p2PreviousInput, _p2CurrentInput;
@@ -18,6 +19,12 @@ namespace DragonGame.Scenes.Game
         protected override void RunFrame()
         {
             ProcessInputs();
+
+            if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_P))
+            {
+                P1Field.Player.Position = new Point(0, int.MaxValue - 100);
+                P2Field.Player.Position = new Point(0, int.MaxValue - 100);
+            }
             Update(_p1CurrentInput, _p2CurrentInput);
             Draw();
         }

@@ -1,5 +1,4 @@
-﻿using DragonGame.Engine.Utilities;
-using DragonGame.Scenes.Game.Gameplay.Players;
+﻿using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Wrappers;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
@@ -45,6 +44,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         {
             return player.State == PlayerState.InGame && player.Descending && CollidingWithPlatform(player);
         }
+
         private void PlayerCollision(Player player)
         {
             if (CanJumpOnPlatform(player))
@@ -52,7 +52,6 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                 OnPlayerJump(player);
                 player.Jump(this);
             }
-
         }
 
         protected abstract void OnPlayerJump(Player player);

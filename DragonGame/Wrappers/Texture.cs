@@ -23,24 +23,6 @@ namespace DragonGame.Wrappers
             UpdateInformation();
         }
 
-        public void SetBlendMode(SDL.SDL_BlendMode blendMode)
-        {
-            SDL.SDL_SetTextureBlendMode(Handle, blendMode);
-        }
-        
-        public void SetAlphaMod(byte alpha)
-        {
-            SDL.SDL_SetTextureAlphaMod(Handle, alpha);
-        }
-
-        public byte GetAlphaMod(byte alpha)
-        {
-            byte al;
-            SDL.SDL_GetTextureAlphaMod(Handle, out al);
-
-            return al;
-        }
-
         public uint Format => _format;
         public int Access => _access;
         public int Width => _width;
@@ -52,6 +34,27 @@ namespace DragonGame.Wrappers
         {
             ReleaseUnmanagedResources();
             GC.SuppressFinalize(this);
+        }
+
+        public void SetBlendMode(SDL.SDL_BlendMode blendMode)
+        {
+            SDL.SDL_SetTextureBlendMode(Handle, blendMode);
+        }
+
+        public void SetAlphaMod(byte alpha)
+        {
+            SDL.SDL_SetTextureAlphaMod(Handle, alpha);
+        }
+
+        public byte GetAlphaMod(byte alpha)
+        {
+            SDL.SDL_GetTextureAlphaMod(Handle, out var result);
+            return result;
+        }
+
+        public void SetColorMod(byte r, byte g, byte b)
+        {
+            SDL.SDL_SetTextureColorMod(Handle, r, g, b);
         }
 
         private void UpdateInformation()
@@ -73,10 +76,10 @@ namespace DragonGame.Wrappers
         }
 
 
-        public static Texture FromBmp(string bmpPath, Renderer renderer)
+        public static Texture FromBmp(string bmpPath)
         {
-            using var surface = new Surface(bmpPath);
-            return new Texture(renderer, surface);
+            using var surface = new Surface($"Assets/Textures/{bmpPath}.bmp");
+            return new Texture(Engine.Game.Instance.Renderer, surface);
         }
     }
 }

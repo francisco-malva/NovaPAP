@@ -1,4 +1,5 @@
-﻿using DragonGame.Engine.Scenes;
+﻿using System;
+using DragonGame.Engine.Scenes;
 using DragonGame.Engine.Utilities;
 using DragonGame.Scenes.Game.Gameplay;
 using DragonGame.Scenes.Game.Gameplay.Players;
@@ -6,6 +7,7 @@ using DragonGame.Scenes.Game.Gameplay.Players.AI;
 using DragonGame.Scenes.Game.Input;
 using DragonGame.Scenes.MainMenu;
 using DragonGame.Wrappers;
+using SDL2;
 
 namespace DragonGame.Scenes.Game
 {
@@ -15,10 +17,19 @@ namespace DragonGame.Scenes.Game
         public const int Width = 640;
         public const int Height = 480;
 
+        public const byte GetReadyTime = 120;
+        public const byte RoundEndTime = 120;
+
         private readonly Texture _gameBackground;
         private readonly Texture _gameBorder;
         private readonly Texture _platformTexture;
         private readonly Texture _playerTexture;
+        private readonly Texture _checkmarkTexture;
+        private readonly Texture _getReadyTexture;
+        private readonly Texture _goTexture;
+        private readonly Texture _winnerTexture;
+        private readonly Texture _youLoseTexture;
+        private readonly Texture _drawTexture;
 
         protected readonly GameField P1Field;
         protected readonly GameField P2Field;
@@ -29,26 +40,37 @@ namespace DragonGame.Scenes.Game
         private byte _stateTimer;
         private Winner _winner;
 
-        private const byte GetReadyTime = 120;
-        private const byte RoundEndTime = 120;
-
         protected GameScene(byte roundsToWin, bool p1Ai = false, bool p2Ai = false,
             AiDifficulty difficulty = AiDifficulty.Easy)
         {
             FrameCount = 0;
 
-            _gameBorder = Texture.FromBmp("Assets/Textures/UI/game-border.bmp", Engine.Game.Instance.Renderer);
-            _gameBackground = Texture.FromBmp("Assets/Textures/Game/background.bmp", Engine.Game.Instance.Renderer);
-            _playerTexture = Texture.FromBmp("Assets/Textures/Game/player.bmp", Engine.Game.Instance.Renderer);
-            _platformTexture = Texture.FromBmp("Assets/Textures/Game/platform.bmp", Engine.Game.Instance.Renderer);
-            _platformTexture.SetBlendMode(SDL2.SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-
+            _gameBorder = Texture.FromBmp("UI/game-border");
+            _gameBackground = Texture.FromBmp("Game/background");
+            _playerTexture = Texture.FromBmp("Game/player");
+            _platformTexture = Texture.FromBmp("Game/platform");
+            _platformTexture.SetBlendMode(SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            _checkmarkTexture = Texture.FromBmp("Game/checkmark");
+            _getReadyTexture = Texture.FromBmp("Game/Banners/get-ready");
+            _goTexture = Texture.FromBmp("Game/Banners/go");
+            _winnerTexture = Texture.FromBmp("Game/Banners/winner");
+            _youLoseTexture = Texture.FromBmp("Game/Banners/you-lose");
+            _drawTexture = Texture.FromBmp("Game/Banners/draw");
             Random = new DeterministicRandom();
 
             P1Field = new GameField(roundsToWin, p1Ai, difficulty, Random, _gameBackground, _playerTexture,
-                _platformTexture);
+                _platformTexture, _checkmarkTexture, _getReadyTexture, _goTexture, _winnerTexture, _youLoseTexture,
+                _drawTexture);
             P2Field = new GameField(roundsToWin, p2Ai, difficulty, Random, _gameBackground, _playerTexture,
-                _platformTexture);
+                _platformTexture, _checkmarkTexture, _getReadyTexture, _goTexture, _winnerTexture, _youLoseTexture,
+                _drawTexture);
+
+            OnStart();
+        }
+
+        protected virtual void OnStart()
+        {
+            ChangeState(GameState.GetReady);
         }
 
         protected ulong FrameCount { get; private set; }
@@ -77,19 +99,19 @@ namespace DragonGame.Scenes.Game
             switch (_state)
             {
                 case GameState.GetReady:
-                    P1Field.Reset();
-                    P2Field.Reset();
+                    P1Field.GetReady();
+                    P2Field.GetReady();
                     break;
                 case GameState.InGame:
-                    P1Field.Player.SetState(PlayerState.InGame);
-                    P2Field.Player.SetState(PlayerState.InGame);
+                    P1Field.BeginRound();
+                    P2Field.BeginRound();
                     break;
                 case GameState.PlayerWon:
                     switch (_winner)
                     {
                         case Winner.Both:
-                            P1Field.WinRound();
-                            P2Field.WinRound();
+                            P1Field.WinRound(true);
+                            P2Field.WinRound(true);
                             break;
                         case Winner.P1:
                             P1Field.WinRound();
@@ -99,11 +121,15 @@ namespace DragonGame.Scenes.Game
                             P2Field.WinRound();
                             P1Field.LoseRound();
                             break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
 
                     break;
                 case GameState.GameOver:
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -184,6 +210,13 @@ namespace DragonGame.Scenes.Game
             _gameBackground.Dispose();
             _playerTexture.Dispose();
             _platformTexture.Dispose();
+            _checkmarkTexture.Dispose();
+            
+            _getReadyTexture.Dispose();
+            _goTexture.Dispose();
+            _winnerTexture.Dispose();
+            _youLoseTexture.Dispose();
+            _drawTexture.Dispose();
         }
 
         protected abstract void OnGameEnd();

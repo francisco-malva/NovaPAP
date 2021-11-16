@@ -29,8 +29,6 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
             _platforms = new Platform[PlatformCount];
             _random = random;
-
-            GeneratePlatforms();
         }
 
         public bool PlayerFinishedCourse => _player.Position.Y + Player.PlatformCollisionHeight > FinishingY;
@@ -39,27 +37,25 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         private PlatformType GetRandomPlatformType()
         {
-            PlatformType type = PlatformType.None;
+            PlatformType type;
 
             do
             {
                 var randomNum = _random.GetFloat();
 
-                if (randomNum <= 0.25f)
-                    type = PlatformType.MovingPlatform;
-                else if (randomNum > 0.25f && randomNum < 0.40f)
+                type = randomNum switch
                 {
-                    type = PlatformType.TeleportingPlatform;
-                }
-                else
-                    type = PlatformType.SimplePlatform;
-            }
-            while (type == _lastPlatformType);
+                    <= 0.25f => PlatformType.MovingPlatform,
+                    > 0.25f and < 0.40f => PlatformType.TeleportingPlatform,
+                    _ => PlatformType.SimplePlatform
+                };
+            } while (type == _lastPlatformType);
 
             _lastPlatformType = type;
 
             return type;
         }
+
         private Platform GetPlatform(PlatformType type, short id, Point position)
         {
             switch (type)
@@ -71,16 +67,16 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                 case PlatformType.TeleportingPlatform:
                     return new TeleportingPlatform(id, position, _random);
             }
+
             return null;
         }
 
         public void GeneratePlatforms()
         {
             for (short i = 0; i < PlatformCount; i++)
-            {
-                _platforms[i] = GetPlatform(GetRandomPlatformType(), i, new Point(_random.GetInteger(Platform.PlatformWidth / 2, GameField.Width - Platform.PlatformWidth / 2),
-                                                                                  InitialPlatformHeight + PlatformYStep * i));
-            }
+                _platforms[i] = GetPlatform(GetRandomPlatformType(), i, new Point(
+                    _random.GetInteger(Platform.PlatformWidth / 2, GameField.Width - Platform.PlatformWidth / 2),
+                    InitialPlatformHeight + PlatformYStep * i));
         }
 
         public void Update()

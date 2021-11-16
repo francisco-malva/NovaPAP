@@ -83,11 +83,11 @@ namespace DragonGame.Wrappers
             var _ = SDL.SDL_RenderDrawLine(Handle, a.X, a.Y, b.X, b.Y);
         }
 
-        public void CopyEx(Texture texture, Rectangle? source, Rectangle? dest, double angle, Point? center, SDL2.SDL.SDL_RendererFlip flip)
+        public void CopyEx(Texture texture, Rectangle? source, Rectangle? dest, double angle, Point? center,
+            SDL.SDL_RendererFlip flip)
         {
             unsafe
             {
-
                 var sourceRect = stackalloc int[4];
                 var destinationRect = stackalloc int[4];
                 var centerPoint = stackalloc int[2];
@@ -101,15 +101,15 @@ namespace DragonGame.Wrappers
                 }
 
                 var _ = SDL.SDL_RenderCopyEx(Handle,
-                                             texture.Handle,
-                                             source == null ? IntPtr.Zero : new IntPtr(sourceRect),
-                                             dest == null ? IntPtr.Zero : new IntPtr(destinationRect),
-                                             angle,
-                                             center == null ? IntPtr.Zero : new IntPtr(centerPoint),
-                                             flip);
+                    texture.Handle,
+                    source == null ? IntPtr.Zero : new IntPtr(sourceRect),
+                    dest == null ? IntPtr.Zero : new IntPtr(destinationRect),
+                    angle,
+                    center == null ? IntPtr.Zero : new IntPtr(centerPoint),
+                    flip);
             }
-
         }
+
         public void SetScale(ref Point scale)
         {
             var _ = SDL.SDL_RenderSetScale(Handle, scale.X, scale.Y);

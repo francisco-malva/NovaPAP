@@ -5,8 +5,8 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
     internal class MovingPlatform : Platform
     {
-        private bool _moveLeft;
         private const int PlatformMoveSpeed = 3;
+        private bool _moveLeft;
 
         public MovingPlatform(short id, Point position) : base(id, position)
         {
