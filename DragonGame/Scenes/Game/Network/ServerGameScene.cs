@@ -10,15 +10,13 @@ namespace DragonGame.Scenes.Game.Network
 {
     internal sealed class ServerGameScene : GameScene
     {
-        private TcpListener _listener;
-        private StreamManipulator _manipulator;
-        private TcpClient _client;
-
-        private readonly byte _roundsToWin;
+        private readonly TcpListener _listener;
+        private readonly StreamManipulator _manipulator;
+        private readonly TcpClient _client;
 
         public ServerGameScene(byte roundsToWin) : base(roundsToWin)
         {
-            _listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 3000);
+            _listener = new TcpListener(IPAddress.Any, 3000);
             _listener.Start();
             _client = _listener.AcceptTcpClient();
             _manipulator = new StreamManipulator(_client.GetStream(), Encoding.Default, true);
@@ -27,7 +25,7 @@ namespace DragonGame.Scenes.Game.Network
             var tickCount = Environment.TickCount;
             Random.Setup(tickCount);
 
-            _manipulator.Writer.Write(_roundsToWin);
+            _manipulator.Writer.Write(roundsToWin);
             _manipulator.Writer.Write(tickCount);
 
             Console.Write("Server Setup successfully");
