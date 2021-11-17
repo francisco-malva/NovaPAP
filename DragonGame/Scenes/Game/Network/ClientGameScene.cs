@@ -16,6 +16,17 @@ namespace DragonGame.Scenes.Game.Network
 
         public ClientGameScene() : base(0)
         {
+            _client = new TcpClient();
+            _client.Connect(new IPEndPoint(IPAddress.Parse(File.ReadAllText("config.txt")), 3000));
+
+            _manipulator = new StreamManipulator(_client.GetStream(), Encoding.Default, true);
+
+            SetRoundsToWin(_manipulator.Reader.ReadByte());
+            Random.Setup(_manipulator.Reader.ReadInt32());
+
+            Console.Write("Client Setup successfully");
+
+            ChangeState(GameState.GetReady);
         }
 
         public override void OnTick()
@@ -30,21 +41,6 @@ namespace DragonGame.Scenes.Game.Network
 
             SimulateFrame(foreignInput, gameInput);
             Draw();
-        }
-
-        protected override void OnStart()
-        {
-            _client = new TcpClient();
-            _client.Connect(new IPEndPoint(IPAddress.Parse(File.ReadAllText("config.txt")), 3000));
-
-            _manipulator = new StreamManipulator(_client.GetStream(), Encoding.Default, true);
-
-            SetRoundsToWin(_manipulator.Reader.ReadByte());
-            Random.Setup(_manipulator.Reader.ReadInt32());
-
-            Console.Write("Client Setup successfully");
-
-            base.OnStart();
         }
 
         protected override void OnGameEnd()

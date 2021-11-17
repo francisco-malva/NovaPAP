@@ -18,7 +18,21 @@ namespace DragonGame.Scenes.Game.Network
 
         public ServerGameScene(byte roundsToWin) : base(roundsToWin)
         {
-            _roundsToWin = roundsToWin;
+            _listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 3000);
+            _listener.Start();
+            _client = _listener.AcceptTcpClient();
+            _manipulator = new StreamManipulator(_client.GetStream(), Encoding.Default, true);
+
+
+            var tickCount = Environment.TickCount;
+            Random.Setup(tickCount);
+
+            _manipulator.Writer.Write(_roundsToWin);
+            _manipulator.Writer.Write(tickCount);
+
+            Console.Write("Server Setup successfully");
+
+            ChangeState(GameState.GetReady);
         }
 
         public override void OnTick()
@@ -34,25 +48,6 @@ namespace DragonGame.Scenes.Game.Network
             SimulateFrame(gameInput, foreignInput);
             Draw();
             base.OnTick();
-        }
-
-        protected override void OnStart()
-        {
-            _listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 3000);
-            _listener.Start();
-            _client = _listener.AcceptTcpClient();
-            _manipulator = new StreamManipulator(_client.GetStream(), Encoding.Default, true);
-
-            
-            var tickCount = Environment.TickCount;
-            Random.Setup(tickCount);
-
-            _manipulator.Writer.Write(_roundsToWin);
-            _manipulator.Writer.Write(tickCount);
-
-            Console.Write("Server Setup successfully");
-
-            base.OnStart();
         }
 
         protected override void OnGameEnd()

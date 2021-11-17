@@ -65,19 +65,12 @@ namespace DragonGame.Scenes.Game
             P2Field = new GameField(roundsToWin, p2Ai, difficulty, Random, _gameBackground, _playerTexture,
                 _platformTexture, _checkmarkTexture, _getReadyTexture, _goTexture, _winnerTexture, _youLoseTexture,
                 _drawTexture);
-
-            OnStart();
         }
 
         protected void SetRoundsToWin(byte roundsToWin)
         {
             P1Field.RoundsToWin = roundsToWin;
             P2Field.RoundsToWin = roundsToWin;
-        }
-
-        protected virtual void OnStart()
-        {
-            ChangeState(GameState.GetReady);
         }
 
         protected ulong FrameCount { get; private set; }
@@ -104,7 +97,7 @@ namespace DragonGame.Scenes.Game
             input |= Keyboard.KeyDown(specialScanCode) ? GameInput.Special : GameInput.None;
         }
 
-        private void ChangeState(GameState state)
+        protected void ChangeState(GameState state)
         {
             _stateTimer = 0;
             _state = state;

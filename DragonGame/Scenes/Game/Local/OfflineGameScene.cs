@@ -15,6 +15,9 @@ namespace DragonGame.Scenes.Game.Local
         public OfflineGameScene(byte roundsToWin, bool p1Ai, bool p2Ai, AiDifficulty difficulty) : base(roundsToWin,
             p1Ai, p2Ai, difficulty)
         {
+            Random.Setup(Environment.TickCount);
+
+            ChangeState(GameState.GetReady);
         }
 
         public override void OnTick()
@@ -40,12 +43,6 @@ namespace DragonGame.Scenes.Game.Local
             if (!P2Field.AiControlled)
                 ProcessInput(ref _p2CurrentInput, SDL.SDL_Scancode.SDL_SCANCODE_J,
                     SDL.SDL_Scancode.SDL_SCANCODE_L, SDL.SDL_Scancode.SDL_SCANCODE_K);
-        }
-
-        protected override void OnStart()
-        {
-            Random.Setup(Environment.TickCount);
-            base.OnStart();
         }
 
         protected override void OnGameEnd()
