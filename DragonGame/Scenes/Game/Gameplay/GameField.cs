@@ -23,7 +23,7 @@ namespace DragonGame.Scenes.Game.Gameplay
         private readonly Texture _youLoseTexture;
         private readonly Texture _drawTexture;
 
-        private readonly byte _roundsToWin;
+        public byte RoundsToWin;
 
         public readonly Platforms Platforms;
 
@@ -51,7 +51,7 @@ namespace DragonGame.Scenes.Game.Gameplay
             Texture platformTexture, Texture checkmarkTexture, Texture getReadyTexture, Texture goTexture,
             Texture winnerTexture, Texture youLoseTexture, Texture drawTexture)
         {
-            _roundsToWin = roundsToWin;
+            RoundsToWin = roundsToWin;
             AiControlled = ai;
             Player = ai ? new AIPlayer(difficulty, random, playerTexture) : new HumanPlayer(random, playerTexture);
             Platforms = new Platforms(Player, random, platformTexture);
@@ -74,7 +74,7 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public Texture OutputTexture { get; }
 
-        public bool PlayerWonGame => _roundsWon == _roundsToWin;
+        public bool PlayerWonGame => _roundsWon == RoundsToWin;
 
         public bool PlayerWonRound => Platforms.PlayerFinishedCourse;
 
@@ -103,7 +103,7 @@ namespace DragonGame.Scenes.Game.Gameplay
             
             RaiseBanner(draw ? Banner.Draw : Banner.Winner, GameScene.RoundEndTime);
 
-            if(draw && _roundsWon == _roundsToWin - 1)
+            if(draw && _roundsWon == RoundsToWin - 1)
                 return;
             _roundsWon++;
             _wonTimer = GameScene.RoundEndTime;
@@ -231,7 +231,7 @@ namespace DragonGame.Scenes.Game.Gameplay
         {
             var renderer = Engine.Game.Instance.Renderer;
 
-            for (var i = 0; i < _roundsToWin; i++)
+            for (var i = 0; i < RoundsToWin; i++)
             {
                 if (i > _roundsWon - 1)
                 {

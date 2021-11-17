@@ -7,9 +7,10 @@ namespace DragonGame.Engine.Utilities
         private byte[] _randomBytes = new byte[2048];
         private int _randomPtr;
 
-        public DeterministicRandom()
+        public void Setup(int seed)
         {
-            var random = new Random();
+            _randomPtr = 0;
+            var random = new Random(seed);
             random.NextBytes(_randomBytes);
         }
 

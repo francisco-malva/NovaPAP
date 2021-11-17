@@ -1,4 +1,5 @@
 ﻿using System;
+using DragonGame.Engine.Input;
 using DragonGame.Engine.Scenes;
 using DragonGame.Engine.Utilities;
 using DragonGame.Scenes.Game.Gameplay;
@@ -68,6 +69,12 @@ namespace DragonGame.Scenes.Game
             OnStart();
         }
 
+        protected void SetRoundsToWin(byte roundsToWin)
+        {
+            P1Field.RoundsToWin = roundsToWin;
+            P2Field.RoundsToWin = roundsToWin;
+        }
+
         protected virtual void OnStart()
         {
             ChangeState(GameState.GetReady);
@@ -83,12 +90,18 @@ namespace DragonGame.Scenes.Game
 
         public override void OnTick()
         {
-            RunFrame();
+            ++FrameCount;
         }
 
-        protected virtual void RunFrame()
+        protected static void ProcessInput(ref GameInput input,
+            SDL.SDL_Scancode leftScanCode,
+            SDL.SDL_Scancode rightScanCode, SDL.SDL_Scancode specialScanCode)
         {
-            ++FrameCount;
+            input = GameInput.None;
+
+            input |= Keyboard.KeyDown(leftScanCode) ? GameInput.Left : GameInput.None;
+            input |= Keyboard.KeyDown(rightScanCode) ? GameInput.Right : GameInput.None;
+            input |= Keyboard.KeyDown(specialScanCode) ? GameInput.Special : GameInput.None;
         }
 
         private void ChangeState(GameState state)
@@ -133,7 +146,7 @@ namespace DragonGame.Scenes.Game
             }
         }
 
-        protected void Update(GameInput p1Input, GameInput p2Input)
+        protected void SimulateFrame(GameInput p1Input, GameInput p2Input)
         {
             ++_stateTimer;
             switch (_state)
