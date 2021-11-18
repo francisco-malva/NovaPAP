@@ -29,10 +29,7 @@ namespace DragonGame.Scenes.Game.Local
                 P1Field.Player.Position = new Point(0, int.MaxValue - 100);
                 P2Field.Player.Position = new Point(0, int.MaxValue - 100);
             }
-            SimulateFrame(_p1CurrentInput, _p2CurrentInput);
-            Draw();
-
-            base.OnTick();
+            SimulateAndDraw(_p1CurrentInput, _p2CurrentInput);
         }
 
         private void ProcessInputs()

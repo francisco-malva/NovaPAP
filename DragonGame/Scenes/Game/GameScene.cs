@@ -81,8 +81,10 @@ namespace DragonGame.Scenes.Game
             ChangeState(GameState.PlayerWon);
         }
 
-        public override void OnTick()
+        protected void SimulateAndDraw(GameInput p1Input, GameInput p2Input)
         {
+            SimulateFrame(p1Input, p2Input);
+            Draw();
             ++FrameCount;
         }
 
@@ -139,7 +141,7 @@ namespace DragonGame.Scenes.Game
             }
         }
 
-        protected void SimulateFrame(GameInput p1Input, GameInput p2Input)
+        private void SimulateFrame(GameInput p1Input, GameInput p2Input)
         {
             ++_stateTimer;
             switch (_state)
@@ -178,6 +180,8 @@ namespace DragonGame.Scenes.Game
                     break;
                 case GameState.GameOver:
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -187,7 +191,7 @@ namespace DragonGame.Scenes.Game
             p2Ai = P2Field.AiControlled;
         }
 
-        protected void Draw()
+        private void Draw()
         {
             var renderer = Engine.Game.Instance.Renderer;
 
