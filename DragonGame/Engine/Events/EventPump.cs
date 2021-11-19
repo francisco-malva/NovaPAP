@@ -23,6 +23,9 @@ namespace DragonGame.Engine.Events
             if (_events[eventType] == null) _events.Remove(eventType);
         }
 
+        /// <summary>
+        /// Call all subscribed event delegates.
+        /// </summary>
         public void Dispatch()
         {
             while (SDL.SDL_PollEvent(out var eventData) > 0)

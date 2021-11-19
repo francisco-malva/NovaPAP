@@ -1,10 +1,11 @@
 ﻿using System;
 using DragonGame.Engine.Utilities;
+using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
 using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Scenes.Game.Gameplay.Players.AI;
 using DragonGame.Scenes.Game.Input;
-using DragonGame.Wrappers;
+using Engine.Wrappers.SDL2;
 using SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay
@@ -28,7 +29,7 @@ namespace DragonGame.Scenes.Game.Gameplay
         public readonly Platforms Platforms;
 
         private byte _roundsWon;
-        private ushort _wonTimer;
+        private ushort _blinkTimer;
 
 
         private Texture _bannerTexture;
@@ -106,7 +107,7 @@ namespace DragonGame.Scenes.Game.Gameplay
             if(draw && _roundsWon == RoundsToWin - 1)
                 return;
             _roundsWon++;
-            _wonTimer = GameScene.RoundEndTime;
+            _blinkTimer = GameScene.RoundEndTime;
         }
 
         public void LoseRound()
@@ -126,7 +127,7 @@ namespace DragonGame.Scenes.Game.Gameplay
                     UpdateOffset();
                     break;
                 case PlayerState.Won:
-                    WinUpdate();
+                    CheckmarkBlinkUpdate();
                     break;
                 case PlayerState.GetReady:
                     break;
@@ -157,13 +158,13 @@ namespace DragonGame.Scenes.Game.Gameplay
             _bannerDuration = duration;
         }
 
-        private void WinUpdate()
+        private void CheckmarkBlinkUpdate()
         {
-            if (_wonTimer > 0)
+            if (_blinkTimer > 0)
             {
-                --_wonTimer;
+                --_blinkTimer;
 
-                if (_wonTimer % 25 == 0)
+                if (_blinkTimer % 25 == 0)
                 {
                     _checkmarkDark = !_checkmarkDark;
                 }
@@ -235,16 +236,15 @@ namespace DragonGame.Scenes.Game.Gameplay
             {
                 if (i > _roundsWon - 1)
                 {
-                    _checkmarkTexture.SetColorMod(0, 0, 0);
+                    _checkmarkTexture.SetColorMod(Color.Black);
                 }
                 else if(i == _roundsWon - 1 && Player.State == PlayerState.Won)
                 {
-                    var colorMod = _checkmarkDark ? (byte)0 : (byte)255;
-                    _checkmarkTexture.SetColorMod(colorMod, colorMod, colorMod);
+                    _checkmarkTexture.SetColorMod(_checkmarkDark ? Color.Black : Color.White);
                 }
                 else
                 {
-                    _checkmarkTexture.SetColorMod(255, 255, 255);
+                    _checkmarkTexture.SetColorMod(Color.White);
                 }
                 renderer.Copy(_checkmarkTexture, null, new Rectangle(8 + 20 * i, 8, 16, 16));
             }

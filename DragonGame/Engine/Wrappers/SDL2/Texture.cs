@@ -1,7 +1,8 @@
 ﻿using System;
+using Engine.Wrappers.SDL2;
 using SDL2;
 
-namespace DragonGame.Wrappers
+namespace DragonGame.Engine.Wrappers.SDL2
 {
     internal class Texture : IDisposable
     {
@@ -46,15 +47,15 @@ namespace DragonGame.Wrappers
             SDL.SDL_SetTextureAlphaMod(Handle, alpha);
         }
 
-        public byte GetAlphaMod(byte alpha)
+        public byte GetAlphaMod()
         {
             SDL.SDL_GetTextureAlphaMod(Handle, out var result);
             return result;
         }
 
-        public void SetColorMod(byte r, byte g, byte b)
+        public void SetColorMod(Color color)
         {
-            SDL.SDL_SetTextureColorMod(Handle, r, g, b);
+            SDL.SDL_SetTextureColorMod(Handle, color.R, color.G, color.B);
         }
 
         private void UpdateInformation()
@@ -79,7 +80,7 @@ namespace DragonGame.Wrappers
         public static Texture FromBmp(string bmpPath)
         {
             using var surface = new Surface($"Assets/Textures/{bmpPath}.bmp");
-            return new Texture(Engine.Game.Instance.Renderer, surface);
+            return new Texture(Game.Instance.Renderer, surface);
         }
     }
 }

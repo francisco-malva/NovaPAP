@@ -2,22 +2,32 @@
 
 namespace DragonGame.Engine.Utilities
 {
+    ///<summary>
+    ///A random class that always returns the same values under the same conditions, also supports saving and loading its state.
+    ///</summary>
     internal class DeterministicRandom
     {
-        private byte[] _randomBytes = new byte[2048];
+        ///<summary>
+        /// The array of random bytes used to give out the random values.
+        ///</summary> 
+        private byte[] _randomBytes = new byte[4096];
+
+        ///<summary>
+        /// Pointer to the next element to fetch in the random byte ID.
+        ///</summary> 
         private int _randomPtr;
 
+        /// <summary>
+        /// Generate array of random numbers with the specified seed [NEED TO CALL BEFORE USING!]
+        /// </summary>
         public void Setup(int seed)
         {
-            _randomPtr = 0;
+            _randomPtr = Math.Abs(_randomPtr) % _randomBytes.Length;
             var random = new Random(seed);
             random.NextBytes(_randomBytes);
         }
 
-        /// <summary>
-        ///     Gets a random byte between 0 and byte.MaxValue.
-        /// </summary>
-        /// <returns></returns>
+        /// <returns>A random number between 0 and byte.MaxValue</returns>
         public byte GetByte()
         {
             var value = _randomBytes[_randomPtr++];
@@ -27,15 +37,13 @@ namespace DragonGame.Engine.Utilities
             return value;
         }
 
-        /// <summary>
-        ///     Compose an int off of 4 random bytes.
-        /// </summary>
-        /// <returns></returns>
+        /// <returns>Gets 4 random bytes and ORs them together to fill a 4 byte value.</returns>
         private uint ComposeInteger()
         {
             return (uint)(GetByte() | (GetByte() << 8) | (GetByte() << 16) | (GetByte() << 24));
         }
 
+        ///
         public int GetInteger(int min, int max)
         {
             return (int)(min + MathF.Floor(GetFloat() * (max - min)));
@@ -54,20 +62,6 @@ namespace DragonGame.Engine.Utilities
         {
             var value = ComposeInteger() / (float)uint.MaxValue;
             return value;
-        }
-
-
-        public byte[] GetInternalArray()
-        {
-            var array = new byte[_randomBytes.Length];
-            Array.Copy(_randomBytes, array, array.Length);
-            return array;
-        }
-
-        public void SetInternalArray(ref byte[] array)
-        {
-            Array.Resize(ref _randomBytes, array.Length);
-            Array.Copy(array, _randomBytes, array.Length);
         }
     }
 }

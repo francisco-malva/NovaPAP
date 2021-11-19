@@ -1,5 +1,5 @@
-﻿using DragonGame.Scenes.Game.Gameplay.Players;
-using DragonGame.Wrappers;
+﻿using DragonGame.Engine.Wrappers.SDL2;
+using DragonGame.Scenes.Game.Gameplay.Players;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
@@ -10,7 +10,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         private const int PlatformMoveSpeed = 2;
 
         public readonly short ID;
-        protected byte _alpha = 255;
+        protected byte Alpha = 255;
 
         public Point Position;
 
@@ -27,7 +27,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
             var dst = new Rectangle(Position.X - texture.Width / 2,
                 GameField.TransformY(Position.Y + texture.Height, yScroll), texture.Width,
                 texture.Height);
-            texture.SetAlphaMod(_alpha);
+            texture.SetAlphaMod(Alpha);
 
             renderer.Copy(texture, null, dst);
         }

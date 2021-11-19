@@ -2,12 +2,12 @@
 using DragonGame.Engine.Input;
 using DragonGame.Engine.Scenes;
 using DragonGame.Engine.Utilities;
+using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay;
-using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Scenes.Game.Gameplay.Players.AI;
 using DragonGame.Scenes.Game.Input;
 using DragonGame.Scenes.MainMenu;
-using DragonGame.Wrappers;
+using Engine.Wrappers.SDL2;
 using SDL2;
 
 namespace DragonGame.Scenes.Game
@@ -201,8 +201,7 @@ namespace DragonGame.Scenes.Game
             var p1Dest = new Rectangle(GameBorder / 2, GameBorder / 2, GameField.Width, GameField.Height);
             var p2Dest = new Rectangle(Width / 2 + GameBorder / 2, GameBorder / 2, GameField.Width, GameField.Height);
 
-
-            renderer.SetDrawColor(0, 0, 0, 0);
+            renderer.SetDrawColor(Color.Black);
             renderer.Clear();
             renderer.Copy(_gameBorder, null, null);
             renderer.Copy(P1Field.OutputTexture, null, p1Dest);

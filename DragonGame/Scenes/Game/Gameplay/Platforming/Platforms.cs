@@ -1,12 +1,13 @@
 ﻿using DragonGame.Engine.Utilities;
+using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
-using DragonGame.Wrappers;
+using Engine.Wrappers.SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
     internal class Platforms
     {
-        public const short PlatformCount = 10;
+        public const short PlatformCount = 50;
         public const int InitialPlatformHeight = 100;
         public const int PlatformYStep = 150;
 
@@ -46,7 +47,8 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                 type = randomNum switch
                 {
                     <= 0.25f => PlatformType.MovingPlatform,
-                    > 0.25f and < 0.40f => PlatformType.TeleportingPlatform,
+                    > 0.25f and <= 0.40f => PlatformType.TeleportingPlatform,
+                    > 0.40f and <= 0.50f => PlatformType.CooldownPlatform,
                     _ => PlatformType.SimplePlatform
                 };
             } while (type == _lastPlatformType);
@@ -63,11 +65,12 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                 case PlatformType.SimplePlatform:
                     return new SimplePlatform(id, position);
                 case PlatformType.MovingPlatform:
-                    return new MovingPlatform(id, position);
+                    return new MovingPlatform(id, position, _random);
                 case PlatformType.TeleportingPlatform:
                     return new TeleportingPlatform(id, position, _random);
+                case PlatformType.CooldownPlatform:
+                    return new CooldownPlatform(id, position);
             }
-
             return null;
         }
 
@@ -100,15 +103,12 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         {
             var a = new Point(0, GameField.TransformY(FinishingY, yScroll));
 
-            if (a.Y > GameField.Height) //Cull test
-                return;
-
             var b = new Point(
                 GameField.Width,
                 GameField.TransformY(FinishingY, yScroll));
 
-            Engine.Game.Instance.Renderer.SetDrawColor(255, 0, 0, 255);
-            Engine.Game.Instance.Renderer.DrawLine(ref a, ref b);
+            Engine.Game.Instance.Renderer.SetDrawColor(Color.Red);
+            Engine.Game.Instance.Renderer.DrawLine(a, b);
         }
 
         public short GetPlatformAbove(ref Point position)

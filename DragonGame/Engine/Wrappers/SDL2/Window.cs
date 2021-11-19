@@ -1,7 +1,7 @@
 ﻿using System;
 using SDL2;
 
-namespace DragonGame.Wrappers
+namespace DragonGame.Engine.Wrappers.SDL2
 {
     internal class Window : IDisposable
     {

@@ -11,6 +11,9 @@ namespace DragonGame.Engine.Input
             _keyState = (bool*)SDL.SDL_GetKeyboardState(out _);
         }
 
+        /// <summary>
+        /// Is the key down?
+        /// </summary>
         public static unsafe bool KeyDown(SDL.SDL_Scancode scancode)
         {
             return _keyState[(int)scancode];

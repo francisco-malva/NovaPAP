@@ -1,5 +1,6 @@
+using DragonGame.Engine.Utilities;
+using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
-using DragonGame.Wrappers;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
@@ -8,8 +9,9 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         private const int PlatformMoveSpeed = 3;
         private bool _moveLeft;
 
-        public MovingPlatform(short id, Point position) : base(id, position)
+        public MovingPlatform(short id, Point position, DeterministicRandom random) : base(id, position)
         {
+            _moveLeft = random.GetFloat() >= 0.5f;
         }
 
         protected override void OnPlayerJump(Player player)

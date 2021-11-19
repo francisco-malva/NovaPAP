@@ -1,8 +1,8 @@
 using System;
 using DragonGame.Engine.Utilities;
+using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
 using DragonGame.Scenes.Game.Input;
-using DragonGame.Wrappers;
 
 namespace DragonGame.Scenes.Game.Gameplay.Players.AI
 {

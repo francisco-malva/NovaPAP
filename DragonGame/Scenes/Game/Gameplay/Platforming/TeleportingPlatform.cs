@@ -1,6 +1,6 @@
 using DragonGame.Engine.Utilities;
+using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
-using DragonGame.Wrappers;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
@@ -12,7 +12,6 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         private readonly DeterministicRandom _random;
         private TeleportingPlatformState _state;
-
 
         private ushort _stateTimer;
 
@@ -37,20 +36,19 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
             switch (_state)
             {
                 case TeleportingPlatformState.Static:
-                    _alpha = byte.MaxValue;
+                    Alpha = byte.MaxValue;
                     if (_stateTimer == 0) SetState(TeleportingPlatformState.Dissapearing);
                     break;
                 case TeleportingPlatformState.Dissapearing:
-                    _alpha = (byte)(_stateTimer / (float)DissapearingTime * 255.0f);
+                    Alpha = (byte)(_stateTimer / (float)DissapearingTime * 255.0f);
                     if (_stateTimer == 0)
                     {
                         Position.X = _random.GetInteger(PlatformWidth / 2, GameField.Width - PlatformWidth / 2);
                         SetState(TeleportingPlatformState.Appearing);
                     }
-
                     break;
                 case TeleportingPlatformState.Appearing:
-                    _alpha = (byte)((1.0f - (float)_stateTimer / DissapearingTime) * 255);
+                    Alpha = (byte)((1.0f - (float)_stateTimer / DissapearingTime) * 255);
                     if (_stateTimer == 0) SetState(TeleportingPlatformState.Static);
                     break;
             }

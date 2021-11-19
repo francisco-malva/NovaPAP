@@ -1,5 +1,5 @@
+using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
-using DragonGame.Wrappers;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {

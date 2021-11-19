@@ -16,7 +16,7 @@ namespace DragonGame.Scenes.Game.Network
             _listener = new TcpListener(IPAddress.Any, 3000);
             _listener.Start();
             _client = _listener.AcceptTcpClient();
-            Stream = new InOutStream(_client.GetStream(), Encoding.Default, true);
+            Stream = new StreamReaderWriter(_client.GetStream(), Encoding.Default, true);
 
 
             var tickCount = Environment.TickCount;

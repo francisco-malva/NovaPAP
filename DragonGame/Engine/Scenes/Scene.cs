@@ -10,7 +10,13 @@ namespace DragonGame.Engine.Scenes
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Runs every frame.
+        /// </summary>
         public abstract void OnTick();
+
+        /// <summary>
+        /// Runs when the scene gets pushed out of the scene stack.
         protected abstract void OnUnload();
 
         protected virtual void Dispose(bool disposing)

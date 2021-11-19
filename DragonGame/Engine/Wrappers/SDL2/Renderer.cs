@@ -1,7 +1,8 @@
 ﻿using System;
+using Engine.Wrappers.SDL2;
 using SDL2;
 
-namespace DragonGame.Wrappers
+namespace DragonGame.Engine.Wrappers.SDL2
 {
     internal class Renderer : IDisposable
     {
@@ -73,12 +74,12 @@ namespace DragonGame.Wrappers
             SDL.SDL_RenderPresent(Handle);
         }
 
-        public void SetDrawColor(byte r, byte g, byte b, byte a)
+        public void SetDrawColor(Color color)
         {
-            var _ = SDL.SDL_SetRenderDrawColor(Handle, r, g, b, a);
+            var _ = SDL.SDL_SetRenderDrawColor(Handle, color.R, color.G, color.B, color.A);
         }
 
-        public void DrawLine(ref Point a, ref Point b)
+        public void DrawLine(Point a, Point b)
         {
             var _ = SDL.SDL_RenderDrawLine(Handle, a.X, a.Y, b.X, b.Y);
         }
@@ -110,7 +111,7 @@ namespace DragonGame.Wrappers
             }
         }
 
-        public void SetScale(ref Point scale)
+        public void SetScale(Point scale)
         {
             var _ = SDL.SDL_RenderSetScale(Handle, scale.X, scale.Y);
         }

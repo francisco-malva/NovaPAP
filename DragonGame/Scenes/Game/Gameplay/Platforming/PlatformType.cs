@@ -5,6 +5,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         None,
         SimplePlatform,
         MovingPlatform,
-        TeleportingPlatform
+        TeleportingPlatform,
+        CooldownPlatform
     }
 }

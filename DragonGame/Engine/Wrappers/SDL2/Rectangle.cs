@@ -1,6 +1,6 @@
 ﻿using SDL2;
 
-namespace DragonGame.Wrappers
+namespace DragonGame.Engine.Wrappers.SDL2
 {
     public struct Rectangle
     {

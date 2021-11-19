@@ -1,8 +1,8 @@
 ﻿using System;
 using DragonGame.Engine.Utilities;
+using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
 using DragonGame.Scenes.Game.Input;
-using DragonGame.Wrappers;
 using SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Players
@@ -26,6 +26,8 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
         public Point Position;
 
         protected int XSpeed, YSpeed;
+
+        private ulong _stateTimer;
 
         protected Player(DeterministicRandom random, Texture texture)
         {
@@ -54,6 +56,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
             UpdateMovement(platforms, input);
             UpdateAngle();
             UpdateFlip();
+            ++_stateTimer;
         }
 
         private void UpdateMovement(Platforms platforms, GameInput input)
@@ -71,10 +74,10 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
                     UpdatePosition();
                     break;
                 case PlayerState.Won:
-                    Position.Y += 10;
+                    Position.Y += (int)_stateTimer;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    break;
             }
         }
 
@@ -129,7 +132,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
 
         private void UpdatePosition()
         {
-            if (Position.Y < 0 && State != PlayerState.Lost) Jump();
+            if (Position.Y < 0 && State != PlayerState.Lost) Jump(null,true);
             Position.X = Math.Min(GameField.Width, Math.Max(0, Position.X + XSpeed));
             YSpeed = Math.Max(YTerminalSpeed, YSpeed - YDrag);
             Position.Y += YSpeed;
@@ -148,12 +151,12 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
 
         protected abstract void MoveX(Platforms platforms, GameInput input);
 
-        public void Jump(Platform platform = null)
+        public void Jump(Platform platform = null, bool ground = false, int jumpMultiplier = 1)
         {
             OnJump(platform);
 
-            Position.Y = platform == null ? 0 : platform.Position.Y + Platform.PlatformHeight;
-            YSpeed = YJumpSpeed;
+            Position.Y = platform == null ? (ground ? 0 : Position.Y) : platform.Position.Y + Platform.PlatformHeight;
+            YSpeed = YJumpSpeed * jumpMultiplier;
         }
 
         protected abstract void OnJump(Platform platform);
@@ -161,6 +164,17 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
         public void SetState(PlayerState state)
         {
             State = state;
+
+            switch (state)
+            {
+                case PlayerState.Lost:
+                    XSpeed = 0;
+                    Jump();
+                    break;
+                default:
+                    break;
+            }
+            _stateTimer = 0;
         }
     }
 }
