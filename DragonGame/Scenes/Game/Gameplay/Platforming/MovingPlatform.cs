@@ -1,6 +1,7 @@
 using DragonGame.Engine.Utilities;
 using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
+using Engine.Wrappers.SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
@@ -16,6 +17,11 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         protected override void OnPlayerJump(Player player)
         {
+        }
+
+        protected override Color GetPlatformDrawColor()
+        {
+            return new Color(173, 198, 152, 255);
         }
 
         protected override void OnUpdate(Player player)

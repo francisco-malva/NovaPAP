@@ -79,7 +79,7 @@ namespace DragonGame.Engine.Wrappers.SDL2
 
         public static Texture FromBmp(string bmpPath)
         {
-            using var surface = new Surface($"Assets/Textures/{bmpPath}.bmp");
+            using var surface = new Surface(bmpPath);
             return new Texture(Game.Instance.Renderer, surface);
         }
     }

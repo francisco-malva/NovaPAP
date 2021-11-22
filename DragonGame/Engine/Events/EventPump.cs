@@ -24,7 +24,7 @@ namespace DragonGame.Engine.Events
         }
 
         /// <summary>
-        /// Call all subscribed event delegates.
+        ///     Call all subscribed event delegates.
         /// </summary>
         public void Dispatch()
         {

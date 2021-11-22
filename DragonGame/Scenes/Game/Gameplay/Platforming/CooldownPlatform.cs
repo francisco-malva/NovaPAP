@@ -1,5 +1,6 @@
 using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
+using Engine.Wrappers.SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
@@ -9,9 +10,9 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         private const ushort FadeInTime = 15;
         private const ushort DissapearenceTime = 60;
 
-        private ushort _timer = 0;
-
         private CooldownPlatformState _state;
+
+        private ushort _timer;
 
         public CooldownPlatform(short id, Point position) : base(id, position)
         {
@@ -29,6 +30,11 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
             SetState(CooldownPlatformState.Dissapearing);
         }
 
+        protected override Color GetPlatformDrawColor()
+        {
+            return new Color(192, 87, 70, 255);
+        }
+
         protected override void OnUpdate(Player player)
         {
             ++_timer;
@@ -38,23 +44,14 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                     break;
                 case CooldownPlatformState.Dissapearing:
                     Alpha = (byte)((1.0f - _timer / (float)FadeOutTime) * 255.0f);
-                    if (_timer == FadeOutTime)
-                    {
-                        SetState(CooldownPlatformState.Dissapeared);
-                    }
+                    if (_timer == FadeOutTime) SetState(CooldownPlatformState.Dissapeared);
                     break;
                 case CooldownPlatformState.Appearing:
-                Alpha = (byte)((_timer / (float)FadeOutTime) * 255.0f);
-                    if (_timer == FadeInTime)
-                    {
-                        SetState(CooldownPlatformState.Static);
-                    }
+                    Alpha = (byte)(_timer / (float)FadeOutTime * 255.0f);
+                    if (_timer == FadeInTime) SetState(CooldownPlatformState.Static);
                     break;
                 case CooldownPlatformState.Dissapeared:
-                    if (_timer == DissapearenceTime)
-                    {
-                        SetState(CooldownPlatformState.Appearing);
-                    }
+                    if (_timer == DissapearenceTime) SetState(CooldownPlatformState.Appearing);
                     break;
             }
         }

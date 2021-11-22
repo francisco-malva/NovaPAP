@@ -14,6 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ManagedBass" Version="3.1.0" />
     <PackageReference Include="ppy.SDL2-CS" Version="1.0.468-alpha" />
   </ItemGroup>
 

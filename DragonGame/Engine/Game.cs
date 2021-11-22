@@ -1,8 +1,10 @@
 ﻿using System;
+using DragonGame.Engine.Assets;
 using DragonGame.Engine.Events;
 using DragonGame.Engine.Scenes;
 using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.MainMenu;
+using ManagedBass;
 using SDL2;
 
 namespace DragonGame.Engine
@@ -10,9 +12,13 @@ namespace DragonGame.Engine
     internal class Game : IDisposable
     {
         private bool _running;
+
         public EventPump EventPump;
         public Renderer Renderer;
         public SceneManager SceneManager;
+
+
+        public TextureManager TextureManager;
         public Window Window;
 
         public Game()
@@ -28,6 +34,7 @@ namespace DragonGame.Engine
             SceneManager?.Clear();
             Window?.Dispose();
             Renderer?.Dispose();
+            TextureManager?.Dispose();
         }
 
         private void CreateSingleton()
@@ -45,6 +52,8 @@ namespace DragonGame.Engine
 
             EventPump = new EventPump();
             EventPump.Subscribe(SDL.SDL_EventType.SDL_QUIT, _ => Exit());
+
+            TextureManager = new TextureManager();
 
             SceneManager = new SceneManager();
             SceneManager.Set(new MainMenuScene());

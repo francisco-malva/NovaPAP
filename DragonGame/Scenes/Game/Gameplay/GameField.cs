@@ -17,53 +17,49 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         private readonly Texture _backgroundTexture;
         private readonly Texture _checkmarkTexture;
+        private readonly Texture _drawTexture;
 
         private readonly Texture _getReadyTexture;
         private readonly Texture _goTexture;
         private readonly Texture _winnerTexture;
         private readonly Texture _youLoseTexture;
-        private readonly Texture _drawTexture;
-
-        public byte RoundsToWin;
 
         public readonly Platforms Platforms;
-
-        private byte _roundsWon;
-        private ushort _blinkTimer;
-
+        private ushort _bannerDuration;
 
         private Texture _bannerTexture;
-        private ushort _bannerTimer = 0;
-        private ushort _bannerDuration = 0;
+        private ushort _bannerTimer;
+        private ushort _blinkTimer;
 
         /// <summary>
-        /// By how much to affect the drawing operations in the Y axis for the game elements (player, platforms, etc)
-        /// </summary>
-        private int _yScroll;
-
-        /// <summary>
-        /// Is the checkmark that indicates the won round dark?
+        ///     Is the checkmark that indicates the won round dark?
         /// </summary>
         private bool _checkmarkDark;
 
-        public GameField(byte roundsToWin, bool ai, AiDifficulty difficulty, DeterministicRandom random,
-            Texture backgroundTexture,
-            Texture playerTexture,
-            Texture platformTexture, Texture checkmarkTexture, Texture getReadyTexture, Texture goTexture,
-            Texture winnerTexture, Texture youLoseTexture, Texture drawTexture)
+        private byte _roundsWon;
+
+        /// <summary>
+        ///     By how much to affect the drawing operations in the Y axis for the game elements (player, platforms, etc)
+        /// </summary>
+        private int _yScroll;
+
+        public byte RoundsToWin;
+
+        public GameField(byte roundsToWin, bool ai, AiDifficulty difficulty, DeterministicRandom random)
         {
             RoundsToWin = roundsToWin;
             AiControlled = ai;
-            Player = ai ? new AIPlayer(difficulty, random, playerTexture) : new HumanPlayer(random, playerTexture);
-            Platforms = new Platforms(Player, random, platformTexture);
+            Player = ai ? new AIPlayer(difficulty, random) : new HumanPlayer(random);
+            Platforms = new Platforms(Player, random);
 
-            _backgroundTexture = backgroundTexture;
-            _checkmarkTexture = checkmarkTexture;
-            _getReadyTexture = getReadyTexture;
-            _goTexture = goTexture;
-            _winnerTexture = winnerTexture;
-            _youLoseTexture = youLoseTexture;
-            _drawTexture = drawTexture;
+            _backgroundTexture = Engine.Game.Instance.TextureManager["Game/background"];
+            _backgroundTexture.SetBlendMode(SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            _checkmarkTexture = Engine.Game.Instance.TextureManager["Game/checkmark"];
+            _getReadyTexture = Engine.Game.Instance.TextureManager["Game/Banners/get-ready"];
+            _goTexture = Engine.Game.Instance.TextureManager["Game/Banners/go"];
+            _winnerTexture = Engine.Game.Instance.TextureManager["Game/Banners/winner"];
+            _youLoseTexture = Engine.Game.Instance.TextureManager["Game/Banners/you_lose"];
+            _drawTexture = Engine.Game.Instance.TextureManager["Game/Banners/draw"];
 
             OutputTexture = new Texture(Engine.Game.Instance.Renderer, SDL.SDL_PIXELFORMAT_RGBA8888,
                 (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
@@ -101,10 +97,10 @@ namespace DragonGame.Scenes.Game.Gameplay
         public void WinRound(bool draw = false)
         {
             Player.SetState(PlayerState.Won);
-            
+
             RaiseBanner(draw ? Banner.Draw : Banner.Winner, GameScene.RoundEndTime);
 
-            if(draw && _roundsWon == RoundsToWin - 1)
+            if (draw && _roundsWon == RoundsToWin - 1)
                 return;
             _roundsWon++;
             _blinkTimer = GameScene.RoundEndTime;
@@ -134,9 +130,8 @@ namespace DragonGame.Scenes.Game.Gameplay
                 case PlayerState.Lost:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(input));
             }
-            
         }
 
         private Texture GetTextureForBanner(Banner bannerType)
@@ -151,6 +146,7 @@ namespace DragonGame.Scenes.Game.Gameplay
                 _ => throw new ArgumentOutOfRangeException(nameof(bannerType), bannerType, null)
             };
         }
+
         public void RaiseBanner(Banner bannerType, ushort duration)
         {
             _bannerTexture = GetTextureForBanner(bannerType);
@@ -164,16 +160,12 @@ namespace DragonGame.Scenes.Game.Gameplay
             {
                 --_blinkTimer;
 
-                if (_blinkTimer % 25 == 0)
-                {
-                    _checkmarkDark = !_checkmarkDark;
-                }
+                if (_blinkTimer % 25 == 0) _checkmarkDark = !_checkmarkDark;
             }
             else
             {
                 _checkmarkDark = false;
             }
-                
         }
 
         private void UpdateOffset()
@@ -196,10 +188,7 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         private void DrawBanner()
         {
-            if (_bannerTexture == null)
-            {
-                return;
-            }
+            if (_bannerTexture == null) return;
 
             if (_bannerTimer == 0)
             {
@@ -224,8 +213,20 @@ namespace DragonGame.Scenes.Game.Gameplay
         private void DrawBackground()
         {
             var renderer = Engine.Game.Instance.Renderer;
+
+            var nightExposure = Mathematics.Lerp(0.0f, 255.0f,
+                Platforms.GetClimbingProgress(_yScroll == 0 ? 0 : Player.Position.Y));
+
+            //Drawing the day
+            _backgroundTexture.SetAlphaMod(255);
             renderer.Copy(_backgroundTexture,
-                new Rectangle(0, 0, _backgroundTexture.Width, _backgroundTexture.Height + _yScroll), new Rectangle(0,0,_backgroundTexture.Width * 2,_backgroundTexture.Height * 2));
+                new Rectangle(0, 0, 250, 250),
+                new Rectangle(0, 0, 250 * 2, 250 * 2));
+
+            _backgroundTexture.SetAlphaMod((byte)nightExposure);
+            renderer.Copy(_backgroundTexture,
+                new Rectangle(250, 0, 250 * 2, 250 * 2),
+                new Rectangle(0, 0, 250 * 2, 250 * 2));
         }
 
         private void DrawScoreboard()
@@ -235,17 +236,11 @@ namespace DragonGame.Scenes.Game.Gameplay
             for (var i = 0; i < RoundsToWin; i++)
             {
                 if (i > _roundsWon - 1)
-                {
                     _checkmarkTexture.SetColorMod(Color.Black);
-                }
-                else if(i == _roundsWon - 1 && Player.State == PlayerState.Won)
-                {
+                else if (i == _roundsWon - 1 && Player.State == PlayerState.Won)
                     _checkmarkTexture.SetColorMod(_checkmarkDark ? Color.Black : Color.White);
-                }
                 else
-                {
                     _checkmarkTexture.SetColorMod(Color.White);
-                }
                 renderer.Copy(_checkmarkTexture, null, new Rectangle(8 + 20 * i, 8, 16, 16));
             }
         }

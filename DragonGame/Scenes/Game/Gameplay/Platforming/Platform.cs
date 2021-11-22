@@ -1,5 +1,6 @@
 ﻿using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
+using Engine.Wrappers.SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
@@ -7,18 +8,20 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
     {
         public const int PlatformWidth = 68;
         public const int PlatformHeight = 14;
-        private const int PlatformMoveSpeed = 2;
 
-        public readonly short ID;
+        public readonly short Id;
         protected byte Alpha = 255;
 
         public Point Position;
 
-        public Platform(short id, Point position)
+        protected Platform(short id, Point position)
         {
-            ID = id;
+            Id = id;
             Position = position;
         }
+
+        private Rectangle Collision => new(Position.X - PlatformWidth / 2, Position.Y - PlatformHeight / 2,
+            PlatformWidth, PlatformHeight);
 
         public void Draw(Texture texture, int yScroll)
         {
@@ -27,7 +30,10 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
             var dst = new Rectangle(Position.X - texture.Width / 2,
                 GameField.TransformY(Position.Y + texture.Height, yScroll), texture.Width,
                 texture.Height);
+
+            if (dst.Y is < PlatformHeight / 2 or > GameField.Height + PlatformHeight / 2) return;
             texture.SetAlphaMod(Alpha);
+            texture.SetColorMod(GetPlatformDrawColor());
 
             renderer.Copy(texture, null, dst);
         }
@@ -47,35 +53,22 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         private void PlayerCollision(Player player)
         {
-            if (CanJumpOnPlatform(player))
-            {
-                OnPlayerJump(player);
-                player.Jump(this);
-            }
+            if (!CanJumpOnPlatform(player)) return;
+
+            OnPlayerJump(player);
+            player.Jump(this);
         }
 
         protected abstract void OnPlayerJump(Player player);
 
         private bool CollidingWithPlatform(Player player)
         {
-            var rectangle = new Rectangle(Position.X - PlatformWidth / 2, Position.Y - PlatformHeight / 2,
-                PlatformWidth, PlatformHeight);
+            var platformRect = Collision;
+            var playerRect = player.Collision;
 
-            var a1 = new Point(player.Position.X - Player.PlatformCollisionWidth / 2, player.Position.Y);
-            var b1 = new Point(player.Position.X + Player.PlatformCollisionWidth / 2, player.Position.Y);
-
-            var a2 = new Point(player.Position.X - Player.PlatformCollisionWidth / 2,
-                player.Position.Y + Player.PlatformCollisionHeight / 2);
-            var b2 = new Point(player.Position.X + Player.PlatformCollisionWidth / 2,
-                player.Position.Y + Player.PlatformCollisionHeight / 2);
-
-            var a3 = new Point(player.Position.X - Player.PlatformCollisionWidth / 2,
-                player.Position.Y + Player.PlatformCollisionHeight);
-            var b3 = new Point(player.Position.X + Player.PlatformCollisionWidth / 2,
-                player.Position.Y + Player.PlatformCollisionHeight);
-
-            return rectangle.HasLine(ref a1, ref b1) || rectangle.HasLine(ref a2, ref b2) ||
-                   rectangle.HasLine(ref a3, ref b3);
+            return platformRect.HasIntersection(ref playerRect);
         }
+
+        protected abstract Color GetPlatformDrawColor();
     }
 }

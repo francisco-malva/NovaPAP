@@ -1,6 +1,8 @@
+using System;
 using DragonGame.Engine.Utilities;
 using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
+using Engine.Wrappers.SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
@@ -31,6 +33,22 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         {
         }
 
+        protected override Color GetPlatformDrawColor()
+        {
+            switch (_state)
+            {
+                case TeleportingPlatformState.Static:
+                    var color = (byte)((float)_stateTimer / StaticTime * 255.0f);
+                    return new Color(color, color, color, 255);
+                case TeleportingPlatformState.Dissapearing:
+                    return Color.Black;
+                case TeleportingPlatformState.Appearing:
+                    return Color.White;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         protected override void OnUpdate(Player player)
         {
             switch (_state)
@@ -46,6 +64,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                         Position.X = _random.GetInteger(PlatformWidth / 2, GameField.Width - PlatformWidth / 2);
                         SetState(TeleportingPlatformState.Appearing);
                     }
+
                     break;
                 case TeleportingPlatformState.Appearing:
                     Alpha = (byte)((1.0f - (float)_stateTimer / DissapearingTime) * 255);

@@ -9,21 +9,24 @@ namespace Engine.Wrappers.SDL2
         public static readonly Color Green = new(0, 255, 0, 255);
 
 
-        ///<summary>
-        ///The red channel.
-        ///</summary>
+        /// <summary>
+        ///     The red channel.
+        /// </summary>
         public byte R;
-        ///<summary>
-        ///The green channel.
-        ///</summary>
+
+        /// <summary>
+        ///     The green channel.
+        /// </summary>
         public byte G;
-        ///<summary>
-        ///The blue channel.
-        ///</summary>
+
+        /// <summary>
+        ///     The blue channel.
+        /// </summary>
         public byte B;
-        ///<summary>
-        ///The alpha channel.
-        ///</summary>
+
+        /// <summary>
+        ///     The alpha channel.
+        /// </summary>
         public byte A;
 
 

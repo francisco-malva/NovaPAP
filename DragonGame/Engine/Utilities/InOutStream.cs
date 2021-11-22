@@ -4,14 +4,14 @@ using System.Text;
 
 namespace DragonGame.Engine.Utilities
 {
-    ///<summary>
-    ///An utility class to wrap both a BinaryReader and BinaryWriter around a stream, to enable both reading and writing.
-    ///</summary>
+    /// <summary>
+    ///     An utility class to wrap both a BinaryReader and BinaryWriter around a stream, to enable both reading and writing.
+    /// </summary>
     public sealed class StreamReaderWriter : IDisposable
     {
-        public readonly BinaryWriter Writer;
         public readonly BinaryReader Reader;
         public readonly Stream Stream;
+        public readonly BinaryWriter Writer;
 
         public StreamReaderWriter(Stream stream, Encoding encoding, bool leaveOpen = false)
         {

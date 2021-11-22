@@ -8,8 +8,8 @@ namespace DragonGame.Scenes.Game.Network
 {
     internal class OnlineGameScene : GameScene
     {
-        protected StreamReaderWriter Stream;
         private readonly bool _onLeftSide;
+        protected StreamReaderWriter Stream;
 
         public OnlineGameScene(byte roundsToWin, bool onLeftSide) : base(roundsToWin)
         {
@@ -41,7 +41,5 @@ namespace DragonGame.Scenes.Game.Network
         {
             Stream.Dispose();
         }
-
-        
     }
 }

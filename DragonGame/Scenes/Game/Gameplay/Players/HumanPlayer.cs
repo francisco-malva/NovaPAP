@@ -1,5 +1,4 @@
 using DragonGame.Engine.Utilities;
-using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
 using DragonGame.Scenes.Game.Input;
 
@@ -7,7 +6,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
 {
     internal class HumanPlayer : Player
     {
-        public HumanPlayer(DeterministicRandom random, Texture texture) : base(random, texture)
+        public HumanPlayer(DeterministicRandom random) : base(random)
         {
         }
 

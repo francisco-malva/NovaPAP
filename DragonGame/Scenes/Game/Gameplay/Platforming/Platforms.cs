@@ -7,7 +7,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
     internal class Platforms
     {
-        public const short PlatformCount = 50;
+        public const short PlatformCount = 30;
         public const int InitialPlatformHeight = 100;
         public const int PlatformYStep = 150;
 
@@ -23,10 +23,11 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         private PlatformType _lastPlatformType = PlatformType.None;
 
-        public Platforms(Player player, DeterministicRandom random, Texture texture)
+
+        public Platforms(Player player, DeterministicRandom random)
         {
             _player = player;
-            _texture = texture;
+            _texture = Engine.Game.Instance.TextureManager["Game/platform"];
 
             _platforms = new Platform[PlatformCount];
             _random = random;
@@ -35,6 +36,12 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         public bool PlayerFinishedCourse => _player.Position.Y + Player.PlatformCollisionHeight > FinishingY;
 
         public Platform this[short id] => _platforms[id];
+
+
+        public static float GetClimbingProgress(int yPosition)
+        {
+            return yPosition == 0 ? 0.0f : yPosition / (float)FinishingY;
+        }
 
         private PlatformType GetRandomPlatformType()
         {
@@ -60,18 +67,14 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         private Platform GetPlatform(PlatformType type, short id, Point position)
         {
-            switch (type)
+            return type switch
             {
-                case PlatformType.SimplePlatform:
-                    return new SimplePlatform(id, position);
-                case PlatformType.MovingPlatform:
-                    return new MovingPlatform(id, position, _random);
-                case PlatformType.TeleportingPlatform:
-                    return new TeleportingPlatform(id, position, _random);
-                case PlatformType.CooldownPlatform:
-                    return new CooldownPlatform(id, position);
-            }
-            return null;
+                PlatformType.SimplePlatform => new SimplePlatform(id, position),
+                PlatformType.MovingPlatform => new MovingPlatform(id, position, _random),
+                PlatformType.TeleportingPlatform => new TeleportingPlatform(id, position, _random),
+                PlatformType.CooldownPlatform => new CooldownPlatform(id, position),
+                _ => null
+            };
         }
 
         public void GeneratePlatforms()
@@ -124,7 +127,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                     continue;
 
                 closestDistance = yDiff;
-                target = platform.ID;
+                target = platform.Id;
             }
 
             return target;
@@ -143,7 +146,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                     continue;
 
                 closestDistance = yDiff;
-                target = platform.ID;
+                target = platform.Id;
             }
 
             return target;

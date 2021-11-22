@@ -12,7 +12,7 @@ namespace DragonGame.Engine.Input
         }
 
         /// <summary>
-        /// Is the key down?
+        ///     Is the key down?
         /// </summary>
         public static unsafe bool KeyDown(SDL.SDL_Scancode scancode)
         {

@@ -1,6 +1,5 @@
 using System;
 using DragonGame.Engine.Utilities;
-using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
 using DragonGame.Scenes.Game.Input;
 
@@ -16,7 +15,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Players.AI
         private int _prevXDiff;
         private bool _selectTarget = true;
 
-        public AIPlayer(AiDifficulty difficulty, DeterministicRandom random, Texture texture) : base(random, texture)
+        public AIPlayer(AiDifficulty difficulty, DeterministicRandom random) : base(random)
         {
             _difficulty = difficulty;
         }

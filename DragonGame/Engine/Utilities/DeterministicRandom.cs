@@ -2,23 +2,24 @@
 
 namespace DragonGame.Engine.Utilities
 {
-    ///<summary>
-    ///A random class that always returns the same values under the same conditions, also supports saving and loading its state.
-    ///</summary>
+    /// <summary>
+    ///     A random class that always returns the same values under the same conditions, also supports saving and loading its
+    ///     state.
+    /// </summary>
     internal class DeterministicRandom
     {
-        ///<summary>
-        /// The array of random bytes used to give out the random values.
-        ///</summary> 
-        private byte[] _randomBytes = new byte[4096];
+        /// <summary>
+        ///     The array of random bytes used to give out the random values.
+        /// </summary>
+        private readonly byte[] _randomBytes = new byte[4096];
 
-        ///<summary>
-        /// Pointer to the next element to fetch in the random byte ID.
-        ///</summary> 
+        /// <summary>
+        ///     Pointer to the next element to fetch in the random byte ID.
+        /// </summary>
         private int _randomPtr;
 
         /// <summary>
-        /// Generate array of random numbers with the specified seed [NEED TO CALL BEFORE USING!]
+        ///     Generate array of random numbers with the specified seed [NEED TO CALL BEFORE USING!]
         /// </summary>
         public void Setup(int seed)
         {

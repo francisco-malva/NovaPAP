@@ -23,21 +23,24 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
         private double _angle;
 
         private SDL.SDL_RendererFlip _flip;
+
+        private ulong _stateTimer;
         public Point Position;
 
         protected int XSpeed, YSpeed;
 
-        private ulong _stateTimer;
-
-        protected Player(DeterministicRandom random, Texture texture)
+        protected Player(DeterministicRandom random)
         {
             Random = random;
-            _texture = texture;
+            _texture = Engine.Game.Instance.TextureManager["Game/player"];
         }
 
         public PlayerState State { get; private set; }
 
         public bool Descending => YSpeed < 0;
+
+        public Rectangle Collision => new(Position.X - PlatformCollisionWidth / 2,
+            Position.Y - PlatformCollisionHeight / 2, PlatformCollisionWidth, PlatformCollisionHeight);
 
         public void GetReady()
         {
@@ -75,8 +78,6 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
                     break;
                 case PlayerState.Won:
                     Position.Y += (int)_stateTimer;
-                    break;
-                default:
                     break;
             }
         }
@@ -116,9 +117,9 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
                     break;
                 case PlayerState.InGame:
                     if (XSpeed != 0)
-                    {
-                        _flip = XSpeed < 0 ? SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL : SDL.SDL_RendererFlip.SDL_FLIP_NONE;
-                    }
+                        _flip = XSpeed < 0
+                            ? SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL
+                            : SDL.SDL_RendererFlip.SDL_FLIP_NONE;
 
                     break;
                 case PlayerState.Won:
@@ -132,7 +133,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
 
         private void UpdatePosition()
         {
-            if (Position.Y < 0 && State != PlayerState.Lost) Jump(null,true);
+            if (Position.Y < 0 && State != PlayerState.Lost) Jump(null, true);
             Position.X = Math.Min(GameField.Width, Math.Max(0, Position.X + XSpeed));
             YSpeed = Math.Max(YTerminalSpeed, YSpeed - YDrag);
             Position.Y += YSpeed;
@@ -155,7 +156,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
         {
             OnJump(platform);
 
-            Position.Y = platform == null ? (ground ? 0 : Position.Y) : platform.Position.Y + Platform.PlatformHeight;
+            Position.Y = platform == null ? ground ? 0 : Position.Y : platform.Position.Y + Platform.PlatformHeight;
             YSpeed = YJumpSpeed * jumpMultiplier;
         }
 
@@ -171,9 +172,8 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
                     XSpeed = 0;
                     Jump();
                     break;
-                default:
-                    break;
             }
+
             _stateTimer = 0;
         }
     }

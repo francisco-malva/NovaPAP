@@ -4,9 +4,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using DragonGame.Engine.Utilities;
-using DragonGame.Scenes.Game.Input;
-using DragonGame.Scenes.MainMenu;
-using SDL2;
 
 namespace DragonGame.Scenes.Game.Network
 {
@@ -19,7 +16,7 @@ namespace DragonGame.Scenes.Game.Network
             _client = new TcpClient();
             _client.Connect(new IPEndPoint(IPAddress.Parse(File.ReadAllText("config.txt")), 3000));
 
-             Stream = new StreamReaderWriter(_client.GetStream(), Encoding.Default, true);
+            Stream = new StreamReaderWriter(_client.GetStream(), Encoding.Default, true);
 
             SetRoundsToWin(Stream.Reader.ReadByte());
             Random.Setup(Stream.Reader.ReadInt32());
@@ -33,11 +30,6 @@ namespace DragonGame.Scenes.Game.Network
         {
             _client.Dispose();
             base.OnGameEnd();
-        }
-
-        private void IoLoop()
-        {
-
         }
     }
 }

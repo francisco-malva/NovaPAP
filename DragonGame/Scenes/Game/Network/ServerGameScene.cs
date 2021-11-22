@@ -8,8 +8,8 @@ namespace DragonGame.Scenes.Game.Network
 {
     internal sealed class ServerGameScene : OnlineGameScene
     {
-        private readonly TcpListener _listener;
         private readonly TcpClient _client;
+        private readonly TcpListener _listener;
 
         public ServerGameScene(byte roundsToWin) : base(roundsToWin, true)
         {
