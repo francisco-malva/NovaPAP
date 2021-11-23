@@ -1,5 +1,6 @@
 ﻿using System;
 using DragonGame.Engine.Assets;
+using DragonGame.Engine.Audio;
 using DragonGame.Engine.Events;
 using DragonGame.Engine.Scenes;
 using DragonGame.Engine.Wrappers.SDL2;
@@ -17,7 +18,8 @@ namespace DragonGame.Engine
         public Renderer Renderer;
         public SceneManager SceneManager;
 
-
+        public AudioManager AudioManager;
+        
         public TextureManager TextureManager;
         public Window Window;
 
@@ -35,6 +37,7 @@ namespace DragonGame.Engine
             Window?.Dispose();
             Renderer?.Dispose();
             TextureManager?.Dispose();
+            AudioManager?.Dispose();
         }
 
         private void CreateSingleton()
@@ -54,6 +57,8 @@ namespace DragonGame.Engine
             EventPump.Subscribe(SDL.SDL_EventType.SDL_QUIT, _ => Exit());
 
             TextureManager = new TextureManager();
+
+            AudioManager = new AudioManager();
 
             SceneManager = new SceneManager();
             SceneManager.Set(new MainMenuScene());

@@ -18,7 +18,7 @@ namespace DragonGame.Scenes.MainMenu
                 Engine.Game.Instance.SceneManager.Set(new ServerGameScene(3));
             else if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_D))
                 Engine.Game.Instance.SceneManager.Set(new ClientGameScene());
-
+            
             Engine.Game.Instance.Renderer.SetDrawColor(Color.Red);
             Engine.Game.Instance.Renderer.Clear();
             Engine.Game.Instance.Renderer.Present();
