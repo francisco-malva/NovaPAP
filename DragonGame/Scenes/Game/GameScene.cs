@@ -1,4 +1,5 @@
 ﻿using System;
+using DragonGame.Engine.Assets.Audio;
 using DragonGame.Engine.Input;
 using DragonGame.Engine.Scenes;
 using DragonGame.Engine.Utilities;
@@ -6,11 +7,21 @@ using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay;
 using DragonGame.Scenes.Game.Gameplay.Players.AI;
 using DragonGame.Scenes.Game.Input;
+using DragonGame.Scenes.MainMenu;
 using Engine.Wrappers.SDL2;
+using ManagedBass;
 using SDL2;
 
 namespace DragonGame.Scenes.Game
 {
+    internal enum AnnouncerType : byte
+    {
+        GetReady,
+        Go,
+        P1Wins,
+        P2Wins,
+        Draw
+    }
     internal abstract class GameScene : Scene
     {
         public const int GameBorder = 32;
@@ -31,6 +42,12 @@ namespace DragonGame.Scenes.Game
         private byte _stateTimer;
         private Winner _winner;
 
+        private readonly AudioClip _music;
+        private readonly int _musicChannel;
+
+        private readonly AudioClip _getReady, _go, _p1Wins, _p2Wins, _draw;
+        private int _announcerChannel;
+
         protected GameScene(byte roundsToWin, bool p1Ai = false, bool p2Ai = false,
             AiDifficulty difficulty = AiDifficulty.Easy)
         {
@@ -41,6 +58,48 @@ namespace DragonGame.Scenes.Game
 
             P1Field = new GameField(roundsToWin, p1Ai, difficulty, Random);
             P2Field = new GameField(roundsToWin, p2Ai, difficulty, Random);
+
+            _music = Engine.Game.Instance.AudioManager["mus-test"];
+
+            _musicChannel = Bass.SampleGetChannel(_music.Handle, BassFlags.Loop);
+            Bass.ChannelPlay(_musicChannel);
+
+            
+
+            _p1Wins = Engine.Game.Instance.AudioManager["p1-wins"];
+            _p2Wins = Engine.Game.Instance.AudioManager["p2-wins"];
+            _getReady = Engine.Game.Instance.AudioManager["get-ready"];
+            _go = Engine.Game.Instance.AudioManager["go"];
+            _draw = Engine.Game.Instance.AudioManager["draw"];
+        }
+
+        private void PlayAnnouncer(AnnouncerType announcer)
+        {
+            AudioClip sample;
+
+            switch (announcer)
+            {
+                case AnnouncerType.GetReady:
+                    sample = _getReady;
+                    break;
+                case AnnouncerType.Go:
+                    sample = _go;
+                    break;
+                case AnnouncerType.P1Wins:
+                    sample = _p1Wins;
+                    break;
+                case AnnouncerType.P2Wins:
+                    sample = _p2Wins;
+                    break;
+                case AnnouncerType.Draw:
+                    sample = _draw;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(announcer), announcer, null);
+            }
+
+            _announcerChannel = Bass.SampleGetChannel(sample.Handle, BassFlags.Default);
+            Bass.ChannelPlay(_announcerChannel);
         }
 
         protected ulong FrameCount { get; private set; }
@@ -82,14 +141,17 @@ namespace DragonGame.Scenes.Game
                 case Winner.Both:
                     P1Field.WinRound(true);
                     P2Field.WinRound(true);
+                    PlayAnnouncer(AnnouncerType.Draw);
                     break;
                 case Winner.P1:
                     P1Field.WinRound();
                     P2Field.LoseRound();
+                    PlayAnnouncer(AnnouncerType.P1Wins);
                     break;
                 case Winner.P2:
                     P2Field.WinRound();
                     P1Field.LoseRound();
+                    PlayAnnouncer(AnnouncerType.P2Wins);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -104,14 +166,19 @@ namespace DragonGame.Scenes.Game
             switch (_state)
             {
                 case GameState.GetReady:
+                    Bass.ChannelSetAttribute(_musicChannel, ChannelAttribute.Volume, 0.25f);
+                    PlayAnnouncer(AnnouncerType.GetReady);
                     P1Field.GetReady();
                     P2Field.GetReady();
                     break;
                 case GameState.InGame:
+                    Bass.ChannelSetAttribute(_musicChannel, ChannelAttribute.Volume, 0.50f);
+                    PlayAnnouncer(AnnouncerType.Go);
                     P1Field.BeginRound();
                     P2Field.BeginRound();
                     break;
                 case GameState.PlayerWon:
+                    Bass.ChannelSetAttribute(_musicChannel, ChannelAttribute.Volume, 0.25f);
                     DecideWinner();
                     break;
                 case GameState.GameOver:
@@ -173,6 +240,7 @@ namespace DragonGame.Scenes.Game
                     PlayerWonUpdate(p1Input, p2Input);
                     break;
                 case GameState.GameOver:
+                    Engine.Game.Instance.SceneManager.Set(new MainMenuScene());
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -206,6 +274,9 @@ namespace DragonGame.Scenes.Game
             P2Field.Dispose();
         }
 
-        protected abstract void OnGameEnd();
+        protected virtual void OnGameEnd()
+        {
+            Bass.ChannelStop(_musicChannel);
+        }
     }
 }

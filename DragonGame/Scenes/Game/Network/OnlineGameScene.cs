@@ -40,6 +40,7 @@ namespace DragonGame.Scenes.Game.Network
         protected override void OnGameEnd()
         {
             Stream.Dispose();
+            base.OnGameEnd();
         }
     }
 }

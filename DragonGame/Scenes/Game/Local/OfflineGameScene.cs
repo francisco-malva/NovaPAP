@@ -45,6 +45,7 @@ namespace DragonGame.Scenes.Game.Local
 
         protected override void OnGameEnd()
         {
+            base.OnGameEnd();
         }
     }
 }

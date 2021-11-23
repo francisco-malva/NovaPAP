@@ -27,16 +27,35 @@ namespace DragonGame.Engine.Assets
             }
         }
 
-        public void Dispose()
-        {
-            ClearCache();
-        }
-
         public void ClearCache()
         {
             foreach (var pair in _assetCache) pair.Value.Dispose(); //Unload all cached assets
         }
 
         protected abstract T LoadAsset(string path);
+
+        protected virtual void ReleaseUnmanagedResources()
+        {
+            // TODO release unmanaged resources here
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            ReleaseUnmanagedResources();
+            if (disposing)
+            {
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~ResourceManager()
+        {
+            Dispose(false);
+        }
     }
 }

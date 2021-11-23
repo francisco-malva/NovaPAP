@@ -1,6 +1,7 @@
 ﻿using System;
 using DragonGame.Engine.Assets;
-using DragonGame.Engine.Audio;
+using DragonGame.Engine.Assets.Audio;
+using DragonGame.Engine.Assets.Textures;
 using DragonGame.Engine.Events;
 using DragonGame.Engine.Scenes;
 using DragonGame.Engine.Wrappers.SDL2;

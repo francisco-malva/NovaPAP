@@ -1,6 +1,6 @@
 ﻿using DragonGame.Engine.Wrappers.SDL2;
 
-namespace DragonGame.Engine.Assets
+namespace DragonGame.Engine.Assets.Textures
 {
     internal class TextureManager : ResourceManager<Texture>
     {

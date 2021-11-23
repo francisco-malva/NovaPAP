@@ -1,8 +1,10 @@
 ﻿using System;
+using DragonGame.Engine.Assets.Audio;
 using DragonGame.Engine.Utilities;
 using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
 using DragonGame.Scenes.Game.Input;
+using ManagedBass;
 using SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Players
@@ -29,10 +31,16 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
 
         protected int XSpeed, YSpeed;
 
+        private readonly AudioClip _jump;
+        private readonly int _jumpChannel;
+
         protected Player(DeterministicRandom random)
         {
             Random = random;
             _texture = Engine.Game.Instance.TextureManager["Game/player"];
+            _jump = Engine.Game.Instance.AudioManager["jump"];
+            _jumpChannel = Bass.SampleGetChannel(_jump.Handle, BassFlags.Default);
+            Bass.ChannelSetAttribute(_jumpChannel, ChannelAttribute.Volume, 0.10f);
         }
 
         public PlayerState State { get; private set; }
@@ -158,6 +166,8 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
 
             Position.Y = platform == null ? ground ? 0 : Position.Y : platform.Position.Y + Platform.PlatformHeight;
             YSpeed = YJumpSpeed * jumpMultiplier;
+
+            Bass.ChannelPlay(_jumpChannel, true);
         }
 
         protected abstract void OnJump(Platform platform);
