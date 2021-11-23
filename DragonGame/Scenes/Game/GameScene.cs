@@ -22,6 +22,7 @@ namespace DragonGame.Scenes.Game
         P2Wins,
         Draw
     }
+
     internal abstract class GameScene : Scene
     {
         public const int GameBorder = 32;
@@ -33,20 +34,20 @@ namespace DragonGame.Scenes.Game
 
         private readonly Texture _gameBorder;
 
-        protected readonly GameField P1Field;
-        protected readonly GameField P2Field;
-
-        protected readonly DeterministicRandom Random;
-
-        private GameState _state = GameState.GetReady;
-        private byte _stateTimer;
-        private Winner _winner;
+        private readonly AudioClip _getReady, _go, _p1Wins, _p2Wins, _draw;
 
         private readonly AudioClip _music;
         private readonly int _musicChannel;
 
-        private readonly AudioClip _getReady, _go, _p1Wins, _p2Wins, _draw;
+        protected readonly GameField P1Field;
+        protected readonly GameField P2Field;
+
+        protected readonly DeterministicRandom Random;
         private int _announcerChannel;
+
+        private GameState _state = GameState.GetReady;
+        private byte _stateTimer;
+        private Winner _winner;
 
         protected GameScene(byte roundsToWin, bool p1Ai = false, bool p2Ai = false,
             AiDifficulty difficulty = AiDifficulty.Easy)
@@ -64,7 +65,6 @@ namespace DragonGame.Scenes.Game
             _musicChannel = Bass.SampleGetChannel(_music.Handle, BassFlags.Loop);
             Bass.ChannelPlay(_musicChannel);
 
-            
 
             _p1Wins = Engine.Game.Instance.AudioManager["p1-wins"];
             _p2Wins = Engine.Game.Instance.AudioManager["p2-wins"];
@@ -72,6 +72,8 @@ namespace DragonGame.Scenes.Game
             _go = Engine.Game.Instance.AudioManager["go"];
             _draw = Engine.Game.Instance.AudioManager["draw"];
         }
+
+        protected ulong FrameCount { get; private set; }
 
         private void PlayAnnouncer(AnnouncerType announcer)
         {
@@ -101,8 +103,6 @@ namespace DragonGame.Scenes.Game
             _announcerChannel = Bass.SampleGetChannel(sample.Handle, BassFlags.Default);
             Bass.ChannelPlay(_announcerChannel);
         }
-
-        protected ulong FrameCount { get; private set; }
 
         protected void SetRoundsToWin(byte roundsToWin)
         {

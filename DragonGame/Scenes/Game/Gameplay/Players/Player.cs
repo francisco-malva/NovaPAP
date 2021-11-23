@@ -18,6 +18,9 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
         private const int YDrag = 1;
         protected const int XMoveSpeed = 8;
 
+        private readonly AudioClip _jump;
+        private readonly int _jumpChannel;
+
         private readonly Texture _texture;
 
         protected readonly DeterministicRandom Random;
@@ -30,9 +33,6 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
         public Point Position;
 
         protected int XSpeed, YSpeed;
-
-        private readonly AudioClip _jump;
-        private readonly int _jumpChannel;
 
         protected Player(DeterministicRandom random)
         {

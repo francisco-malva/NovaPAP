@@ -1,5 +1,4 @@
 ﻿using System;
-using DragonGame.Engine.Assets;
 using DragonGame.Engine.Assets.Audio;
 using DragonGame.Engine.Assets.Textures;
 using DragonGame.Engine.Events;
@@ -14,12 +13,12 @@ namespace DragonGame.Engine
     {
         private bool _running;
 
+        public AudioManager AudioManager;
+
         public EventPump EventPump;
         public Renderer Renderer;
         public SceneManager SceneManager;
 
-        public AudioManager AudioManager;
-        
         public TextureManager TextureManager;
         public Window Window;
 

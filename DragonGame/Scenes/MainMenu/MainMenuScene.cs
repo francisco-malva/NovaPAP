@@ -12,16 +12,20 @@ namespace DragonGame.Scenes.MainMenu
     {
         public override void OnTick()
         {
+#if DEBUG
             if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_A))
                 Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(3, false, false, AiDifficulty.Easy));
             else if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_S))
                 Engine.Game.Instance.SceneManager.Set(new ServerGameScene(3));
             else if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_D))
                 Engine.Game.Instance.SceneManager.Set(new ClientGameScene());
-            
+
             Engine.Game.Instance.Renderer.SetDrawColor(Color.Red);
             Engine.Game.Instance.Renderer.Clear();
             Engine.Game.Instance.Renderer.Present();
+#else
+            Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(3, false, true, AiDifficulty.Easy));
+#endif
         }
 
         protected override void OnUnload()

@@ -5,9 +5,9 @@ namespace DragonGame.Engine.Assets
 {
     internal abstract class ResourceManager<T> : IDisposable where T : IDisposable
     {
+        private readonly Dictionary<string, T> _assetCache = new();
         private readonly string _fileExtension;
         private readonly string _rootPath;
-        private readonly Dictionary<string, T> _assetCache = new();
 
         internal ResourceManager(string rootPath, string fileExtension)
         {
@@ -25,6 +25,12 @@ namespace DragonGame.Engine.Assets
                 _assetCache.Add(name, asset);
                 return asset;
             }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public void ClearCache()
@@ -45,12 +51,6 @@ namespace DragonGame.Engine.Assets
             if (disposing)
             {
             }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         ~ResourceManager()

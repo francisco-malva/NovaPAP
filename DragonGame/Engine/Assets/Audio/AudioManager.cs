@@ -4,7 +4,6 @@ namespace DragonGame.Engine.Assets.Audio
 {
     internal class AudioManager : ResourceManager<AudioClip>
     {
-
         public AudioManager() : base("Assets/Audio", "ogg")
         {
             Bass.Init();
