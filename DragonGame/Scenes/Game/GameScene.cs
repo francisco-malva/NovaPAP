@@ -8,20 +8,13 @@ using DragonGame.Scenes.Game.Gameplay;
 using DragonGame.Scenes.Game.Gameplay.Players.AI;
 using DragonGame.Scenes.Game.Input;
 using DragonGame.Scenes.MainMenu;
+using DuckDuckJump.Scenes.Game.Gameplay.Announcer;
 using Engine.Wrappers.SDL2;
 using ManagedBass;
 using SDL2;
 
 namespace DragonGame.Scenes.Game
 {
-    internal enum AnnouncerType : byte
-    {
-        GetReady,
-        Go,
-        P1Wins,
-        P2Wins,
-        Draw
-    }
 
     internal abstract class GameScene : Scene
     {
@@ -34,7 +27,7 @@ namespace DragonGame.Scenes.Game
 
         private readonly Texture _gameBorder;
 
-        private readonly AudioClip _getReady, _go, _p1Wins, _p2Wins, _draw;
+        private readonly Announcer _announcer;
 
         private readonly AudioClip _music;
         private readonly int _musicChannel;
@@ -43,7 +36,6 @@ namespace DragonGame.Scenes.Game
         protected readonly GameField P2Field;
 
         protected readonly DeterministicRandom Random;
-        private int _announcerChannel;
 
         private GameState _state = GameState.GetReady;
         private byte _stateTimer;
@@ -66,48 +58,15 @@ namespace DragonGame.Scenes.Game
             Bass.ChannelPlay(_musicChannel);
 
 
-            _p1Wins = Engine.Game.Instance.AudioManager["p1-wins"];
-            _p2Wins = Engine.Game.Instance.AudioManager["p2-wins"];
-            _getReady = Engine.Game.Instance.AudioManager["get-ready"];
-            _go = Engine.Game.Instance.AudioManager["go"];
-            _draw = Engine.Game.Instance.AudioManager["draw"];
+            _announcer = new Announcer();
         }
 
         protected ulong FrameCount { get; private set; }
 
-        private void PlayAnnouncer(AnnouncerType announcer)
-        {
-            AudioClip sample;
-
-            switch (announcer)
-            {
-                case AnnouncerType.GetReady:
-                    sample = _getReady;
-                    break;
-                case AnnouncerType.Go:
-                    sample = _go;
-                    break;
-                case AnnouncerType.P1Wins:
-                    sample = _p1Wins;
-                    break;
-                case AnnouncerType.P2Wins:
-                    sample = _p2Wins;
-                    break;
-                case AnnouncerType.Draw:
-                    sample = _draw;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(announcer), announcer, null);
-            }
-
-            _announcerChannel = Bass.SampleGetChannel(sample.Handle, BassFlags.Default);
-            Bass.ChannelPlay(_announcerChannel);
-        }
-
         protected void SetRoundsToWin(byte roundsToWin)
         {
-            P1Field.RoundsToWin = roundsToWin;
-            P2Field.RoundsToWin = roundsToWin;
+            P1Field.Scoreboard.RoundsToWin = roundsToWin;
+            P2Field.Scoreboard.RoundsToWin = roundsToWin;
         }
 
         private void EndRound(Winner winner)
@@ -141,17 +100,17 @@ namespace DragonGame.Scenes.Game
                 case Winner.Both:
                     P1Field.WinRound(true);
                     P2Field.WinRound(true);
-                    PlayAnnouncer(AnnouncerType.Draw);
+                    _announcer.Say(AnnouncementType.Draw);
                     break;
                 case Winner.P1:
                     P1Field.WinRound();
                     P2Field.LoseRound();
-                    PlayAnnouncer(AnnouncerType.P1Wins);
+                    _announcer.Say(AnnouncementType.P1Wins);
                     break;
                 case Winner.P2:
                     P2Field.WinRound();
                     P1Field.LoseRound();
-                    PlayAnnouncer(AnnouncerType.P2Wins);
+                    _announcer.Say(AnnouncementType.P2Wins);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -167,13 +126,13 @@ namespace DragonGame.Scenes.Game
             {
                 case GameState.GetReady:
                     Bass.ChannelSetAttribute(_musicChannel, ChannelAttribute.Volume, 0.25f);
-                    PlayAnnouncer(AnnouncerType.GetReady);
+                    _announcer.Say(AnnouncementType.GetReady);
                     P1Field.GetReady();
                     P2Field.GetReady();
                     break;
                 case GameState.InGame:
                     Bass.ChannelSetAttribute(_musicChannel, ChannelAttribute.Volume, 0.50f);
-                    PlayAnnouncer(AnnouncerType.Go);
+                    _announcer.Say(AnnouncementType.Go);
                     P1Field.BeginRound();
                     P2Field.BeginRound();
                     break;

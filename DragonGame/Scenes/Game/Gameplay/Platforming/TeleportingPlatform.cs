@@ -91,5 +91,10 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                     break;
             }
         }
+
+        public override bool TargetableByAi()
+        {
+            return _state == TeleportingPlatformState.Static;
+        }
     }
 }

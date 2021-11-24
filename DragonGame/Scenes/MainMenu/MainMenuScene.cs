@@ -14,7 +14,7 @@ namespace DragonGame.Scenes.MainMenu
         {
 #if DEBUG
             if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_A))
-                Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(3, false, false, AiDifficulty.Easy));
+                Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(3, false, false, AiDifficulty.Nightmare));
             else if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_S))
                 Engine.Game.Instance.SceneManager.Set(new ServerGameScene(3));
             else if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_D))

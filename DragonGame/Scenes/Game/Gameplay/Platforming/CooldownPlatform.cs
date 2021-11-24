@@ -60,5 +60,10 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         {
             return base.CanJumpOnPlatform(player) && _state == CooldownPlatformState.Static;
         }
+
+        public override bool TargetableByAi()
+        {
+            return _state == CooldownPlatformState.Static;
+        }
     }
 }

@@ -2,18 +2,16 @@ using System;
 using DragonGame.Engine.Utilities;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
 using DragonGame.Scenes.Game.Input;
+using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
 
 namespace DragonGame.Scenes.Game.Gameplay.Players.AI
 {
     internal class AIPlayer : Player
     {
         private readonly AiDifficulty _difficulty;
-        private bool _canFailTarget = true;
-
-        private byte _failTimer;
-        private short _platformTarget = -1;
-        private int _prevXDiff;
-        private bool _selectTarget = true;
+        private AiState _state;
+        private ushort _timer;
+        private Platform _target;
 
         public AIPlayer(AiDifficulty difficulty, DeterministicRandom random) : base(random)
         {
@@ -22,67 +20,83 @@ namespace DragonGame.Scenes.Game.Gameplay.Players.AI
 
         protected override void MoveX(Platforms platforms, GameInput input)
         {
-            UpdateTargetSelection(platforms);
-
-            if (_platformTarget == -1)
-                return;
-
-            if (_failTimer > 0)
+            switch (_state)
             {
-                --_failTimer;
-                XSpeed = _prevXDiff * XMoveSpeed;
+                case AiState.Waiting:
+                    SteerAi();
+                    break;
+                case AiState.SelectingPlatform:
+                    var newTarget = platforms.GetAiTarget(this);
 
-                if (_failTimer != 0) return;
-                _canFailTarget = false;
-                _platformTarget = platforms.GetPlatformBelow(ref Position);
-                return;
+                    if (newTarget != null)
+                    {
+                        _target = newTarget;
+                    }
+                    SetAiState(AiState.Waiting);
+                    break;
             }
+            if (_timer > 0)
+            {
+                --_timer;
+            }
+        }
 
-            var target = platforms[_platformTarget];
-
-            if (Position.X > target.Position.X - Platform.PlatformWidth / 2 &&
-                Position.X < target.Position.X + Platform.PlatformWidth / 2)
+        private void SteerAi()
+        {
+            if (_target == null || !_target.TargetableByAi() || _target.InZone(this))
             {
                 XSpeed = 0;
                 return;
             }
 
-            var xDiff = Math.Sign(target.Position.X - Position.X);
+            int sign = Math.Sign(_target.Position.X - Position.X);
 
-            var failProbability = _difficulty switch
+            XSpeed = sign * XMoveSpeed;
+        }
+        private void SetAiState(AiState state)
+        {
+            _state = state;
+            switch (state)
             {
-                AiDifficulty.Easy => 0.45f,
-                AiDifficulty.Normal => 0.25f,
-                AiDifficulty.Hard => 0.05f,
-                _ => 0.0f
-            };
+                case AiState.Waiting:
+                    _timer = WaitTime;
+                    break;
+                case AiState.SelectingPlatform:
+                    break;
+            }
+        }
 
-            if (Random.GetFloat() <= failProbability && _canFailTarget) _failTimer = 15;
-            XSpeed = xDiff * XMoveSpeed;
-            _prevXDiff = xDiff;
+        private ushort WaitTime
+        {
+            get
+            {
+                switch (_difficulty)
+                {
+                    case AiDifficulty.Easy:
+                        return 60;
+                    case AiDifficulty.Normal:
+                        return 30;
+                    case AiDifficulty.Hard:
+                        return 25;
+                    case AiDifficulty.Nightmare:
+                        return 0;
+                }
+                return 0;
+            }
         }
 
         protected override void OnJump(Platform platform)
         {
-            _selectTarget = true;
-            _canFailTarget = true;
+            if (_timer == 0)
+            {
+                SetAiState(AiState.SelectingPlatform);
+            }
         }
 
         protected override void ResetSpecialFields()
         {
-            _platformTarget = -1;
-            _canFailTarget = true;
-            _selectTarget = true;
-            _failTimer = 0;
-            _prevXDiff = 0;
-        }
-
-        private void UpdateTargetSelection(Platforms platforms)
-        {
-            if (!_selectTarget) return;
-
-            _selectTarget = false;
-            _platformTarget = platforms.GetPlatformAbove(ref Position);
+            _target = null;
+            SetAiState(AiState.SelectingPlatform);
         }
     }
 }

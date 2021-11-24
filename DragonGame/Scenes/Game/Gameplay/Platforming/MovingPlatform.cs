@@ -39,5 +39,10 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                 if (Position.X >= GameField.Width - PlatformWidth / 2) _moveLeft = true;
             }
         }
+
+        public override bool TargetableByAi()
+        {
+            return true;
+        }
     }
 }

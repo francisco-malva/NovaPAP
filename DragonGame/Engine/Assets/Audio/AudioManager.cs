@@ -1,4 +1,5 @@
-﻿using ManagedBass;
+﻿using System;
+using ManagedBass;
 
 namespace DragonGame.Engine.Assets.Audio
 {
@@ -7,6 +8,9 @@ namespace DragonGame.Engine.Assets.Audio
         public AudioManager() : base("Assets/Audio", "ogg")
         {
             Bass.Init();
+
+            var error = Bass.LastError;
+            Console.WriteLine(Bass.LastError);
         }
 
         protected override void ReleaseUnmanagedResources()

@@ -22,5 +22,30 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         protected override void OnUpdate(Player player)
         {
         }
+
+        public override bool Equals(object obj)
+        {
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return base.ToString();
+        }
+
+        protected override bool CanJumpOnPlatform(Player player)
+        {
+            return base.CanJumpOnPlatform(player);
+        }
+
+        public override bool TargetableByAi()
+        {
+            return true;
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace DragonGame.Scenes.Game.Gameplay
 {
-    internal enum Banner : byte
+    internal enum BannerType : byte
     {
         GetReady,
         Go,

@@ -1,5 +1,6 @@
 ﻿using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
+using DragonGame.Scenes.Game.Gameplay.Players.AI;
 using Engine.Wrappers.SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
@@ -70,5 +71,9 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         }
 
         protected abstract Color GetPlatformDrawColor();
+
+        public abstract bool TargetableByAi();
+
+        public bool InZone(AIPlayer player) => player.Position.X >= Position.X - PlatformWidth / 2 + 5 && player.Position.X <= Position.X + PlatformWidth / 2 - 5;
     }
 }

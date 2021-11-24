@@ -4,6 +4,7 @@
     {
         Easy,
         Normal,
-        Hard
+        Hard,
+        Nightmare
     }
 }

@@ -1,6 +1,7 @@
 ﻿using DragonGame.Engine.Utilities;
 using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
+using DragonGame.Scenes.Game.Gameplay.Players.AI;
 using Engine.Wrappers.SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
@@ -114,42 +115,19 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
             Engine.Game.Instance.Renderer.DrawLine(a, b);
         }
 
-        public short GetPlatformAbove(ref Point position)
+        public Platform GetAiTarget(AIPlayer player)
         {
-            short target = -1;
-            var closestDistance = int.MaxValue;
-
             foreach (var platform in _platforms)
             {
-                var yDiff = platform.Position.Y - position.Y;
+                var yDiff = platform.Position.Y - player.Position.Y;
 
-                if (yDiff <= 0 || yDiff >= closestDistance)
+                if (yDiff <= 0)
                     continue;
 
-                closestDistance = yDiff;
-                target = platform.Id;
+                return platform;
             }
 
-            return target;
-        }
-
-        public short GetPlatformBelow(ref Point position)
-        {
-            short target = -1;
-            var closestDistance = int.MinValue;
-
-            foreach (var platform in _platforms)
-            {
-                var yDiff = platform.Position.Y - position.Y;
-
-                if (yDiff >= 0 || yDiff <= closestDistance)
-                    continue;
-
-                closestDistance = yDiff;
-                target = platform.Id;
-            }
-
-            return target;
+            return null;
         }
     }
 }
