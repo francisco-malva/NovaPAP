@@ -2,17 +2,16 @@
 using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Scenes.Game.Gameplay.Players.AI;
-using Engine.Wrappers.SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
     internal class Platforms
     {
-        public const short PlatformCount = 30;
+        public const short PlatformCount = 100;
         public const int InitialPlatformHeight = 100;
         public const int PlatformYStep = 150;
 
-        private const int FinishingY = InitialPlatformHeight + PlatformCount * PlatformYStep;
+        public const int FinishingY = InitialPlatformHeight + PlatformCount * PlatformYStep;
 
         private readonly Platform[] _platforms;
 
@@ -94,25 +93,11 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         public void Draw(int yScroll)
         {
             DrawPlatforms(yScroll);
-            if (_player.State == PlayerState.InGame)
-                DrawFinishingLine(yScroll);
         }
 
         private void DrawPlatforms(int yScroll)
         {
             foreach (var platform in _platforms) platform.Draw(_texture, yScroll);
-        }
-
-        private static void DrawFinishingLine(int yScroll)
-        {
-            var a = new Point(0, GameField.TransformY(FinishingY, yScroll));
-
-            var b = new Point(
-                GameField.Width,
-                GameField.TransformY(FinishingY, yScroll));
-
-            Engine.Game.Instance.Renderer.SetDrawColor(Color.Red);
-            Engine.Game.Instance.Renderer.DrawLine(a, b);
         }
 
         public Platform GetAiTarget(AIPlayer player)

@@ -47,7 +47,7 @@ namespace DragonGame.Engine
 
         private void Initialize()
         {
-            Window = new Window("Dragon Game", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
+            Window = new Window("Duck Duck Jump", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
                 640, 480, 0);
             Renderer = new Renderer(Window, -1,
                 SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL.SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE);

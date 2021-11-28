@@ -29,6 +29,7 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         private BannerDisplay _bannerDisplay;
         public Scoreboard Scoreboard;
+        private FinishLine _finishLine;
 
         public GameField(byte roundsToWin, bool ai, AiDifficulty difficulty, DeterministicRandom random)
         {
@@ -42,6 +43,7 @@ namespace DragonGame.Scenes.Game.Gameplay
             _backgroundTexture.SetBlendMode(SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
             _bannerDisplay = new BannerDisplay();
+            _finishLine = new FinishLine(Player, Platforms.FinishingY);
 
             OutputTexture = new Texture(Engine.Game.Instance.Renderer, SDL.SDL_PIXELFORMAT_RGBA8888,
                 (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
@@ -55,7 +57,7 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public bool PlayerWonGame => Scoreboard.WonGame;
 
-        public bool PlayerWonRound => Platforms.PlayerFinishedCourse;
+        public bool PlayerWonRound => _finishLine.CrossedFinishLine;
 
         public void Dispose()
         {
@@ -64,6 +66,7 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public void GetReady()
         {
+            _finishLine.Decreasing = false;
             _bannerDisplay.Raise(BannerType.GetReady, GameScene.GetReadyTime);
             Platforms.GeneratePlatforms();
             Player.GetReady();
@@ -72,12 +75,14 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public void BeginRound()
         {
+            _finishLine.Decreasing = false;
             _bannerDisplay.Raise(BannerType.Go, GameScene.GetReadyTime / 4);
             Player.SetState(PlayerState.InGame);
         }
 
         public void WinRound(bool draw = false)
         {
+            _finishLine.Decreasing = true;
             Player.SetState(PlayerState.Won);
 
             _bannerDisplay.Raise(draw ? BannerType.Draw : BannerType.Winner, GameScene.RoundEndTime);
@@ -86,6 +91,7 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public void LoseRound()
         {
+            _finishLine.Decreasing = true;
             _bannerDisplay.Raise(BannerType.YouLose, GameScene.RoundEndTime);
             Player.SetState(PlayerState.Lost);
         }
@@ -96,6 +102,7 @@ namespace DragonGame.Scenes.Game.Gameplay
             Platforms.Update();
 
             _bannerDisplay.Update();
+            _finishLine.Update();
 
             switch (Player.State)
             {
@@ -136,6 +143,7 @@ namespace DragonGame.Scenes.Game.Gameplay
         {
             Player.Draw(_yScroll);
             Platforms.Draw(_yScroll);
+            _finishLine.Draw(_yScroll);
         }
 
         private void DrawBackground()
