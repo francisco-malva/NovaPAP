@@ -21,15 +21,10 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public readonly Platforms Platforms;
 
-        /// <summary>
-        ///     By how much to affect the drawing operations in the Y axis for the game elements (player, platforms, etc)
-        /// </summary>
-        private int _yScroll;
-
-
         private BannerDisplay _bannerDisplay;
         public Scoreboard Scoreboard;
         private FinishLine _finishLine;
+        private Camera _camera;
 
         public GameField(byte roundsToWin, bool ai, AiDifficulty difficulty, DeterministicRandom random)
         {
@@ -44,6 +39,8 @@ namespace DragonGame.Scenes.Game.Gameplay
 
             _bannerDisplay = new BannerDisplay();
             _finishLine = new FinishLine(Player, Platforms.FinishingY);
+
+            _camera = new Camera(new Point(Width, Height), new Rectangle(0, 0, GameField.Width, Platforms.FinishingY));
 
             OutputTexture = new Texture(Engine.Game.Instance.Renderer, SDL.SDL_PIXELFORMAT_RGBA8888,
                 (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
@@ -70,7 +67,7 @@ namespace DragonGame.Scenes.Game.Gameplay
             _bannerDisplay.Raise(BannerType.GetReady, GameScene.GetReadyTime);
             Platforms.GeneratePlatforms();
             Player.GetReady();
-            UpdateOffset();
+            UpdateCamera();
         }
 
         public void BeginRound()
@@ -103,11 +100,11 @@ namespace DragonGame.Scenes.Game.Gameplay
 
             _bannerDisplay.Update();
             _finishLine.Update();
+            UpdateCamera();
 
             switch (Player.State)
             {
                 case PlayerState.InGame:
-                    UpdateOffset();
                     break;
                 case PlayerState.Won:
                     Scoreboard.Update();
@@ -121,10 +118,7 @@ namespace DragonGame.Scenes.Game.Gameplay
             }
         }
 
-        private void UpdateOffset()
-        {
-            _yScroll = Math.Max(0, Player.Position.Y - Height / 2);
-        }
+        private void UpdateCamera() => _camera.Position = new Point(0, Player.Position.Y - Height / 2);
 
         public void Draw()
         {
@@ -141,9 +135,9 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         private void DrawGameElements()
         {
-            Player.Draw(_yScroll);
-            Platforms.Draw(_yScroll);
-            _finishLine.Draw(_yScroll);
+            Player.Draw(_camera);
+            Platforms.Draw(_camera);
+            _finishLine.Draw(_camera);
         }
 
         private void DrawBackground()
@@ -151,7 +145,7 @@ namespace DragonGame.Scenes.Game.Gameplay
             var renderer = Engine.Game.Instance.Renderer;
 
             var nightExposure = Mathematics.Lerp(0.0f, 255.0f,
-                Platforms.GetClimbingProgress(_yScroll == 0 ? 0 : Player.Position.Y));
+                Platforms.GetClimbingProgress(_camera.Position.Y == 0 ? 0 : Player.Position.Y));
 
             //Drawing the day
             _backgroundTexture.SetAlphaMod(255);

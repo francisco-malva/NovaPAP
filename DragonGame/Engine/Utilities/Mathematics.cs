@@ -18,5 +18,18 @@ namespace DragonGame.Engine.Utilities
             var b = (byte)Lerp(from.B, to.B, t);
             return new Color(r, g, b, 255);
         }
+
+        public static int Clamp(int value, int min, int max)
+        {
+            if (value < min)
+            {
+                value = min;
+            }
+            else if (value > max)
+            {
+                value = max;
+            }
+            return value;
+        }
     }
 }

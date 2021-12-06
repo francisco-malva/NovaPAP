@@ -1,4 +1,5 @@
 ﻿using DragonGame.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Assets;
 
 namespace DragonGame.Engine.Assets.Textures
 {

@@ -4,6 +4,7 @@ using DragonGame.Engine.Utilities;
 using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Platforming;
 using DragonGame.Scenes.Game.Input;
+using DuckDuckJump.Scenes.Game.Gameplay;
 using ManagedBass;
 using SDL2;
 
@@ -147,12 +148,13 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
             Position.Y += YSpeed;
         }
 
-        public void Draw(int yScroll)
+        public void Draw(Camera camera)
         {
             var renderer = Engine.Game.Instance.Renderer;
 
-            var dst = new Rectangle(Position.X - _texture.Width / 2,
-                GameField.TransformY(Position.Y + _texture.Height, yScroll), _texture.Width,
+            var screenPosition = camera.TransformPoint(new Point(Position.X - _texture.Width / 2,
+                Position.Y + _texture.Height));
+            var dst = new Rectangle(screenPosition.X, screenPosition.Y, _texture.Width,
                 _texture.Height);
 
             renderer.CopyEx(_texture, null, dst, _angle, null, _flip);

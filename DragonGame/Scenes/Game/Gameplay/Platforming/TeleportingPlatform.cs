@@ -17,19 +17,19 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         private ushort _stateTimer;
 
-        public TeleportingPlatform(short id, Point position, DeterministicRandom random) : base(id, position)
+        public TeleportingPlatform(short id, Point position, DeterministicRandom random, Player player) : base(id, position, player)
         {
             _random = random;
             SetState(TeleportingPlatformState.Static);
             _stateTimer = (ushort)_random.GetInteger(10, StaticTime);
         }
 
-        protected override bool CanJumpOnPlatform(Player player)
+        protected override bool CanJumpOnPlatform()
         {
-            return base.CanJumpOnPlatform(player) && _state == TeleportingPlatformState.Static;
+            return base.CanJumpOnPlatform() && _state == TeleportingPlatformState.Static;
         }
 
-        protected override void OnPlayerJump(Player player)
+        protected override void OnPlayerJump()
         {
         }
 
@@ -49,7 +49,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
             }
         }
 
-        protected override void OnUpdate(Player player)
+        protected override void OnUpdate()
         {
             switch (_state)
             {

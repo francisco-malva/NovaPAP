@@ -1,6 +1,7 @@
 ﻿using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Scenes.Game.Gameplay.Players.AI;
+using DuckDuckJump.Scenes.Game.Gameplay;
 using Engine.Wrappers.SDL2;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
@@ -15,59 +16,66 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         public Point Position;
 
-        protected Platform(short id, Point position)
+        protected readonly Player Player;
+        private Texture _texture;
+
+        protected Platform(short id, Point position, Player player)
         {
             Id = id;
             Position = position;
+            Player = player;
+            _texture = DragonGame.Engine.Game.Instance.TextureManager["Game/platform"];
         }
 
         private Rectangle Collision => new(Position.X - PlatformWidth / 2, Position.Y - PlatformHeight / 2,
             PlatformWidth, PlatformHeight);
 
-        public void Draw(Texture texture, int yScroll)
+        public void Draw(Camera camera)
         {
             var renderer = Engine.Game.Instance.Renderer;
 
-            var dst = new Rectangle(Position.X - texture.Width / 2,
-                GameField.TransformY(Position.Y + texture.Height, yScroll), texture.Width,
-                texture.Height);
+            var screenPosition = camera.TransformPoint(new Point(Position.X - _texture.Width / 2, Position.Y + _texture.Height));
+            var dst = new Rectangle(screenPosition.X, screenPosition.Y, _texture.Width, _texture.Height);
 
-            if (dst.Y is < PlatformHeight / 2 or > GameField.Height + PlatformHeight / 2) return;
-            texture.SetAlphaMod(Alpha);
-            texture.SetColorMod(GetPlatformDrawColor());
+            if (!camera.OnScreen(dst)) return;
+            _texture.SetAlphaMod(Alpha);
+            _texture.SetColorMod(GetPlatformDrawColor());
 
-            renderer.Copy(texture, null, dst);
+            renderer.Copy(_texture, null, dst);
         }
 
-        public void Update(Player player)
+        public void Update()
         {
-            OnUpdate(player);
-            PlayerCollision(player);
+            OnUpdate();
+            PlayerCollision();
         }
 
-        protected abstract void OnUpdate(Player player);
+        protected abstract void OnUpdate();
 
-        protected virtual bool CanJumpOnPlatform(Player player)
+        protected virtual bool CanJumpOnPlatform()
         {
-            return player.State == PlayerState.InGame && player.Descending && CollidingWithPlatform(player);
+            return Player.State == PlayerState.InGame && Player.Descending && PlayerCollidingWithPlatform;
         }
 
-        private void PlayerCollision(Player player)
+        private void PlayerCollision()
         {
-            if (!CanJumpOnPlatform(player)) return;
+            if (!CanJumpOnPlatform()) return;
 
-            OnPlayerJump(player);
-            player.Jump(this);
+            OnPlayerJump();
+            Player.Jump(this);
         }
 
-        protected abstract void OnPlayerJump(Player player);
+        protected abstract void OnPlayerJump();
 
-        private bool CollidingWithPlatform(Player player)
+        private bool PlayerCollidingWithPlatform
         {
-            var platformRect = Collision;
-            var playerRect = player.Collision;
+            get
+            {
+                var platformRect = Collision;
+                var playerRect = Player.Collision;
 
-            return platformRect.HasIntersection(ref playerRect);
+                return platformRect.HasIntersection(ref playerRect);
+            }
         }
 
         protected abstract Color GetPlatformDrawColor();

@@ -10,12 +10,12 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         private const int PlatformMoveSpeed = 3;
         private bool _moveLeft;
 
-        public MovingPlatform(short id, Point position, DeterministicRandom random) : base(id, position)
+        public MovingPlatform(short id, Point position, DeterministicRandom random, Player player) : base(id, position, player)
         {
             _moveLeft = random.GetFloat() >= 0.5f;
         }
 
-        protected override void OnPlayerJump(Player player)
+        protected override void OnPlayerJump()
         {
         }
 
@@ -24,7 +24,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
             return new Color(173, 198, 152, 255);
         }
 
-        protected override void OnUpdate(Player player)
+        protected override void OnUpdate()
         {
             if (_moveLeft)
             {

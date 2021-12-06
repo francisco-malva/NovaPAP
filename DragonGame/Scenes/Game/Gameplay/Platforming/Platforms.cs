@@ -2,12 +2,13 @@
 using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players;
 using DragonGame.Scenes.Game.Gameplay.Players.AI;
+using DuckDuckJump.Scenes.Game.Gameplay;
 
 namespace DragonGame.Scenes.Game.Gameplay.Platforming
 {
     internal class Platforms
     {
-        public const short PlatformCount = 100;
+        public const short PlatformCount = 1;
         public const int InitialPlatformHeight = 100;
         public const int PlatformYStep = 150;
 
@@ -69,10 +70,10 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         {
             return type switch
             {
-                PlatformType.SimplePlatform => new SimplePlatform(id, position),
-                PlatformType.MovingPlatform => new MovingPlatform(id, position, _random),
-                PlatformType.TeleportingPlatform => new TeleportingPlatform(id, position, _random),
-                PlatformType.CooldownPlatform => new CooldownPlatform(id, position),
+                PlatformType.SimplePlatform => new SimplePlatform(id, position, _player),
+                PlatformType.MovingPlatform => new MovingPlatform(id, position, _random, _player),
+                PlatformType.TeleportingPlatform => new TeleportingPlatform(id, position, _random, _player),
+                PlatformType.CooldownPlatform => new CooldownPlatform(id, position, _player),
                 _ => null
             };
         }
@@ -87,17 +88,12 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         public void Update()
         {
-            foreach (var platform in _platforms) platform.Update(_player);
+            foreach (var platform in _platforms) platform.Update();
         }
 
-        public void Draw(int yScroll)
+        public void Draw(Camera camera)
         {
-            DrawPlatforms(yScroll);
-        }
-
-        private void DrawPlatforms(int yScroll)
-        {
-            foreach (var platform in _platforms) platform.Draw(_texture, yScroll);
+            foreach (var platform in _platforms) platform.Draw(camera);
         }
 
         public Platform GetAiTarget(AIPlayer player)

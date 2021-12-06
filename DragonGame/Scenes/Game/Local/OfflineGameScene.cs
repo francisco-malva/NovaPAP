@@ -1,8 +1,8 @@
 ﻿using System;
-using DragonGame.Engine.Input;
 using DragonGame.Engine.Wrappers.SDL2;
 using DragonGame.Scenes.Game.Gameplay.Players.AI;
 using DragonGame.Scenes.Game.Input;
+using DuckDuckJump.Engine.Input;
 using SDL2;
 
 namespace DragonGame.Scenes.Game.Local

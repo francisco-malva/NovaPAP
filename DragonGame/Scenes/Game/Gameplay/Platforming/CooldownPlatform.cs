@@ -8,13 +8,13 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
     {
         private const ushort FadeOutTime = 15;
         private const ushort FadeInTime = 15;
-        private const ushort DissapearenceTime = 60;
+        private const ushort GoneTime = 60;
 
         private CooldownPlatformState _state;
 
         private ushort _timer;
 
-        public CooldownPlatform(short id, Point position) : base(id, position)
+        public CooldownPlatform(short id, Point position, Player player) : base(id, position, player)
         {
             SetState(CooldownPlatformState.Static);
         }
@@ -22,12 +22,26 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         private void SetState(CooldownPlatformState state)
         {
             _state = state;
-            _timer = 0;
+            switch (state)
+            {
+                case CooldownPlatformState.Static:
+                    _timer = 0;
+                    break;
+                case CooldownPlatformState.FadingOut:
+                    _timer = FadeOutTime;
+                    break;
+                case CooldownPlatformState.FadingIn:
+                    _timer = FadeInTime;
+                    break;
+                case CooldownPlatformState.Gone:
+                    _timer = GoneTime;
+                    break;
+            }
         }
 
-        protected override void OnPlayerJump(Player player)
+        protected override void OnPlayerJump()
         {
-            SetState(CooldownPlatformState.Dissapearing);
+            SetState(CooldownPlatformState.FadingOut);
         }
 
         protected override Color GetPlatformDrawColor()
@@ -35,30 +49,50 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
             return new Color(192, 87, 70, 255);
         }
 
-        protected override void OnUpdate(Player player)
+        protected override void OnUpdate()
         {
-            ++_timer;
             switch (_state)
             {
                 case CooldownPlatformState.Static:
                     break;
-                case CooldownPlatformState.Dissapearing:
-                    Alpha = (byte)((1.0f - _timer / (float)FadeOutTime) * 255.0f);
-                    if (_timer == FadeOutTime) SetState(CooldownPlatformState.Dissapeared);
+                case CooldownPlatformState.FadingOut:
+                    FadingOutUpdate();
                     break;
-                case CooldownPlatformState.Appearing:
-                    Alpha = (byte)(_timer / (float)FadeOutTime * 255.0f);
-                    if (_timer == FadeInTime) SetState(CooldownPlatformState.Static);
+                case CooldownPlatformState.FadingIn:
+                    FadingInUpdate();
                     break;
-                case CooldownPlatformState.Dissapeared:
-                    if (_timer == DissapearenceTime) SetState(CooldownPlatformState.Appearing);
+                case CooldownPlatformState.Gone:
+                    GoneUpdate();
                     break;
+            }
+            if (_timer > 0)
+            {
+                --_timer;
             }
         }
 
-        protected override bool CanJumpOnPlatform(Player player)
+        private bool ShouldSwitchState => _timer == 0;
+
+        private void GoneUpdate()
         {
-            return base.CanJumpOnPlatform(player) && _state == CooldownPlatformState.Static;
+            if (ShouldSwitchState) SetState(CooldownPlatformState.FadingIn);
+        }
+
+        private void FadingOutUpdate()
+        {
+            Alpha = (byte)((_timer / (float)FadeOutTime) * 255.0f);
+            if (ShouldSwitchState) SetState(CooldownPlatformState.Gone);
+        }
+
+        private void FadingInUpdate()
+        {
+            Alpha = (byte)((1.0f - _timer / (float)FadeOutTime) * 255.0f);
+            if (ShouldSwitchState) SetState(CooldownPlatformState.Static);
+        }
+
+        protected override bool CanJumpOnPlatform()
+        {
+            return base.CanJumpOnPlatform() && _state == CooldownPlatformState.Static;
         }
 
         public override bool TargetableByAi()
