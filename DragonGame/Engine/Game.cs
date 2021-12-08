@@ -1,11 +1,12 @@
-﻿using System;
-using DuckDuckJump.Engine.Assets.Audio;
+﻿using DuckDuckJump.Engine.Assets.Audio;
 using DuckDuckJump.Engine.Assets.Textures;
 using DuckDuckJump.Engine.Events;
+using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Scenes;
 using DuckDuckJump.Engine.Wrappers.SDL2;
 using DuckDuckJump.Scenes.MainMenu;
 using SDL2;
+using System;
 
 namespace DuckDuckJump.Engine
 {
@@ -52,6 +53,8 @@ namespace DuckDuckJump.Engine
             Renderer = new Renderer(Window, -1,
                 SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL.SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE);
 
+            Renderer.SetLogicalSize(new Point(640, 480));
+
             EventPump = new EventPump();
             EventPump.Subscribe(SDL.SDL_EventType.SDL_QUIT, _ => Exit());
 
@@ -65,7 +68,7 @@ namespace DuckDuckJump.Engine
 
         public void Run(uint fps)
         {
-            var ms = (uint) (1.0f / fps * 1000.0f);
+            var ms = (uint)(1.0f / fps * 1000.0f);
             _running = true;
 
             while (_running)
@@ -73,6 +76,8 @@ namespace DuckDuckJump.Engine
                 var start = SDL.SDL_GetTicks();
 
                 EventPump.Dispatch();
+                Keyboard.Update();
+
                 SceneManager.Tick();
 
                 var end = SDL.SDL_GetTicks();

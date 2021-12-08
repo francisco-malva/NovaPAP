@@ -1,12 +1,12 @@
-﻿using System.IO;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+﻿using DuckDuckJump.Engine.Wrappers.SDL2;
 using StbImageSharp;
+using System.IO;
 
 namespace DuckDuckJump.Engine.Assets.Textures
 {
     internal class TextureManager : ResourceManager<Texture>
     {
-        public TextureManager() : base("Assets/Textures", "bmp")
+        public TextureManager() : base("Assets/Textures", "png")
         {
         }
 

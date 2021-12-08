@@ -1,5 +1,4 @@
-﻿using System;
-using DuckDuckJump.Engine.Utilities;
+﻿using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Engine.Wrappers.SDL2;
 using DuckDuckJump.Scenes.Game.Gameplay.Banners;
 using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
@@ -8,6 +7,7 @@ using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
 using DuckDuckJump.Scenes.Game.Gameplay.Score;
 using DuckDuckJump.Scenes.Game.Input;
 using SDL2;
+using System;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay
 {
@@ -42,7 +42,7 @@ namespace DuckDuckJump.Scenes.Game.Gameplay
             _camera = new Camera(new Point(Width, Height), new Rectangle(0, 0, Width, Platforms.FinishingY));
 
             OutputTexture = new Texture(Engine.Game.Instance.Renderer, SDL.SDL_PIXELFORMAT_RGBA8888,
-                (int) SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
+                (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
         }
 
         public Player Player { get; }
@@ -99,11 +99,11 @@ namespace DuckDuckJump.Scenes.Game.Gameplay
 
             _bannerDisplay.Update();
             _finishLine.Update();
-            UpdateCamera();
 
             switch (Player.State)
             {
                 case PlayerState.InGame:
+                    UpdateCamera();
                     break;
                 case PlayerState.Won:
                     Scoreboard.Update();
@@ -155,7 +155,7 @@ namespace DuckDuckJump.Scenes.Game.Gameplay
                 new Rectangle(0, 0, 250, 250),
                 new Rectangle(0, 0, 250 * 2, 250 * 2));
 
-            _backgroundTexture.SetAlphaMod((byte) nightExposure);
+            _backgroundTexture.SetAlphaMod((byte)nightExposure);
             renderer.Copy(_backgroundTexture,
                 new Rectangle(250, 0, 250 * 2, 250 * 2),
                 new Rectangle(0, 0, 250 * 2, 250 * 2));

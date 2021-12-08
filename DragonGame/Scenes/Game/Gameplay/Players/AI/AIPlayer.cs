@@ -1,7 +1,7 @@
-using System;
 using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
 using DuckDuckJump.Scenes.Game.Input;
+using System;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Players.AI
 {

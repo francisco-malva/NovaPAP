@@ -8,7 +8,7 @@ namespace DuckDuckJump.Engine.Wrappers.SDL2
 
         public Rectangle(int x, int y, int w, int h)
         {
-            Value = new SDL.SDL_Rect {x = x, y = y, w = w, h = h};
+            Value = new SDL.SDL_Rect { x = x, y = y, w = w, h = h };
         }
 
         public int X

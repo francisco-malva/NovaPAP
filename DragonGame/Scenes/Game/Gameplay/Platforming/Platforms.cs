@@ -7,7 +7,7 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
 {
     internal class Platforms
     {
-        public const short PlatformCount = 1;
+        public const short PlatformCount = 50;
         public const int InitialPlatformHeight = 100;
         public const int PlatformYStep = 150;
 
@@ -19,15 +19,12 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
 
         private readonly DeterministicRandom _random;
 
-        private readonly Texture _texture;
-
         private PlatformType _lastPlatformType = PlatformType.None;
 
 
         public Platforms(Player player, DeterministicRandom random)
         {
             _player = player;
-            _texture = Engine.Game.Instance.TextureManager["Game/platform"];
 
             _platforms = new Platform[PlatformCount];
             _random = random;
@@ -40,7 +37,7 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
 
         public static float GetClimbingProgress(int yPosition)
         {
-            return yPosition == 0 ? 0.0f : yPosition / (float) FinishingY;
+            return yPosition == 0 ? 0.0f : yPosition / (float)FinishingY;
         }
 
         private PlatformType GetRandomPlatformType()

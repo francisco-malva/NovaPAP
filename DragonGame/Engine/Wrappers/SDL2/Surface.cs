@@ -1,6 +1,6 @@
-﻿using System;
-using SDL2;
+﻿using SDL2;
 using StbImageSharp;
+using System;
 
 namespace DuckDuckJump.Engine.Wrappers.SDL2
 {
@@ -15,7 +15,7 @@ namespace DuckDuckJump.Engine.Wrappers.SDL2
         {
             fixed (byte* pixels = result.Data)
             {
-                Handle = SDL.SDL_CreateRGBSurfaceFrom((IntPtr) pixels,
+                Handle = SDL.SDL_CreateRGBSurfaceFrom((IntPtr)pixels,
                     result.Width,
                     result.Height,
                     32,

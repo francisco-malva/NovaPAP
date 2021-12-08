@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SDL2;
+using System;
 using System.Collections.Generic;
-using SDL2;
 
 namespace DuckDuckJump.Engine.Events
 {

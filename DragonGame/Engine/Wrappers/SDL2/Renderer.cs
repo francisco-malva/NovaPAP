@@ -1,5 +1,5 @@
-﻿using System;
-using SDL2;
+﻿using SDL2;
+using System;
 
 namespace DuckDuckJump.Engine.Wrappers.SDL2
 {
@@ -110,9 +110,15 @@ namespace DuckDuckJump.Engine.Wrappers.SDL2
             }
         }
 
+        public void DrawRect(Rectangle rectangle) => _ = SDL.SDL_RenderDrawRect(Handle, ref rectangle.Value);
         public void SetScale(Point scale)
         {
             var _ = SDL.SDL_RenderSetScale(Handle, scale.X, scale.Y);
+        }
+
+        public void SetLogicalSize(Point size)
+        {
+            _ = SDL.SDL_RenderSetLogicalSize(Handle, size.X, size.Y);
         }
 
         ~Renderer()

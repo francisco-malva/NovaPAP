@@ -22,7 +22,7 @@ namespace DuckDuckJump.Engine.Wrappers.SDL2
 
         public Point(int x, int y)
         {
-            Value = new SDL.SDL_Point {x = x, y = y};
+            Value = new SDL.SDL_Point { x = x, y = y };
         }
     }
 }

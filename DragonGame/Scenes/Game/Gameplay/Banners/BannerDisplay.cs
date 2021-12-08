@@ -19,7 +19,7 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Banners
 
         private BannerType _currentBanner;
 
-        private Texture BannerTexture => _banners[(int) _currentBanner];
+        private Texture BannerTexture => _banners[(int)_currentBanner];
 
 
         public void Raise(BannerType type, ushort duration)
@@ -39,7 +39,7 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Banners
         {
             if (_bannerTimer != 0)
             {
-                BannerTexture.SetAlphaMod((byte) (_bannerTimer / (float) _bannerDuration * 255.0f));
+                BannerTexture.SetAlphaMod((byte)(_bannerTimer / (float)_bannerDuration * 255.0f));
                 Engine.Game.Instance.Renderer.Copy(BannerTexture, null,
                     new Rectangle(GameField.Width / 2 - BannerTexture.Width / 2,
                         GameField.Height / 2 - BannerTexture.Height / 2, BannerTexture.Width, BannerTexture.Height));

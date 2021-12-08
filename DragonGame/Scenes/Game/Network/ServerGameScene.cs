@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DuckDuckJump.Engine.Utilities;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using DuckDuckJump.Engine.Utilities;
 
 namespace DuckDuckJump.Scenes.Game.Network
 {

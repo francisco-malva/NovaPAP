@@ -1,5 +1,5 @@
-﻿using System;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+﻿using DuckDuckJump.Engine.Wrappers.SDL2;
+using System;
 
 namespace DuckDuckJump.Engine.Utilities
 {
@@ -13,9 +13,9 @@ namespace DuckDuckJump.Engine.Utilities
 
         public static Color Lerp(Color from, Color to, float t)
         {
-            var r = (byte) Lerp(from.R, to.R, t);
-            var g = (byte) Lerp(from.G, to.G, t);
-            var b = (byte) Lerp(from.B, to.B, t);
+            var r = (byte)Lerp(from.R, to.R, t);
+            var g = (byte)Lerp(from.G, to.G, t);
+            var b = (byte)Lerp(from.B, to.B, t);
             return new Color(r, g, b);
         }
 

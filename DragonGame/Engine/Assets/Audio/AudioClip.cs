@@ -1,5 +1,5 @@
-﻿using System;
-using ManagedBass;
+﻿using ManagedBass;
+using System;
 
 namespace DuckDuckJump.Engine.Assets.Audio
 {

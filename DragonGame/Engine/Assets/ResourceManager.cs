@@ -33,6 +33,13 @@ namespace DuckDuckJump.Engine.Assets
             GC.SuppressFinalize(this);
         }
 
+        public void Unload(string name)
+        {
+            T asset = this[name];
+
+            asset.Dispose();
+            _assetCache.Remove(name);
+        }
         public void ClearCache()
         {
             foreach (var pair in _assetCache) pair.Value.Dispose(); //Unload all cached assets

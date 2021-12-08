@@ -1,11 +1,11 @@
-﻿using System;
-using DuckDuckJump.Engine.Assets.Audio;
+﻿using DuckDuckJump.Engine.Assets.Audio;
 using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Engine.Wrappers.SDL2;
 using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
 using DuckDuckJump.Scenes.Game.Input;
 using ManagedBass;
 using SDL2;
+using System;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Players
 {
@@ -85,7 +85,7 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Players
                     UpdatePosition();
                     break;
                 case PlayerState.Won:
-                    Position.Y += (int) _stateTimer;
+                    Position.Y += (int)_stateTimer;
                     break;
             }
         }

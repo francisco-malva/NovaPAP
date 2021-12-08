@@ -23,7 +23,6 @@ namespace DuckDuckJump.Engine.Utilities
         /// </summary>
         public void Setup(int seed)
         {
-            _randomPtr = Math.Abs(_randomPtr) % _randomBytes.Length;
             var random = new Random(seed);
             random.NextBytes(_randomBytes);
         }
@@ -41,13 +40,13 @@ namespace DuckDuckJump.Engine.Utilities
         /// <returns>Gets 4 random bytes and ORs them together to fill a 4 byte value.</returns>
         private uint ComposeInteger()
         {
-            return (uint) (GetByte() | (GetByte() << 8) | (GetByte() << 16) | (GetByte() << 24));
+            return (uint)(GetByte() | (GetByte() << 8) | (GetByte() << 16) | (GetByte() << 24));
         }
 
         ///
         public int GetInteger(int min, int max)
         {
-            return (int) (min + MathF.Floor(GetFloat() * (max - min)));
+            return (int)(min + MathF.Floor(GetFloat() * (max - min)));
         }
 
         public int GetInteger(int max)
@@ -61,7 +60,7 @@ namespace DuckDuckJump.Engine.Utilities
         /// <returns></returns>
         public float GetFloat()
         {
-            var value = ComposeInteger() / (float) uint.MaxValue;
+            var value = ComposeInteger() / (float)uint.MaxValue;
             return value;
         }
     }

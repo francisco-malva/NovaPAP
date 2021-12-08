@@ -1,8 +1,8 @@
-﻿using System;
-using DuckDuckJump.Engine.Utilities;
+﻿using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Scenes.Game.Input;
 using DuckDuckJump.Scenes.MainMenu;
 using SDL2;
+using System;
 
 namespace DuckDuckJump.Scenes.Game.Network
 {
@@ -25,8 +25,8 @@ namespace DuckDuckJump.Scenes.Game.Network
                 ProcessInput(ref gameInput, SDL.SDL_Scancode.SDL_SCANCODE_A, SDL.SDL_Scancode.SDL_SCANCODE_D,
                     SDL.SDL_Scancode.SDL_SCANCODE_S);
 
-                Stream.Writer.Write((byte) gameInput);
-                var foreignInput = (GameInput) Stream.Reader.ReadByte();
+                Stream.Writer.Write((byte)gameInput);
+                var foreignInput = (GameInput)Stream.Reader.ReadByte();
 
                 SimulateAndDraw(_onLeftSide ? gameInput : foreignInput, _onLeftSide ? foreignInput : gameInput);
             }

@@ -16,7 +16,7 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Announcer
 
         public void Say(AnnouncementType announcement)
         {
-            var channel = Bass.SampleGetChannel(_clips[(int) announcement].Handle);
+            var channel = Bass.SampleGetChannel(_clips[(int)announcement].Handle);
             Bass.ChannelPlay(channel);
         }
     }

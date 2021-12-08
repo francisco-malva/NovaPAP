@@ -7,7 +7,7 @@ namespace DuckDuckJump.Engine.Wrappers.SDL2
         public static readonly Color Red = new(255, 0, 0);
         public static readonly Color Blue = new(0, 0, 255);
         public static readonly Color Green = new(0, 255, 0);
-
+        public static readonly Color Yellow = new(255, 255, 0);
 
         /// <summary>
         ///     The red channel.

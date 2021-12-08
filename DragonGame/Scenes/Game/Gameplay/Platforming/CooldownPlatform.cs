@@ -77,13 +77,13 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
 
         private void FadingOutUpdate()
         {
-            Alpha = (byte) (_timer / (float) FadeOutTime * 255.0f);
+            Alpha = (byte)(_timer / (float)FadeOutTime * 255.0f);
             if (ShouldSwitchState) SetState(CooldownPlatformState.Gone);
         }
 
         private void FadingInUpdate()
         {
-            Alpha = (byte) ((1.0f - _timer / (float) FadeOutTime) * 255.0f);
+            Alpha = (byte)((1.0f - _timer / (float)FadeOutTime) * 255.0f);
             if (ShouldSwitchState) SetState(CooldownPlatformState.Static);
         }
 

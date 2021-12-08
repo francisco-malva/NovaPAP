@@ -1,4 +1,3 @@
-using System;
 using DuckDuckJump.Engine.Wrappers.SDL2;
 
 namespace DuckDuckJump.Engine.Utilities
@@ -27,17 +26,20 @@ namespace DuckDuckJump.Engine.Utilities
                 switch (character)
                 {
                     case ' ':
-                        x += 8;
+                        x += 5;
                         break;
                     case '\n':
                         x = point.X;
-                        y += 8;
+                        y += 12;
                         break;
                     default:
-                        var xCoord = (int) (character * 8.0f % 128.0f);
-                        var yCoord = (int) (MathF.Floor(character / 8.0f) * 8.0f);
+                        var chara = character - 32;
+                        var xCoord = chara % 20;
+                        var yCoord = chara / 20;
 
-                        _renderer.Copy(_font, new Rectangle(xCoord, yCoord, 8, 8), new Rectangle(x, y, 8, 8));
+                        var src = new Rectangle(xCoord * 5, yCoord * 12, 5, 12);
+                        _renderer.Copy(_font, src, new Rectangle(x, y, 5, 12));
+                        x += 5;
                         break;
                 }
         }

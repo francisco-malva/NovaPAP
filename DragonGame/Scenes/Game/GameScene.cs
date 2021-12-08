@@ -1,5 +1,4 @@
-﻿using System;
-using DuckDuckJump.Engine.Assets.Audio;
+﻿using DuckDuckJump.Engine.Assets.Audio;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Scenes;
 using DuckDuckJump.Engine.Utilities;
@@ -11,6 +10,7 @@ using DuckDuckJump.Scenes.Game.Input;
 using DuckDuckJump.Scenes.MainMenu;
 using ManagedBass;
 using SDL2;
+using System;
 
 namespace DuckDuckJump.Scenes.Game
 {
@@ -86,9 +86,9 @@ namespace DuckDuckJump.Scenes.Game
         {
             input = GameInput.None;
 
-            input |= Keyboard.KeyDown(leftScanCode) ? GameInput.Left : GameInput.None;
-            input |= Keyboard.KeyDown(rightScanCode) ? GameInput.Right : GameInput.None;
-            input |= Keyboard.KeyDown(specialScanCode) ? GameInput.Special : GameInput.None;
+            input |= Keyboard.KeyHeld(leftScanCode) ? GameInput.Left : GameInput.None;
+            input |= Keyboard.KeyHeld(rightScanCode) ? GameInput.Right : GameInput.None;
+            input |= Keyboard.KeyHeld(specialScanCode) ? GameInput.Special : GameInput.None;
         }
 
         private void DecideWinner()
@@ -183,6 +183,8 @@ namespace DuckDuckJump.Scenes.Game
             }
         }
 
+        protected bool CanPause => _state == GameState.InGame;
+
         private void SimulateFrame(GameInput p1Input, GameInput p2Input)
         {
             switch (_state)
@@ -206,7 +208,7 @@ namespace DuckDuckJump.Scenes.Game
             ++_stateTimer;
         }
 
-        private void Draw()
+        protected void Draw(Action<Renderer> postRenderCallback = null)
         {
             var renderer = Engine.Game.Instance.Renderer;
 
@@ -221,6 +223,9 @@ namespace DuckDuckJump.Scenes.Game
             renderer.Copy(_gameBorder, null, null);
             renderer.Copy(P1Field.OutputTexture, null, p1Dest);
             renderer.Copy(P2Field.OutputTexture, null, p2Dest);
+
+            postRenderCallback?.Invoke(renderer);
+
             renderer.Present();
         }
 

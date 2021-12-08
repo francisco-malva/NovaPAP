@@ -1,7 +1,7 @@
-using System;
 using DuckDuckJump.Engine.Wrappers.SDL2;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 using SDL2;
+using System;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay
 {
@@ -32,23 +32,23 @@ namespace DuckDuckJump.Scenes.Game.Gameplay
             {
                 if (_alpha > 0)
                 {
-                    var alpha = (short) Math.Max(_alpha - 5, 0);
-                    _alpha = (byte) alpha;
+                    var alpha = (short)Math.Max(_alpha - 5, 0);
+                    _alpha = (byte)alpha;
                 }
             }
             else
             {
                 if (_alpha < byte.MaxValue)
                 {
-                    var alpha = (short) Math.Min(_alpha + 5, byte.MaxValue);
-                    _alpha = (byte) alpha;
+                    var alpha = (short)Math.Min(_alpha + 5, byte.MaxValue);
+                    _alpha = (byte)alpha;
                 }
             }
         }
 
         public void Draw(Camera _camera)
         {
-            var screenPosition = _camera.TransformPoint(new Point(0, _y - _finishLine.Height / 2));
+            var screenPosition = _camera.TransformPoint(new Point(0, _y + _finishLine.Height / 2));
             var dst = new Rectangle(screenPosition.X, screenPosition.Y, _finishLine.Width, _finishLine.Height);
             if (!_camera.OnScreen(dst)) return;
 
