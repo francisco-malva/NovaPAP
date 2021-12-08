@@ -1,11 +1,10 @@
-﻿namespace DuckDuckJump.Scenes.Game.Gameplay.Banners
+﻿namespace DuckDuckJump.Scenes.Game.Gameplay.Banners;
+
+internal enum BannerType : byte
 {
-    internal enum BannerType : byte
-    {
-        GetReady,
-        Go,
-        Winner,
-        YouLose,
-        Draw
-    }
+    GetReady,
+    Go,
+    Winner,
+    YouLose,
+    Draw
 }

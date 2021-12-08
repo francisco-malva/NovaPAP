@@ -1,8 +1,7 @@
-namespace DuckDuckJump.Scenes.Game.Gameplay.Players.AI
+namespace DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
+
+internal enum AiState : byte
 {
-    internal enum AiState : byte
-    {
-        Waiting,
-        SelectingPlatform
-    }
+    Waiting,
+    SelectingPlatform
 }

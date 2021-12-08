@@ -1,11 +1,10 @@
-namespace DuckDuckJump.Scenes.Game.Gameplay.Announcer
+namespace DuckDuckJump.Scenes.Game.Gameplay.Announcer;
+
+internal enum AnnouncementType
 {
-    internal enum AnnouncementType
-    {
-        GetReady,
-        Go,
-        P1Wins,
-        P2Wins,
-        Draw
-    }
+    GetReady,
+    Go,
+    P1Wins,
+    P2Wins,
+    Draw
 }

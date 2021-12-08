@@ -1,39 +1,38 @@
-﻿using ManagedBass;
-using System;
+﻿using System;
+using ManagedBass;
 
-namespace DuckDuckJump.Engine.Assets.Audio
+namespace DuckDuckJump.Engine.Assets.Audio;
+
+internal class AudioClip : IDisposable
 {
-    internal class AudioClip : IDisposable
+    private readonly bool _isStream;
+
+    public AudioClip(string file, long offset, int length, int playbackCount, BassFlags flags)
     {
-        private readonly bool _isStream;
+        Handle = Bass.SampleLoad(file, offset, length, playbackCount, flags);
 
-        public AudioClip(string file, long offset, int length, int playbackCount, BassFlags flags)
-        {
-            Handle = Bass.SampleLoad(file, offset, length, playbackCount, flags);
+        _isStream = false;
+    }
 
-            _isStream = false;
-        }
+    public int Handle { get; }
 
-        public int Handle { get; }
-
-        public void Dispose()
-        {
-            ReleaseUnmanagedResources();
-            GC.SuppressFinalize(this);
-        }
+    public void Dispose()
+    {
+        ReleaseUnmanagedResources();
+        GC.SuppressFinalize(this);
+    }
 
 
-        private void ReleaseUnmanagedResources()
-        {
-            if (_isStream)
-                Bass.StreamFree(Handle);
-            else
-                Bass.SampleFree(Handle);
-        }
+    private void ReleaseUnmanagedResources()
+    {
+        if (_isStream)
+            Bass.StreamFree(Handle);
+        else
+            Bass.SampleFree(Handle);
+    }
 
-        ~AudioClip()
-        {
-            ReleaseUnmanagedResources();
-        }
+    ~AudioClip()
+    {
+        ReleaseUnmanagedResources();
     }
 }

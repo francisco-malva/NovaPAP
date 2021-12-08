@@ -1,10 +1,9 @@
-namespace DuckDuckJump.Scenes.Game
+namespace DuckDuckJump.Scenes.Game;
+
+internal enum GameState : byte
 {
-    internal enum GameState : byte
-    {
-        GetReady,
-        InGame,
-        PlayerWon,
-        GameOver
-    }
+    GetReady,
+    InGame,
+    PlayerWon,
+    GameOver
 }

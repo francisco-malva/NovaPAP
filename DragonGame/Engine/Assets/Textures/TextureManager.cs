@@ -1,23 +1,22 @@
-﻿using DuckDuckJump.Engine.Wrappers.SDL2;
+﻿using System.IO;
+using DuckDuckJump.Engine.Wrappers.SDL2;
 using StbImageSharp;
-using System.IO;
 
-namespace DuckDuckJump.Engine.Assets.Textures
+namespace DuckDuckJump.Engine.Assets.Textures;
+
+internal class TextureManager : ResourceManager<Texture>
 {
-    internal class TextureManager : ResourceManager<Texture>
+    public TextureManager() : base("Assets/Textures", "png")
     {
-        public TextureManager() : base("Assets/Textures", "png")
-        {
-        }
+    }
 
-        protected override Texture LoadAsset(string path)
+    protected override Texture LoadAsset(string path)
+    {
+        using (var file = File.OpenRead(path))
         {
-            using (var file = File.OpenRead(path))
+            using (var surface = new Surface(ImageResult.FromStream(file, ColorComponents.RedGreenBlueAlpha)))
             {
-                using (var surface = new Surface(ImageResult.FromStream(file, ColorComponents.RedGreenBlueAlpha)))
-                {
-                    return new Texture(Game.Instance.Renderer, surface);
-                }
+                return new Texture(Game.Instance.Renderer, surface);
             }
         }
     }

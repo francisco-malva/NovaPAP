@@ -1,85 +1,84 @@
-﻿using SDL2;
-using System;
+﻿using System;
+using SDL2;
 
-namespace DuckDuckJump.Engine.Wrappers.SDL2
+namespace DuckDuckJump.Engine.Wrappers.SDL2;
+
+internal class Texture : IDisposable
 {
-    internal class Texture : IDisposable
+    private int _access;
+    private uint _format;
+
+    private int _height;
+    private int _width;
+
+    public Texture(Renderer renderer, uint format, int access, int w, int h)
     {
-        private int _access;
-        private uint _format;
+        Handle = SDL.SDL_CreateTexture(renderer.Handle, format, access, w, h);
+        UpdateInformation();
+    }
 
-        private int _height;
-        private int _width;
+    public Texture(Renderer renderer, Surface surface)
+    {
+        Handle = SDL.SDL_CreateTextureFromSurface(renderer.Handle, surface.Handle);
+        UpdateInformation();
+    }
 
-        public Texture(Renderer renderer, uint format, int access, int w, int h)
-        {
-            Handle = SDL.SDL_CreateTexture(renderer.Handle, format, access, w, h);
-            UpdateInformation();
-        }
+    public uint Format => _format;
+    public int Access => _access;
+    public int Width => _width;
+    public int Height => _height;
 
-        public Texture(Renderer renderer, Surface surface)
-        {
-            Handle = SDL.SDL_CreateTextureFromSurface(renderer.Handle, surface.Handle);
-            UpdateInformation();
-        }
+    public IntPtr Handle { get; private set; }
 
-        public uint Format => _format;
-        public int Access => _access;
-        public int Width => _width;
-        public int Height => _height;
+    public void Dispose()
+    {
+        ReleaseUnmanagedResources();
+        GC.SuppressFinalize(this);
+    }
 
-        public IntPtr Handle { get; private set; }
+    public void SetBlendMode(SDL.SDL_BlendMode blendMode)
+    {
+        SDL.SDL_SetTextureBlendMode(Handle, blendMode);
+    }
 
-        public void Dispose()
-        {
-            ReleaseUnmanagedResources();
-            GC.SuppressFinalize(this);
-        }
+    public void SetAlphaMod(byte alpha)
+    {
+        SDL.SDL_SetTextureAlphaMod(Handle, alpha);
+    }
 
-        public void SetBlendMode(SDL.SDL_BlendMode blendMode)
-        {
-            SDL.SDL_SetTextureBlendMode(Handle, blendMode);
-        }
+    public byte GetAlphaMod()
+    {
+        SDL.SDL_GetTextureAlphaMod(Handle, out var result);
+        return result;
+    }
 
-        public void SetAlphaMod(byte alpha)
-        {
-            SDL.SDL_SetTextureAlphaMod(Handle, alpha);
-        }
+    public void SetColorMod(Color color)
+    {
+        SDL.SDL_SetTextureColorMod(Handle, color.R, color.G, color.B);
+    }
 
-        public byte GetAlphaMod()
-        {
-            SDL.SDL_GetTextureAlphaMod(Handle, out var result);
-            return result;
-        }
+    private void UpdateInformation()
+    {
+        var _ = SDL.SDL_QueryTexture(Handle, out _format, out _access, out _width, out _height);
+    }
 
-        public void SetColorMod(Color color)
-        {
-            SDL.SDL_SetTextureColorMod(Handle, color.R, color.G, color.B);
-        }
+    private void ReleaseUnmanagedResources()
+    {
+        if (Handle == IntPtr.Zero) return;
 
-        private void UpdateInformation()
-        {
-            var _ = SDL.SDL_QueryTexture(Handle, out _format, out _access, out _width, out _height);
-        }
+        SDL.SDL_DestroyTexture(Handle);
+        Handle = IntPtr.Zero;
+    }
 
-        private void ReleaseUnmanagedResources()
-        {
-            if (Handle == IntPtr.Zero) return;
-
-            SDL.SDL_DestroyTexture(Handle);
-            Handle = IntPtr.Zero;
-        }
-
-        ~Texture()
-        {
-            ReleaseUnmanagedResources();
-        }
+    ~Texture()
+    {
+        ReleaseUnmanagedResources();
+    }
 
 
-        public static Texture FromBmp(string bmpPath)
-        {
-            using var surface = new Surface(bmpPath);
-            return new Texture(Game.Instance.Renderer, surface);
-        }
+    public static Texture FromBmp(string bmpPath)
+    {
+        using var surface = new Surface(bmpPath);
+        return new Texture(Game.Instance.Renderer, surface);
     }
 }

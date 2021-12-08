@@ -1,9 +1,8 @@
-namespace DuckDuckJump.Scenes.Game.Gameplay.Items
+namespace DuckDuckJump.Scenes.Game.Gameplay.Items;
+
+internal enum Item : byte
 {
-    internal enum Item : byte
-    {
-        None,
-        Inverter,
-        Umbrella
-    }
+    None,
+    Inverter,
+    Umbrella
 }

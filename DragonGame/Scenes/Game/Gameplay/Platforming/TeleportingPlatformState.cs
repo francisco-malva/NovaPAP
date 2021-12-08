@@ -1,9 +1,8 @@
-namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
+namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming;
+
+internal enum TeleportingPlatformState
 {
-    internal enum TeleportingPlatformState
-    {
-        Static,
-        Dissapearing,
-        Appearing
-    }
+    Static,
+    Dissapearing,
+    Appearing
 }

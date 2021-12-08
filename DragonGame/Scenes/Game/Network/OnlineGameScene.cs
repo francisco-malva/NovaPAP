@@ -1,46 +1,45 @@
-﻿using DuckDuckJump.Engine.Utilities;
+﻿using System;
+using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Scenes.Game.Input;
 using DuckDuckJump.Scenes.MainMenu;
 using SDL2;
-using System;
 
-namespace DuckDuckJump.Scenes.Game.Network
+namespace DuckDuckJump.Scenes.Game.Network;
+
+internal class OnlineGameScene : GameScene
 {
-    internal class OnlineGameScene : GameScene
+    private readonly bool _onLeftSide;
+    protected StreamReaderWriter Stream;
+
+    public OnlineGameScene(byte roundsToWin, bool onLeftSide) : base(roundsToWin)
     {
-        private readonly bool _onLeftSide;
-        protected StreamReaderWriter Stream;
+        _onLeftSide = onLeftSide;
+    }
 
-        public OnlineGameScene(byte roundsToWin, bool onLeftSide) : base(roundsToWin)
+    public override void OnTick()
+    {
+        try
         {
-            _onLeftSide = onLeftSide;
-        }
+            var gameInput = GameInput.None;
 
-        public override void OnTick()
+            ProcessInput(ref gameInput, SDL.SDL_Scancode.SDL_SCANCODE_A, SDL.SDL_Scancode.SDL_SCANCODE_D,
+                SDL.SDL_Scancode.SDL_SCANCODE_S);
+
+            Stream.Writer.Write((byte)gameInput);
+            var foreignInput = (GameInput)Stream.Reader.ReadByte();
+
+            SimulateAndDraw(_onLeftSide ? gameInput : foreignInput, _onLeftSide ? foreignInput : gameInput);
+        }
+        catch (Exception e)
         {
-            try
-            {
-                var gameInput = GameInput.None;
-
-                ProcessInput(ref gameInput, SDL.SDL_Scancode.SDL_SCANCODE_A, SDL.SDL_Scancode.SDL_SCANCODE_D,
-                    SDL.SDL_Scancode.SDL_SCANCODE_S);
-
-                Stream.Writer.Write((byte)gameInput);
-                var foreignInput = (GameInput)Stream.Reader.ReadByte();
-
-                SimulateAndDraw(_onLeftSide ? gameInput : foreignInput, _onLeftSide ? foreignInput : gameInput);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                Engine.Game.Instance.SceneManager.Set(new MainMenuScene());
-            }
+            Console.WriteLine(e);
+            Engine.Game.Instance.SceneManager.Set(new MainMenuScene());
         }
+    }
 
-        protected override void OnGameEnd()
-        {
-            Stream.Dispose();
-            base.OnGameEnd();
-        }
+    protected override void OnGameEnd()
+    {
+        Stream.Dispose();
+        base.OnGameEnd();
     }
 }

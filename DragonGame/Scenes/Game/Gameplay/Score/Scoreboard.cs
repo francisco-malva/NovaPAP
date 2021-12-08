@@ -1,68 +1,68 @@
 using DuckDuckJump.Engine.Wrappers.SDL2;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 
-namespace DuckDuckJump.Scenes.Game.Gameplay.Score
+namespace DuckDuckJump.Scenes.Game.Gameplay.Score;
+
+internal sealed class Scoreboard
 {
-    internal sealed class Scoreboard
+    private readonly Texture _checkmark;
+
+    private readonly Player _player;
+    private ushort _blinkTimer;
+
+    /// <summary>
+    ///     Is the checkmark that indicates the won round dark?
+    /// </summary>
+    private bool _checkmarkDark;
+
+    private byte _roundsWon;
+    public byte RoundsToWin;
+
+    public Scoreboard(Player player, byte roundsToWin)
     {
-        private ushort _blinkTimer;
-        private readonly Texture _checkmark;
+        _checkmark = Engine.Game.Instance.TextureManager["Game/checkmark"];
+        _player = player;
+        RoundsToWin = roundsToWin;
+        _roundsWon = 0;
+    }
 
-        /// <summary>
-        ///     Is the checkmark that indicates the won round dark?
-        /// </summary>
-        private bool _checkmarkDark;
+    public bool WonGame => RoundsToWin == _roundsWon;
 
-        private readonly Player _player;
-        private byte _roundsWon;
-        public byte RoundsToWin;
+    public void WinRound(bool draw, ushort blinkTime)
+    {
+        if (draw && _roundsWon == RoundsToWin - 1)
+            return;
+        _roundsWon++;
+        _blinkTimer = blinkTime;
+    }
 
-        public Scoreboard(Player player, byte roundsToWin)
+    public void Update()
+    {
+        if (_blinkTimer > 0)
         {
-            _checkmark = Engine.Game.Instance.TextureManager["Game/checkmark"];
-            _player = player;
-            RoundsToWin = roundsToWin;
-            _roundsWon = 0;
+            --_blinkTimer;
+
+            if (_blinkTimer % 25 == 0) _checkmarkDark = !_checkmarkDark;
         }
-
-        public bool WonGame => RoundsToWin == _roundsWon;
-
-        public void WinRound(bool draw, ushort blinkTime)
+        else
         {
-            if (draw && _roundsWon == RoundsToWin - 1)
-                return;
-            _roundsWon++;
-            _blinkTimer = blinkTime;
+            _checkmarkDark = false;
         }
+    }
 
-        public void Update()
+    public void Draw()
+    {
+        var renderer = Engine.Game.Instance.Renderer;
+
+        for (var i = 0; i < RoundsToWin; i++)
         {
-            if (_blinkTimer > 0)
-            {
-                --_blinkTimer;
-
-                if (_blinkTimer % 25 == 0) _checkmarkDark = !_checkmarkDark;
-            }
+            if (i > _roundsWon - 1)
+                _checkmark.SetColorMod(Color.Black);
+            else if (i == _roundsWon - 1 && _player.State == PlayerState.Won)
+                _checkmark.SetColorMod(_checkmarkDark ? Color.Black : Color.White);
             else
-            {
-                _checkmarkDark = false;
-            }
-        }
-
-        public void Draw()
-        {
-            var renderer = Engine.Game.Instance.Renderer;
-
-            for (var i = 0; i < RoundsToWin; i++)
-            {
-                if (i > _roundsWon - 1)
-                    _checkmark.SetColorMod(Color.Black);
-                else if (i == _roundsWon - 1 && _player.State == PlayerState.Won)
-                    _checkmark.SetColorMod(_checkmarkDark ? Color.Black : Color.White);
-                else
-                    _checkmark.SetColorMod(Color.White);
-                renderer.Copy(_checkmark, null, new Rectangle(8 + 20 * i, 8, 16, 16));
-            }
+                _checkmark.SetColorMod(Color.White);
+            renderer.Copy(_checkmark, null, new Rectangle(8 + 20 * i, 8, 16, 16));
         }
     }
 }

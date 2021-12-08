@@ -1,11 +1,10 @@
-namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
+namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming;
+
+internal enum PlatformType : byte
 {
-    internal enum PlatformType : byte
-    {
-        None,
-        SimplePlatform,
-        MovingPlatform,
-        TeleportingPlatform,
-        CooldownPlatform
-    }
+    None,
+    SimplePlatform,
+    MovingPlatform,
+    TeleportingPlatform,
+    CooldownPlatform
 }

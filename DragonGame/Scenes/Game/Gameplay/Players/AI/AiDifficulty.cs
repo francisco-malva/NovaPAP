@@ -1,10 +1,9 @@
-﻿namespace DuckDuckJump.Scenes.Game.Gameplay.Players.AI
+﻿namespace DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
+
+internal enum AiDifficulty : byte
 {
-    internal enum AiDifficulty : byte
-    {
-        Easy,
-        Normal,
-        Hard,
-        Nightmare
-    }
+    Easy,
+    Normal,
+    Hard,
+    Nightmare
 }

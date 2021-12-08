@@ -1,19 +1,18 @@
 ﻿using ManagedBass;
 
-namespace DuckDuckJump.Engine.Assets.Audio
+namespace DuckDuckJump.Engine.Assets.Audio;
+
+public readonly struct Channel
 {
-    public readonly struct Channel
+    public readonly int Handle;
+
+    public Channel(int handle)
     {
-        public readonly int Handle;
+        Handle = handle;
+    }
 
-        public Channel(int handle)
-        {
-            Handle = handle;
-        }
-
-        public BassFlags ChannelFlags(BassFlags flags, BassFlags mask)
-        {
-            return Bass.ChannelFlags(Handle, flags, mask);
-        }
+    public BassFlags ChannelFlags(BassFlags flags, BassFlags mask)
+    {
+        return Bass.ChannelFlags(Handle, flags, mask);
     }
 }

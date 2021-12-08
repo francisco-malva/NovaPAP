@@ -1,26 +1,25 @@
-﻿using ManagedBass;
-using System;
+﻿using System;
+using ManagedBass;
 
-namespace DuckDuckJump.Engine.Assets.Audio
+namespace DuckDuckJump.Engine.Assets.Audio;
+
+internal class AudioManager : ResourceManager<AudioClip>
 {
-    internal class AudioManager : ResourceManager<AudioClip>
+    public AudioManager() : base("Assets/Audio", "ogg")
     {
-        public AudioManager() : base("Assets/Audio", "ogg")
-        {
-            Bass.Init();
+        Bass.Init();
 
-            var error = Bass.LastError;
-            Console.WriteLine(Bass.LastError);
-        }
+        var error = Bass.LastError;
+        Console.WriteLine(Bass.LastError);
+    }
 
-        protected override void ReleaseUnmanagedResources()
-        {
-            Bass.Free();
-        }
+    protected override void ReleaseUnmanagedResources()
+    {
+        Bass.Free();
+    }
 
-        protected override AudioClip LoadAsset(string path)
-        {
-            return new AudioClip(path, 0, 0, 16, BassFlags.Default);
-        }
+    protected override AudioClip LoadAsset(string path)
+    {
+        return new AudioClip(path, 0, 0, 16, BassFlags.Default);
     }
 }

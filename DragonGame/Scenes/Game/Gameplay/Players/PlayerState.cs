@@ -1,10 +1,9 @@
-namespace DuckDuckJump.Scenes.Game.Gameplay.Players
+namespace DuckDuckJump.Scenes.Game.Gameplay.Players;
+
+internal enum PlayerState : byte
 {
-    internal enum PlayerState : byte
-    {
-        GetReady,
-        InGame,
-        Won,
-        Lost
-    }
+    GetReady,
+    InGame,
+    Won,
+    Lost
 }

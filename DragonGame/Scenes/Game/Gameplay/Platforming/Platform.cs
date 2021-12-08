@@ -2,89 +2,88 @@
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
 
-namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
+namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming;
+
+internal abstract class Platform
 {
-    internal abstract class Platform
+    public const int PlatformWidth = 68;
+    public const int PlatformHeight = 14;
+    private readonly Texture _texture;
+
+    public readonly short Id;
+
+    protected readonly Player Player;
+    protected byte Alpha = 255;
+
+    public Point Position;
+
+    protected Platform(short id, Point position, Player player)
     {
-        public const int PlatformWidth = 68;
-        public const int PlatformHeight = 14;
+        Id = id;
+        Position = position;
+        Player = player;
+        _texture = Engine.Game.Instance.TextureManager["Game/platform"];
+    }
 
-        public readonly short Id;
+    private Rectangle Collision => new(Position.X - PlatformWidth / 2, Position.Y - PlatformHeight / 2,
+        PlatformWidth, PlatformHeight);
 
-        protected readonly Player Player;
-        private readonly Texture _texture;
-        protected byte Alpha = 255;
-
-        public Point Position;
-
-        protected Platform(short id, Point position, Player player)
+    private bool PlayerCollidingWithPlatform
+    {
+        get
         {
-            Id = id;
-            Position = position;
-            Player = player;
-            _texture = Engine.Game.Instance.TextureManager["Game/platform"];
+            var platformRect = Collision;
+            var playerRect = Player.Collision;
+
+            return platformRect.HasIntersection(ref playerRect);
         }
+    }
 
-        private Rectangle Collision => new(Position.X - PlatformWidth / 2, Position.Y - PlatformHeight / 2,
-            PlatformWidth, PlatformHeight);
+    public void Draw(Camera camera)
+    {
+        var renderer = Engine.Game.Instance.Renderer;
 
-        private bool PlayerCollidingWithPlatform
-        {
-            get
-            {
-                var platformRect = Collision;
-                var playerRect = Player.Collision;
+        var screenPosition =
+            camera.TransformPoint(new Point(Position.X - _texture.Width / 2, Position.Y + _texture.Height));
+        var dst = new Rectangle(screenPosition.X, screenPosition.Y, _texture.Width, _texture.Height);
 
-                return platformRect.HasIntersection(ref playerRect);
-            }
-        }
+        if (!camera.OnScreen(dst)) return;
+        _texture.SetAlphaMod(Alpha);
+        _texture.SetColorMod(GetPlatformDrawColor());
 
-        public void Draw(Camera camera)
-        {
-            var renderer = Engine.Game.Instance.Renderer;
+        renderer.Copy(_texture, null, dst);
+    }
 
-            var screenPosition =
-                camera.TransformPoint(new Point(Position.X - _texture.Width / 2, Position.Y + _texture.Height));
-            var dst = new Rectangle(screenPosition.X, screenPosition.Y, _texture.Width, _texture.Height);
+    public void Update()
+    {
+        OnUpdate();
+        PlayerCollision();
+    }
 
-            if (!camera.OnScreen(dst)) return;
-            _texture.SetAlphaMod(Alpha);
-            _texture.SetColorMod(GetPlatformDrawColor());
+    protected abstract void OnUpdate();
 
-            renderer.Copy(_texture, null, dst);
-        }
+    protected virtual bool CanJumpOnPlatform()
+    {
+        return Player.State == PlayerState.InGame && Player.Descending && PlayerCollidingWithPlatform;
+    }
 
-        public void Update()
-        {
-            OnUpdate();
-            PlayerCollision();
-        }
+    private void PlayerCollision()
+    {
+        if (!CanJumpOnPlatform()) return;
 
-        protected abstract void OnUpdate();
+        OnPlayerJump();
+        Player.Jump(this);
+    }
 
-        protected virtual bool CanJumpOnPlatform()
-        {
-            return Player.State == PlayerState.InGame && Player.Descending && PlayerCollidingWithPlatform;
-        }
+    protected abstract void OnPlayerJump();
 
-        private void PlayerCollision()
-        {
-            if (!CanJumpOnPlatform()) return;
+    protected abstract Color GetPlatformDrawColor();
 
-            OnPlayerJump();
-            Player.Jump(this);
-        }
+    public abstract bool TargetableByAi();
 
-        protected abstract void OnPlayerJump();
-
-        protected abstract Color GetPlatformDrawColor();
-
-        public abstract bool TargetableByAi();
-
-        public bool InZone(AIPlayer player)
-        {
-            return player.Position.X >= Position.X - PlatformWidth / 2 + 5 &&
-                   player.Position.X <= Position.X + PlatformWidth / 2 - 5;
-        }
+    public bool InZone(AIPlayer player)
+    {
+        return player.Position.X >= Position.X - PlatformWidth / 2 + 5 &&
+               player.Position.X <= Position.X + PlatformWidth / 2 - 5;
     }
 }
