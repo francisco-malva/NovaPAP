@@ -1,10 +1,9 @@
-﻿using DragonGame.Engine.Utilities;
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.Game.Gameplay.Players;
-using DragonGame.Scenes.Game.Gameplay.Players.AI;
-using DuckDuckJump.Scenes.Game.Gameplay;
+﻿using DuckDuckJump.Engine.Utilities;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Players;
+using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
 
-namespace DragonGame.Scenes.Game.Gameplay.Platforming
+namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
 {
     internal class Platforms
     {
@@ -41,7 +40,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         public static float GetClimbingProgress(int yPosition)
         {
-            return yPosition == 0 ? 0.0f : yPosition / (float)FinishingY;
+            return yPosition == 0 ? 0.0f : yPosition / (float) FinishingY;
         }
 
         private PlatformType GetRandomPlatformType()

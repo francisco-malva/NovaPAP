@@ -1,21 +1,19 @@
 ﻿using System;
-using DragonGame.Engine.Assets.Audio;
-using DragonGame.Engine.Utilities;
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.Game.Gameplay;
-using DragonGame.Scenes.Game.Gameplay.Players.AI;
-using DragonGame.Scenes.Game.Input;
-using DragonGame.Scenes.MainMenu;
+using DuckDuckJump.Engine.Assets.Audio;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Scenes;
+using DuckDuckJump.Engine.Utilities;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay;
 using DuckDuckJump.Scenes.Game.Gameplay.Announcer;
-using Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
+using DuckDuckJump.Scenes.Game.Input;
+using DuckDuckJump.Scenes.MainMenu;
 using ManagedBass;
 using SDL2;
 
-namespace DragonGame.Scenes.Game
+namespace DuckDuckJump.Scenes.Game
 {
-
     internal abstract class GameScene : Scene
     {
         public const int GameBorder = 32;
@@ -25,9 +23,9 @@ namespace DragonGame.Scenes.Game
         public const byte GetReadyTime = 120;
         public const byte RoundEndTime = 120;
 
-        private readonly Texture _gameBorder;
-
         private readonly Announcer _announcer;
+
+        private readonly Texture _gameBorder;
 
         private readonly AudioClip _music;
         private readonly int _musicChannel;

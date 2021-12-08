@@ -1,16 +1,15 @@
 ﻿using System;
-using DragonGame.Engine.Utilities;
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.Game.Gameplay.Platforming;
-using DragonGame.Scenes.Game.Gameplay.Players;
-using DragonGame.Scenes.Game.Gameplay.Players.AI;
-using DragonGame.Scenes.Game.Input;
-using DuckDuckJump.Scenes.Game.Gameplay;
+using DuckDuckJump.Engine.Utilities;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Banners;
+using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
+using DuckDuckJump.Scenes.Game.Gameplay.Players;
+using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
 using DuckDuckJump.Scenes.Game.Gameplay.Score;
-using Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Input;
 using SDL2;
 
-namespace DragonGame.Scenes.Game.Gameplay
+namespace DuckDuckJump.Scenes.Game.Gameplay
 {
     internal class GameField : IDisposable
     {
@@ -21,10 +20,10 @@ namespace DragonGame.Scenes.Game.Gameplay
 
         public readonly Platforms Platforms;
 
-        private BannerDisplay _bannerDisplay;
+        private readonly BannerDisplay _bannerDisplay;
+        private readonly Camera _camera;
+        private readonly FinishLine _finishLine;
         public Scoreboard Scoreboard;
-        private FinishLine _finishLine;
-        private Camera _camera;
 
         public GameField(byte roundsToWin, bool ai, AiDifficulty difficulty, DeterministicRandom random)
         {
@@ -40,10 +39,10 @@ namespace DragonGame.Scenes.Game.Gameplay
             _bannerDisplay = new BannerDisplay();
             _finishLine = new FinishLine(Player, Platforms.FinishingY);
 
-            _camera = new Camera(new Point(Width, Height), new Rectangle(0, 0, GameField.Width, Platforms.FinishingY));
+            _camera = new Camera(new Point(Width, Height), new Rectangle(0, 0, Width, Platforms.FinishingY));
 
             OutputTexture = new Texture(Engine.Game.Instance.Renderer, SDL.SDL_PIXELFORMAT_RGBA8888,
-                (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
+                (int) SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
         }
 
         public Player Player { get; }
@@ -118,11 +117,14 @@ namespace DragonGame.Scenes.Game.Gameplay
             }
         }
 
-        private void UpdateCamera() => _camera.Position = new Point(0, Player.Position.Y - Height / 2);
+        private void UpdateCamera()
+        {
+            _camera.Position = new Point(0, Player.Position.Y - Height / 2);
+        }
 
         public void Draw()
         {
-            var renderer = Engine.Game.Instance.Renderer;
+            var renderer = DuckDuckJump.Engine.Game.Instance.Renderer;
             renderer.SetTarget(OutputTexture);
 
             DrawBackground();
@@ -153,7 +155,7 @@ namespace DragonGame.Scenes.Game.Gameplay
                 new Rectangle(0, 0, 250, 250),
                 new Rectangle(0, 0, 250 * 2, 250 * 2));
 
-            _backgroundTexture.SetAlphaMod((byte)nightExposure);
+            _backgroundTexture.SetAlphaMod((byte) nightExposure);
             renderer.Copy(_backgroundTexture,
                 new Rectangle(250, 0, 250 * 2, 250 * 2),
                 new Rectangle(0, 0, 250 * 2, 250 * 2));

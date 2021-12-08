@@ -1,13 +1,13 @@
 ﻿using System;
-using DragonGame.Engine.Assets.Audio;
-using DragonGame.Engine.Assets.Textures;
-using DragonGame.Engine.Scenes;
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.MainMenu;
+using DuckDuckJump.Engine.Assets.Audio;
+using DuckDuckJump.Engine.Assets.Textures;
 using DuckDuckJump.Engine.Events;
+using DuckDuckJump.Engine.Scenes;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.MainMenu;
 using SDL2;
 
-namespace DragonGame.Engine
+namespace DuckDuckJump.Engine
 {
     internal class Game : IDisposable
     {
@@ -65,7 +65,7 @@ namespace DragonGame.Engine
 
         public void Run(uint fps)
         {
-            var ms = (uint)(1.0f / fps * 1000.0f);
+            var ms = (uint) (1.0f / fps * 1000.0f);
             _running = true;
 
             while (_running)

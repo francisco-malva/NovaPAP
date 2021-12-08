@@ -1,8 +1,7 @@
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.Game.Gameplay.Players;
-using Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Players;
 
-namespace DragonGame.Scenes.Game.Gameplay.Platforming
+namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
 {
     internal sealed class CooldownPlatform : Platform
     {
@@ -18,6 +17,8 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
         {
             SetState(CooldownPlatformState.Static);
         }
+
+        private bool ShouldSwitchState => _timer == 0;
 
         private void SetState(CooldownPlatformState state)
         {
@@ -46,7 +47,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         protected override Color GetPlatformDrawColor()
         {
-            return new Color(192, 87, 70, 255);
+            return new Color(192, 87, 70);
         }
 
         protected override void OnUpdate()
@@ -65,13 +66,9 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                     GoneUpdate();
                     break;
             }
-            if (_timer > 0)
-            {
-                --_timer;
-            }
-        }
 
-        private bool ShouldSwitchState => _timer == 0;
+            if (_timer > 0) --_timer;
+        }
 
         private void GoneUpdate()
         {
@@ -80,13 +77,13 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         private void FadingOutUpdate()
         {
-            Alpha = (byte)((_timer / (float)FadeOutTime) * 255.0f);
+            Alpha = (byte) (_timer / (float) FadeOutTime * 255.0f);
             if (ShouldSwitchState) SetState(CooldownPlatformState.Gone);
         }
 
         private void FadingInUpdate()
         {
-            Alpha = (byte)((1.0f - _timer / (float)FadeOutTime) * 255.0f);
+            Alpha = (byte) ((1.0f - _timer / (float) FadeOutTime) * 255.0f);
             if (ShouldSwitchState) SetState(CooldownPlatformState.Static);
         }
 

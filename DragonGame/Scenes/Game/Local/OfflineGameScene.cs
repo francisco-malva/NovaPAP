@@ -1,11 +1,11 @@
 ﻿using System;
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.Game.Gameplay.Players.AI;
-using DragonGame.Scenes.Game.Input;
 using DuckDuckJump.Engine.Input;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
+using DuckDuckJump.Scenes.Game.Input;
 using SDL2;
 
-namespace DragonGame.Scenes.Game.Local
+namespace DuckDuckJump.Scenes.Game.Local
 {
     internal sealed class OfflineGameScene : GameScene
     {

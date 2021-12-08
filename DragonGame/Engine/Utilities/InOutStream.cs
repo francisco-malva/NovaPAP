@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace DragonGame.Engine.Utilities
+namespace DuckDuckJump.Engine.Utilities
 {
     /// <summary>
     ///     An utility class to wrap both a BinaryReader and BinaryWriter around a stream, to enable both reading and writing.

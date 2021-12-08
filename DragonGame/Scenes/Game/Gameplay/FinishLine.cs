@@ -1,58 +1,59 @@
-
 using System;
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.Game.Gameplay;
-using DragonGame.Scenes.Game.Gameplay.Players;
-using DuckDuckJump.Scenes.Game.Gameplay;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Players;
+using SDL2;
 
-internal class FinishLine
+namespace DuckDuckJump.Scenes.Game.Gameplay
 {
-    private int _y;
-    private byte _alpha;
-    public bool Decreasing;
-
-    private Texture _finishLine;
-
-    private Player _player;
-
-    public FinishLine(Player player, int y)
+    internal class FinishLine
     {
-        _player = player;
-        _y = y;
+        private byte _alpha;
 
-        _finishLine = DragonGame.Engine.Game.Instance.TextureManager["Game/finish-line"];
-        _finishLine.SetBlendMode(SDL2.SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-    }
+        private readonly Texture _finishLine;
 
-    public void Update()
-    {
-        if (Decreasing)
+        private readonly Player _player;
+        private readonly int _y;
+        public bool Decreasing;
+
+        public FinishLine(Player player, int y)
         {
-            if (_alpha > 0)
+            _player = player;
+            _y = y;
+
+            _finishLine = Engine.Game.Instance.TextureManager["Game/finish-line"];
+            _finishLine.SetBlendMode(SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+        }
+
+        public bool CrossedFinishLine => _player.Position.Y + Player.PlatformCollisionHeight >= _y;
+
+        public void Update()
+        {
+            if (Decreasing)
             {
-                short alpha = (short)Math.Max((short)_alpha - 5, (short)0);
-                _alpha = (byte)alpha;
+                if (_alpha > 0)
+                {
+                    var alpha = (short) Math.Max(_alpha - 5, 0);
+                    _alpha = (byte) alpha;
+                }
+            }
+            else
+            {
+                if (_alpha < byte.MaxValue)
+                {
+                    var alpha = (short) Math.Min(_alpha + 5, byte.MaxValue);
+                    _alpha = (byte) alpha;
+                }
             }
         }
-        else
+
+        public void Draw(Camera _camera)
         {
-            if (_alpha < byte.MaxValue)
-            {
-                short alpha = (short)Math.Min((short)_alpha + 5, (short)byte.MaxValue);
-                _alpha = (byte)alpha;
-            }
+            var screenPosition = _camera.TransformPoint(new Point(0, _y - _finishLine.Height / 2));
+            var dst = new Rectangle(screenPosition.X, screenPosition.Y, _finishLine.Width, _finishLine.Height);
+            if (!_camera.OnScreen(dst)) return;
+
+            _finishLine.SetAlphaMod(_alpha);
+            Engine.Game.Instance.Renderer.Copy(_finishLine, null, dst);
         }
     }
-
-    public void Draw(Camera _camera)
-    {
-        var screenPosition = _camera.TransformPoint(new Point(0, _y - _finishLine.Height / 2));
-        var dst = new Rectangle(screenPosition.X, screenPosition.Y, _finishLine.Width, _finishLine.Height);
-        if (!_camera.OnScreen(dst)) return;
-
-        _finishLine.SetAlphaMod(_alpha);
-        DragonGame.Engine.Game.Instance.Renderer.Copy(_finishLine, null, dst);
-    }
-
-    public bool CrossedFinishLine => _player.Position.Y + Player.PlatformCollisionHeight >= _y;
 }

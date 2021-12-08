@@ -1,8 +1,7 @@
 ﻿using System;
-using DuckDuckJump.Engine.Assets;
 using ManagedBass;
 
-namespace DragonGame.Engine.Assets.Audio
+namespace DuckDuckJump.Engine.Assets.Audio
 {
     internal class AudioManager : ResourceManager<AudioClip>
     {

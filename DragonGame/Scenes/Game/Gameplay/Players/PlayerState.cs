@@ -1,4 +1,4 @@
-namespace DragonGame.Scenes.Game.Gameplay.Players
+namespace DuckDuckJump.Scenes.Game.Gameplay.Players
 {
     internal enum PlayerState : byte
     {

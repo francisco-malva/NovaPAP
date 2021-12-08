@@ -1,14 +1,13 @@
 ﻿using System;
-using DragonGame.Engine.Assets.Audio;
-using DragonGame.Engine.Utilities;
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.Game.Gameplay.Platforming;
-using DragonGame.Scenes.Game.Input;
-using DuckDuckJump.Scenes.Game.Gameplay;
+using DuckDuckJump.Engine.Assets.Audio;
+using DuckDuckJump.Engine.Utilities;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
+using DuckDuckJump.Scenes.Game.Input;
 using ManagedBass;
 using SDL2;
 
-namespace DragonGame.Scenes.Game.Gameplay.Players
+namespace DuckDuckJump.Scenes.Game.Gameplay.Players
 {
     internal abstract class Player
     {
@@ -86,7 +85,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Players
                     UpdatePosition();
                     break;
                 case PlayerState.Won:
-                    Position.Y += (int)_stateTimer;
+                    Position.Y += (int) _stateTimer;
                     break;
             }
         }

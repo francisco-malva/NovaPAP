@@ -1,4 +1,4 @@
-namespace DragonGame.Scenes.Game.Gameplay.Platforming
+namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
 {
     internal enum PlatformType : byte
     {

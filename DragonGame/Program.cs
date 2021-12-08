@@ -1,6 +1,6 @@
-﻿using DragonGame.Engine;
+﻿using DuckDuckJump.Engine;
 
-namespace DragonGame
+namespace DuckDuckJump
 {
     internal class Program
     {

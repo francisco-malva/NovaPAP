@@ -1,4 +1,4 @@
-﻿namespace DragonGame.Scenes.Game.Gameplay
+﻿namespace DuckDuckJump.Scenes.Game.Gameplay.Banners
 {
     internal enum BannerType : byte
     {

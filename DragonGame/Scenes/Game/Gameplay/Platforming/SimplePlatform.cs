@@ -1,8 +1,7 @@
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.Game.Gameplay.Players;
-using Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Players;
 
-namespace DragonGame.Scenes.Game.Gameplay.Platforming
+namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
 {
     internal class SimplePlatform : Platform
     {
@@ -16,12 +15,13 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         protected override Color GetPlatformDrawColor()
         {
-            return new Color(208, 227, 196, 255);
+            return new Color(208, 227, 196);
         }
 
         protected override void OnUpdate()
         {
         }
+
         public override bool TargetableByAi()
         {
             return true;

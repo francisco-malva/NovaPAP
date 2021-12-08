@@ -1,7 +1,7 @@
 ﻿using System;
 using ManagedBass;
 
-namespace DragonGame.Engine.Assets.Audio
+namespace DuckDuckJump.Engine.Assets.Audio
 {
     internal class AudioClip : IDisposable
     {

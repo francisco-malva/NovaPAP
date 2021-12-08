@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DragonGame.Engine.Utilities
+namespace DuckDuckJump.Engine.Utilities
 {
     /// <summary>
     ///     A random class that always returns the same values under the same conditions, also supports saving and loading its
@@ -41,13 +41,13 @@ namespace DragonGame.Engine.Utilities
         /// <returns>Gets 4 random bytes and ORs them together to fill a 4 byte value.</returns>
         private uint ComposeInteger()
         {
-            return (uint)(GetByte() | (GetByte() << 8) | (GetByte() << 16) | (GetByte() << 24));
+            return (uint) (GetByte() | (GetByte() << 8) | (GetByte() << 16) | (GetByte() << 24));
         }
 
         ///
         public int GetInteger(int min, int max)
         {
-            return (int)(min + MathF.Floor(GetFloat() * (max - min)));
+            return (int) (min + MathF.Floor(GetFloat() * (max - min)));
         }
 
         public int GetInteger(int max)
@@ -61,7 +61,7 @@ namespace DragonGame.Engine.Utilities
         /// <returns></returns>
         public float GetFloat()
         {
-            var value = ComposeInteger() / (float)uint.MaxValue;
+            var value = ComposeInteger() / (float) uint.MaxValue;
             return value;
         }
     }

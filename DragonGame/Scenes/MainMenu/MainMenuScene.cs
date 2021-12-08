@@ -1,12 +1,12 @@
-using DragonGame.Scenes.Game.Gameplay.Players.AI;
-using DragonGame.Scenes.Game.Local;
-using DragonGame.Scenes.Game.Network;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Scenes;
-using Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
+using DuckDuckJump.Scenes.Game.Local;
+using DuckDuckJump.Scenes.Game.Network;
 using SDL2;
 
-namespace DragonGame.Scenes.MainMenu
+namespace DuckDuckJump.Scenes.MainMenu
 {
     internal class MainMenuScene : Scene
     {

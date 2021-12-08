@@ -1,6 +1,6 @@
 ﻿using ManagedBass;
 
-namespace DragonGame.Engine.Assets.Audio
+namespace DuckDuckJump.Engine.Assets.Audio
 {
     public readonly struct Channel
     {

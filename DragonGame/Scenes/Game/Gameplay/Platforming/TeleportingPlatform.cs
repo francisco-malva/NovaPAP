@@ -1,10 +1,9 @@
 using System;
-using DragonGame.Engine.Utilities;
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.Game.Gameplay.Players;
-using Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Utilities;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Players;
 
-namespace DragonGame.Scenes.Game.Gameplay.Platforming
+namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
 {
     internal class TeleportingPlatform : Platform
     {
@@ -17,11 +16,12 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         private ushort _stateTimer;
 
-        public TeleportingPlatform(short id, Point position, DeterministicRandom random, Player player) : base(id, position, player)
+        public TeleportingPlatform(short id, Point position, DeterministicRandom random, Player player) : base(id,
+            position, player)
         {
             _random = random;
             SetState(TeleportingPlatformState.Static);
-            _stateTimer = (ushort)_random.GetInteger(10, StaticTime);
+            _stateTimer = (ushort) _random.GetInteger(10, StaticTime);
         }
 
         protected override bool CanJumpOnPlatform()
@@ -38,8 +38,8 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
             switch (_state)
             {
                 case TeleportingPlatformState.Static:
-                    var color = (byte)((float)_stateTimer / StaticTime * 255.0f);
-                    return new Color(color, color, color, 255);
+                    var color = (byte) ((float) _stateTimer / StaticTime * 255.0f);
+                    return new Color(color, color, color);
                 case TeleportingPlatformState.Dissapearing:
                     return Color.Black;
                 case TeleportingPlatformState.Appearing:
@@ -58,7 +58,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
                     if (_stateTimer == 0) SetState(TeleportingPlatformState.Dissapearing);
                     break;
                 case TeleportingPlatformState.Dissapearing:
-                    Alpha = (byte)(_stateTimer / (float)DissapearingTime * 255.0f);
+                    Alpha = (byte) (_stateTimer / (float) DissapearingTime * 255.0f);
                     if (_stateTimer == 0)
                     {
                         Position.X = _random.GetInteger(PlatformWidth / 2, GameField.Width - PlatformWidth / 2);
@@ -67,7 +67,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
                     break;
                 case TeleportingPlatformState.Appearing:
-                    Alpha = (byte)((1.0f - (float)_stateTimer / DissapearingTime) * 255);
+                    Alpha = (byte) ((1.0f - (float) _stateTimer / DissapearingTime) * 255);
                     if (_stateTimer == 0) SetState(TeleportingPlatformState.Static);
                     break;
             }

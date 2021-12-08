@@ -1,7 +1,8 @@
-﻿using DragonGame.Engine.Wrappers.SDL2;
-using DuckDuckJump.Engine.Assets;
+﻿using System.IO;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using StbImageSharp;
 
-namespace DragonGame.Engine.Assets.Textures
+namespace DuckDuckJump.Engine.Assets.Textures
 {
     internal class TextureManager : ResourceManager<Texture>
     {
@@ -11,7 +12,13 @@ namespace DragonGame.Engine.Assets.Textures
 
         protected override Texture LoadAsset(string path)
         {
-            return Texture.FromBmp(path);
+            using (var file = File.OpenRead(path))
+            {
+                using (var surface = new Surface(ImageResult.FromStream(file, ColorComponents.RedGreenBlueAlpha)))
+                {
+                    return new Texture(Game.Instance.Renderer, surface);
+                }
+            }
         }
     }
 }

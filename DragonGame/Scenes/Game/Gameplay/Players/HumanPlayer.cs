@@ -1,8 +1,8 @@
-using DragonGame.Engine.Utilities;
-using DragonGame.Scenes.Game.Gameplay.Platforming;
-using DragonGame.Scenes.Game.Input;
+using DuckDuckJump.Engine.Utilities;
+using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
+using DuckDuckJump.Scenes.Game.Input;
 
-namespace DragonGame.Scenes.Game.Gameplay.Players
+namespace DuckDuckJump.Scenes.Game.Gameplay.Players
 {
     internal class HumanPlayer : Player
     {

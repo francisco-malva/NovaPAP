@@ -1,26 +1,27 @@
 ﻿using System;
 
-namespace DuckDuckJump.Engine.Scenes;
-
-internal abstract class Scene : IDisposable
+namespace DuckDuckJump.Engine.Scenes
 {
-    public void Dispose()
+    internal abstract class Scene : IDisposable
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-    /// <summary>
-    ///     Runs every frame.
-    /// </summary>
-    public abstract void OnTick();
+        /// <summary>
+        ///     Runs every frame.
+        /// </summary>
+        public abstract void OnTick();
 
-    /// <summary>
-    ///     Runs when the scene gets pushed out of the scene stack.
-    protected abstract void OnUnload();
+        /// <summary>
+        ///     Runs when the scene gets pushed out of the scene stack.
+        protected abstract void OnUnload();
 
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing) OnUnload();
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing) OnUnload();
+        }
     }
 }

@@ -1,32 +1,30 @@
-using DragonGame.Engine.Utilities;
-using DragonGame.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Utilities;
+using DuckDuckJump.Engine.Wrappers.SDL2;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay
 {
     internal class Camera
     {
-        private Point _viewport;
         private Rectangle _limits;
 
 
         private Point _position;
-        public Point Position
-        {
-            get
-            {
-                return _position;
-            }
-            set
-            {
-                _position.X = Mathematics.Clamp(value.X, _limits.X, _limits.W);
-                _position.Y = Mathematics.Clamp(value.Y, _limits.Y, _limits.H);
-            }
-        }
+        private Point _viewport;
 
         public Camera(Point viewport, Rectangle limits)
         {
             _viewport = viewport;
             _limits = limits;
+        }
+
+        public Point Position
+        {
+            get => _position;
+            set
+            {
+                _position.X = Mathematics.Clamp(value.X, _limits.X, _limits.W);
+                _position.Y = Mathematics.Clamp(value.Y, _limits.Y, _limits.H);
+            }
         }
 
         public bool OnScreen(Rectangle rectangle)
@@ -36,12 +34,11 @@ namespace DuckDuckJump.Scenes.Game.Gameplay
         }
 
         /// <summary>
-        /// Transforms a point from the world space to the view space.
+        ///     Transforms a point from the world space to the view space.
         /// </summary>
         public Point TransformPoint(Point point)
         {
             return new Point(point.X - Position.X, _viewport.Y - point.Y + Position.Y);
         }
-
     }
 }

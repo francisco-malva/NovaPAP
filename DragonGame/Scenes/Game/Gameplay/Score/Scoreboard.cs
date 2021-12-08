@@ -1,31 +1,31 @@
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.Game.Gameplay.Players;
-using Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Players;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Score
 {
     internal sealed class Scoreboard
     {
-        private Texture _checkmark;
-        public byte RoundsToWin;
-        private byte _roundsWon;
-
         private ushort _blinkTimer;
+        private readonly Texture _checkmark;
 
         /// <summary>
         ///     Is the checkmark that indicates the won round dark?
         /// </summary>
         private bool _checkmarkDark;
 
-        private Player _player;
+        private readonly Player _player;
+        private byte _roundsWon;
+        public byte RoundsToWin;
 
         public Scoreboard(Player player, byte roundsToWin)
         {
-            _checkmark = DragonGame.Engine.Game.Instance.TextureManager["Game/checkmark"];
+            _checkmark = Engine.Game.Instance.TextureManager["Game/checkmark"];
             _player = player;
             RoundsToWin = roundsToWin;
             _roundsWon = 0;
         }
+
+        public bool WonGame => RoundsToWin == _roundsWon;
 
         public void WinRound(bool draw, ushort blinkTime)
         {
@@ -51,7 +51,7 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Score
 
         public void Draw()
         {
-            var renderer = DragonGame.Engine.Game.Instance.Renderer;
+            var renderer = Engine.Game.Instance.Renderer;
 
             for (var i = 0; i < RoundsToWin; i++)
             {
@@ -64,6 +64,5 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Score
                 renderer.Copy(_checkmark, null, new Rectangle(8 + 20 * i, 8, 16, 16));
             }
         }
-        public bool WonGame => RoundsToWin == _roundsWon;
     }
 }

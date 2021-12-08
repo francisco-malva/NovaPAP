@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using DuckDuckJump.Engine.Scenes;
 
-namespace DragonGame.Engine.Scenes
+namespace DuckDuckJump.Engine.Scenes
 {
     internal class SceneManager
     {

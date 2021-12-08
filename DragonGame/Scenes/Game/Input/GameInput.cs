@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DragonGame.Scenes.Game.Input
+namespace DuckDuckJump.Scenes.Game.Input
 {
     [Flags]
     internal enum GameInput : byte

@@ -1,4 +1,4 @@
-namespace DragonGame.Scenes.Game
+namespace DuckDuckJump.Scenes.Game
 {
     internal enum GameState : byte
     {

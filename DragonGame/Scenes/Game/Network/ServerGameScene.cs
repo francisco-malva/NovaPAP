@@ -2,9 +2,9 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using DragonGame.Engine.Utilities;
+using DuckDuckJump.Engine.Utilities;
 
-namespace DragonGame.Scenes.Game.Network
+namespace DuckDuckJump.Scenes.Game.Network
 {
     internal sealed class ServerGameScene : OnlineGameScene
     {

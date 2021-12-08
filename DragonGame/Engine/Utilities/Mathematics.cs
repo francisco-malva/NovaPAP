@@ -1,7 +1,7 @@
 ﻿using System;
-using Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2;
 
-namespace DragonGame.Engine.Utilities
+namespace DuckDuckJump.Engine.Utilities
 {
     internal static class Mathematics
     {
@@ -13,22 +13,17 @@ namespace DragonGame.Engine.Utilities
 
         public static Color Lerp(Color from, Color to, float t)
         {
-            var r = (byte)Lerp(from.R, to.R, t);
-            var g = (byte)Lerp(from.G, to.G, t);
-            var b = (byte)Lerp(from.B, to.B, t);
-            return new Color(r, g, b, 255);
+            var r = (byte) Lerp(from.R, to.R, t);
+            var g = (byte) Lerp(from.G, to.G, t);
+            var b = (byte) Lerp(from.B, to.B, t);
+            return new Color(r, g, b);
         }
 
-        public static int Clamp(int value, int min, int max)
+        public static T Clamp<T>(T value, T min, T max) where T : IComparable<T>
         {
-            if (value < min)
-            {
+            if (value.CompareTo(min) < 0)
                 value = min;
-            }
-            else if (value > max)
-            {
-                value = max;
-            }
+            else if (value.CompareTo(max) > 0) value = max;
             return value;
         }
     }

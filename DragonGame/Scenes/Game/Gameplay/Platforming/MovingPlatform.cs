@@ -1,16 +1,16 @@
-using DragonGame.Engine.Utilities;
-using DragonGame.Engine.Wrappers.SDL2;
-using DragonGame.Scenes.Game.Gameplay.Players;
-using Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Utilities;
+using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Players;
 
-namespace DragonGame.Scenes.Game.Gameplay.Platforming
+namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming
 {
     internal class MovingPlatform : Platform
     {
         private const int PlatformMoveSpeed = 3;
         private bool _moveLeft;
 
-        public MovingPlatform(short id, Point position, DeterministicRandom random, Player player) : base(id, position, player)
+        public MovingPlatform(short id, Point position, DeterministicRandom random, Player player) : base(id, position,
+            player)
         {
             _moveLeft = random.GetFloat() >= 0.5f;
         }
@@ -21,7 +21,7 @@ namespace DragonGame.Scenes.Game.Gameplay.Platforming
 
         protected override Color GetPlatformDrawColor()
         {
-            return new Color(173, 198, 152, 255);
+            return new Color(173, 198, 152);
         }
 
         protected override void OnUpdate()
