@@ -16,9 +16,18 @@ namespace DuckDuckJump.Engine.GUI
             _selectionStack.Peek().Draw();
         }
 
-        public void Push(SelectionGroup group)
+        public void Push(Selection[] selections)
         {
-            _selectionStack.Push(group);
+            _selectionStack.Push(new SelectionGroup(selections));
+        }
+
+        public void Set(Selection[] selections)
+        {
+            while(_selectionStack.Count > 0)
+            {
+                Pop();
+            }
+            Push(selections);
         }
 
         public void Pop()

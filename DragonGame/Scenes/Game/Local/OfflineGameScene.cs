@@ -32,7 +32,7 @@ namespace DuckDuckJump.Scenes.Game.Local
                 new Selection("PAUSED", null, null, false),
                 new Selection("RESUME", () => { _paused = false; }, null),
                 new Selection("RESET", () => { Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(roundsToWin,p1Ai,p2Ai,difficulty)); }, null),
-                new Selection("QUIT", () => { _pauseSelector.Push(new SelectionGroup(_quitYouSureSelection)); }, null),
+                new Selection("QUIT", () => { _pauseSelector.Push(_quitYouSureSelection); }, null),
             };
 
             _quitYouSureSelection = new Selection[]
@@ -42,7 +42,7 @@ namespace DuckDuckJump.Scenes.Game.Local
                 new Selection("NO!", () => {_pauseSelector.Pop(); }, null)
             };
 
-            _pauseSelector.Push(new SelectionGroup(_pauseSelection));
+            _pauseSelector.Push(_pauseSelection);
         }
 
         public override void OnTick()
