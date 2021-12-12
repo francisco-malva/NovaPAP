@@ -25,13 +25,17 @@ internal class GameField : IDisposable
     public readonly Platforms Platforms;
     public Scoreboard Scoreboard;
 
-    public GameField(byte roundsToWin, bool ai, AiDifficulty difficulty, DeterministicRandom random)
+    public GameField(bool p2, GameInfo info)
     {
-        AiControlled = ai;
-        Player = ai ? new AIPlayer(difficulty, random) : new HumanPlayer(random);
+        AiControlled = p2 ? info.P2Ai : info.P1Ai;
 
-        Scoreboard = new Scoreboard(Player, roundsToWin);
-        Platforms = new Platforms(Player, random);
+        var random = new DeterministicRandom();
+        random.Setup(info.RandomSeed);
+
+        Player = AiControlled ? new AIPlayer(info.Difficulty, random) : new HumanPlayer(random);
+
+        Scoreboard = new Scoreboard(Player, info.RoundsToWin);
+        Platforms = new Platforms(Player, random, info.PlatformCount);
 
         _backgroundTexture = Engine.Game.Instance.TextureManager["Game/background"];
         _backgroundTexture.SetBlendMode(SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);

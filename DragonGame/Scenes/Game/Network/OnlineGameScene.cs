@@ -1,5 +1,6 @@
 ﻿using System;
 using DuckDuckJump.Engine.Utilities;
+using DuckDuckJump.Scenes.Game.Gameplay;
 using DuckDuckJump.Scenes.Game.Input;
 using DuckDuckJump.Scenes.MainMenu;
 using SDL2;
@@ -11,8 +12,9 @@ internal class OnlineGameScene : GameScene
     private readonly bool _onLeftSide;
     protected StreamReaderWriter Stream;
 
-    public OnlineGameScene(byte roundsToWin, bool onLeftSide) : base(roundsToWin)
+    public OnlineGameScene(GameInfo info, StreamReaderWriter stream, bool onLeftSide) : base(info)
     {
+        Stream = stream;
         _onLeftSide = onLeftSide;
     }
 

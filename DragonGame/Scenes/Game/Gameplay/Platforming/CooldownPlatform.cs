@@ -13,7 +13,7 @@ internal sealed class CooldownPlatform : Platform
 
     private ushort _timer;
 
-    public CooldownPlatform(short id, Point position, Player player) : base(id, position, player)
+    public CooldownPlatform(ushort id, Point position, Player player) : base(id, position, player)
     {
         SetState(CooldownPlatformState.Static);
     }

@@ -10,14 +10,14 @@ internal abstract class Platform
     public const int PlatformHeight = 14;
     private readonly Texture _texture;
 
-    public readonly short Id;
+    public readonly ushort Id;
 
     protected readonly Player Player;
     protected byte Alpha = 255;
 
     public Point Position;
 
-    protected Platform(short id, Point position, Player player)
+    protected Platform(ushort id, Point position, Player player)
     {
         Id = id;
         Position = position;

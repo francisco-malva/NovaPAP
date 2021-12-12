@@ -7,11 +7,12 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming;
 
 internal class Platforms
 {
-    public const short PlatformCount = 50;
+    
     public const int InitialPlatformHeight = 100;
     public const int PlatformYStep = 150;
 
-    public const int FinishingY = InitialPlatformHeight + PlatformCount * PlatformYStep;
+    public readonly ushort PlatformCount;
+    public int FinishingY => InitialPlatformHeight + PlatformCount * PlatformYStep;
 
     private readonly Platform[] _platforms;
 
@@ -22,8 +23,9 @@ internal class Platforms
     private PlatformType _lastPlatformType = PlatformType.None;
 
 
-    public Platforms(Player player, DeterministicRandom random)
+    public Platforms(Player player, DeterministicRandom random, ushort platformCount)
     {
+        PlatformCount = platformCount;
         _player = player;
 
         _platforms = new Platform[PlatformCount];
@@ -35,7 +37,7 @@ internal class Platforms
     public Platform this[short id] => _platforms[id];
 
 
-    public static float GetClimbingProgress(int yPosition)
+    public float GetClimbingProgress(int yPosition)
     {
         return yPosition == 0 ? 0.0f : yPosition / (float)FinishingY;
     }
@@ -62,7 +64,7 @@ internal class Platforms
         return type;
     }
 
-    private Platform GetPlatform(PlatformType type, short id, Point position)
+    private Platform GetPlatform(PlatformType type, ushort id, Point position)
     {
         return type switch
         {
@@ -76,7 +78,7 @@ internal class Platforms
 
     public void GeneratePlatforms()
     {
-        for (short i = 0; i < PlatformCount; i++)
+        for (ushort i = 0; i < PlatformCount; i++)
             _platforms[i] = GetPlatform(GetRandomPlatformType(), i, new Point(
                 _random.GetInteger(Platform.PlatformWidth / 2, GameField.Width - Platform.PlatformWidth / 2),
                 InitialPlatformHeight + PlatformYStep * i));

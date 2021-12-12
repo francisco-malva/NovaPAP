@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using DuckDuckJump.Engine.Assets.Audio;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Scenes;
@@ -8,6 +9,7 @@ using DuckDuckJump.Scenes.Game.Gameplay;
 using DuckDuckJump.Scenes.Game.Gameplay.Announcer;
 using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
 using DuckDuckJump.Scenes.Game.Input;
+using DuckDuckJump.Scenes.Game.Local;
 using DuckDuckJump.Scenes.MainMenu;
 using ManagedBass;
 using SDL2;
@@ -39,16 +41,18 @@ internal abstract class GameScene : Scene
     private byte _stateTimer;
     private Winner _winner;
 
-    protected GameScene(byte roundsToWin, bool p1Ai = false, bool p2Ai = false,
-        AiDifficulty difficulty = AiDifficulty.Easy)
+    public static Replay CurrentReplay;
+
+    protected GameScene(GameInfo info)
     {
         FrameCount = 0;
 
         _gameBorder = Engine.Game.Instance.TextureManager["UI/game-border"];
         Random = new DeterministicRandom();
+        Random.Setup(info.RandomSeed);
 
-        P1Field = new GameField(roundsToWin, p1Ai, difficulty, Random);
-        P2Field = new GameField(roundsToWin, p2Ai, difficulty, Random);
+        P1Field = new GameField(false, info);
+        P2Field = new GameField(true, info);
 
         _music = Engine.Game.Instance.AudioManager["mus-test"];
 
@@ -57,6 +61,8 @@ internal abstract class GameScene : Scene
 
 
         _announcer = new Announcer();
+
+        ChangeState(GameState.GetReady);
     }
 
     protected ulong FrameCount { get; private set; }
@@ -199,6 +205,13 @@ internal abstract class GameScene : Scene
                 PlayerWonUpdate(p1Input, p2Input);
                 break;
             case GameState.GameOver:
+                using (FileStream file = File.Create("replay.rpy"))
+                {
+                    using (BinaryWriter writer = new BinaryWriter(file))
+                    {
+                        CurrentReplay.Save(writer);
+                    }
+                }
                 Engine.Game.Instance.SceneManager.Set(new MainMenuScene());
                 break;
             default:
