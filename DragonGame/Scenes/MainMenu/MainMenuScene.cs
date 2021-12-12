@@ -92,7 +92,7 @@ internal class MainMenuScene : Scene
 
     private void BeginHosting()
     {
-        var tcpListener = new TcpListener(IPAddress.Any, 9999);
+        var tcpListener = new TcpListener(IPAddress.IPv6Loopback, 29170);
         tcpListener.Start();
         var client = tcpListener.AcceptTcpClient();
 
@@ -105,7 +105,7 @@ internal class MainMenuScene : Scene
 
     private void BeginSearching()
     {
-        var client = new TcpClient(File.ReadAllText("config.txt").Trim(), 9999);
+        var client = new TcpClient(File.ReadAllText("config.txt").Trim(), 29170);
 
         using var reader = new BinaryReader(client.GetStream(), Encoding.UTF8, true);
         Engine.Game.Instance.SceneManager.Set(new OnlineGameScene(new GameInfo(reader), client, false));
