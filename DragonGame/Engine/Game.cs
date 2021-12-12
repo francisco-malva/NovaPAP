@@ -13,10 +13,10 @@ namespace DuckDuckJump.Engine;
 internal class Game : IDisposable
 {
     private bool _running;
-
-    public AudioManager AudioManager;
+    public ChunkManager ChunkManager;
 
     public EventPump EventPump;
+    public MusicManager MusicManager;
     public Renderer Renderer;
     public SceneManager SceneManager;
 
@@ -37,7 +37,8 @@ internal class Game : IDisposable
         Window?.Dispose();
         Renderer?.Dispose();
         TextureManager?.Dispose();
-        AudioManager?.Dispose();
+        ChunkManager?.Dispose();
+        MusicManager?.Dispose();
     }
 
     private void CreateSingleton()
@@ -60,7 +61,10 @@ internal class Game : IDisposable
 
         TextureManager = new TextureManager();
 
-        AudioManager = new AudioManager();
+        SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 1024);
+
+        ChunkManager = new ChunkManager();
+        MusicManager = new MusicManager();
 
         SceneManager = new SceneManager();
         SceneManager.Set(new MainMenuScene());

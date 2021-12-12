@@ -37,7 +37,7 @@ internal class AIPlayer : Player
         }
     }
 
-    protected override void MoveX(Platforms platforms, GameInput input)
+    protected override void MoveX(PlatformManager platformManager, GameInput input)
     {
         switch (_state)
         {
@@ -45,11 +45,14 @@ internal class AIPlayer : Player
                 SteerAi();
                 break;
             case AiState.SelectingPlatform:
-                var newTarget = platforms.GetAiTarget(this);
+                ItemManager.UseItem();
+                var newTarget = platformManager.GetAiTarget(this);
 
                 if (newTarget != null) _target = newTarget;
                 SetAiState(AiState.Waiting);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
 
         if (_timer > 0) --_timer;
@@ -90,5 +93,9 @@ internal class AIPlayer : Player
     {
         _target = null;
         SetAiState(AiState.SelectingPlatform);
+    }
+
+    protected override void OnPressSpecial()
+    {
     }
 }

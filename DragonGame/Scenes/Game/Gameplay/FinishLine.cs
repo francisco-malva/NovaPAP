@@ -45,13 +45,20 @@ internal class FinishLine
         }
     }
 
-    public void Draw(Camera _camera)
+    public void Draw(Camera camera)
     {
-        var screenPosition = _camera.TransformPoint(new Point(0, _y + _finishLine.Height / 2));
+        var screenPosition = camera.TransformPoint(new Point(0, _y + _finishLine.Height / 2));
         var dst = new Rectangle(screenPosition.X, screenPosition.Y, _finishLine.Width, _finishLine.Height);
-        if (!_camera.OnScreen(dst)) return;
+        if (!camera.OnScreen(dst)) return;
 
+        //My lord
         _finishLine.SetAlphaMod(_alpha);
         Engine.Game.Instance.Renderer.Copy(_finishLine, null, dst);
+        Engine.Game.Instance.Renderer.Copy(_finishLine, null,
+            new Rectangle(dst.X + _finishLine.Width, dst.Y, dst.W, dst.H));
+        Engine.Game.Instance.Renderer.Copy(_finishLine, null,
+            new Rectangle(dst.X + _finishLine.Width * 2, dst.Y, dst.W, dst.H));
+        Engine.Game.Instance.Renderer.Copy(_finishLine, null,
+            new Rectangle(dst.X + _finishLine.Width * 3, dst.Y, dst.W, dst.H));
     }
 }

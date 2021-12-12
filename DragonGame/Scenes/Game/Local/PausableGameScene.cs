@@ -1,5 +1,4 @@
-
-
+using DuckDuckJump.Engine;
 using DuckDuckJump.Engine.GUI;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Wrappers.SDL2;
@@ -10,16 +9,15 @@ using SDL2;
 
 internal abstract class PausableGameScene : GameScene
 {
-    private bool _paused;
-    private readonly Selector _pauseSelector = new();
-
     private readonly Selection[] _pauseSelection;
+    private readonly Selector _pauseSelector = new();
     private readonly Selection[] _quitYouSureSelection;
+    private bool _paused;
 
     public PausableGameScene(GameInfo info) : base(info)
     {
         _pauseSelection = new[]
-                {
+        {
             new Selection("PAUSED", null, null, false),
             new Selection("RESUME", () => { _paused = false; }, null),
             new Selection("RESET",
@@ -30,7 +28,7 @@ internal abstract class PausableGameScene : GameScene
         _quitYouSureSelection = new[]
         {
             new Selection("ARE YOU SURE YOU WANT TO QUIT?", null, null, false),
-            new Selection("YES!", () => { DuckDuckJump.Engine.Game.Instance.SceneManager.Set(new MainMenuScene()); }, null),
+            new Selection("YES!", () => { Game.Instance.SceneManager.Set(new MainMenuScene()); }, null),
             new Selection("NO!", () => { _pauseSelector.Pop(); }, null)
         };
 

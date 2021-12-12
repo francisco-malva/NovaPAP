@@ -9,7 +9,7 @@ internal class MovingPlatform : Platform
     private const int PlatformMoveSpeed = 3;
     private bool _moveLeft;
 
-    public MovingPlatform(ushort id, Point position, DeterministicRandom random, Player player) : base(id, position,
+    public MovingPlatform(Point position, DeterministicRandom random, Player player) : base(position,
         player)
     {
         _moveLeft = random.GetFloat() >= 0.5f;

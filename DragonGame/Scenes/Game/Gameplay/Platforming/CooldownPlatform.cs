@@ -1,3 +1,4 @@
+using System;
 using DuckDuckJump.Engine.Wrappers.SDL2;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 
@@ -13,7 +14,7 @@ internal sealed class CooldownPlatform : Platform
 
     private ushort _timer;
 
-    public CooldownPlatform(ushort id, Point position, Player player) : base(id, position, player)
+    public CooldownPlatform(Point position, Player player) : base(position, player)
     {
         SetState(CooldownPlatformState.Static);
     }
@@ -65,6 +66,8 @@ internal sealed class CooldownPlatform : Platform
             case CooldownPlatformState.Gone:
                 GoneUpdate();
                 break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
 
         if (_timer > 0) --_timer;

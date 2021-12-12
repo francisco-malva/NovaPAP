@@ -52,6 +52,9 @@ internal sealed class Scoreboard
 
     public void Draw()
     {
+        if (RoundsToWin == 1)
+            return;
+
         var renderer = Engine.Game.Instance.Renderer;
 
         for (var i = 0; i < RoundsToWin; i++)

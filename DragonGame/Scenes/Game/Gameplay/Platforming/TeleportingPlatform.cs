@@ -16,8 +16,7 @@ internal class TeleportingPlatform : Platform
 
     private ushort _stateTimer;
 
-    public TeleportingPlatform(ushort id, Point position, DeterministicRandom random, Player player) : base(id,
-        position, player)
+    public TeleportingPlatform(Point position, DeterministicRandom random, Player player) : base(position, player)
     {
         _random = random;
         SetState(TeleportingPlatformState.Static);

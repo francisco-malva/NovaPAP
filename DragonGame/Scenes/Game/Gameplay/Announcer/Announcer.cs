@@ -1,22 +1,20 @@
-using DuckDuckJump.Engine.Assets.Audio;
-using ManagedBass;
+using DuckDuckJump.Engine.Wrappers.SDL2.Mixer;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Announcer;
 
 internal class Announcer
 {
-    private readonly AudioClip[] _clips =
+    private readonly Chunk[] _clips =
     {
-        Engine.Game.Instance.AudioManager["get-ready"],
-        Engine.Game.Instance.AudioManager["go"],
-        Engine.Game.Instance.AudioManager["Game/Banners/winner"],
-        Engine.Game.Instance.AudioManager["Game/Banners/you-lose"],
-        Engine.Game.Instance.AudioManager["Game/Banners/draw"]
+        Engine.Game.Instance.ChunkManager["get-ready"],
+        Engine.Game.Instance.ChunkManager["go"],
+        Engine.Game.Instance.ChunkManager["p1-wins"],
+        Engine.Game.Instance.ChunkManager["p2-wins"],
+        Engine.Game.Instance.ChunkManager["draw"]
     };
 
     public void Say(AnnouncementType announcement)
     {
-        var channel = Bass.SampleGetChannel(_clips[(int)announcement].Handle);
-        Bass.ChannelPlay(channel);
+        _ = _clips[(int)announcement].Play(-1, 0);
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System;
-using DuckDuckJump.Engine.Assets.Audio;
 using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2.Mixer;
+using DuckDuckJump.Scenes.Game.Gameplay.Items;
 using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
 using DuckDuckJump.Scenes.Game.Input;
-using ManagedBass;
 using SDL2;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Players;
@@ -17,9 +17,9 @@ internal abstract class Player
     private const int YJumpSpeed = 20;
     private const int YDrag = 1;
     protected const int XMoveSpeed = 8;
+    private const ushort UmbrellaTime = 300;
 
-    private readonly AudioClip _jump;
-    private readonly int _jumpChannel;
+    private readonly Chunk _jump;
 
     private readonly Texture _texture;
 
@@ -30,6 +30,11 @@ internal abstract class Player
     private SDL.SDL_RendererFlip _flip;
 
     private ulong _stateTimer;
+
+
+    private ushort _umbrellaFrames;
+
+    protected ItemManager ItemManager;
     public Point Position;
 
     protected int XSpeed, YSpeed;
@@ -38,14 +43,14 @@ internal abstract class Player
     {
         Random = random;
         _texture = Engine.Game.Instance.TextureManager["Game/player"];
-        _jump = Engine.Game.Instance.AudioManager["jump"];
-        _jumpChannel = Bass.SampleGetChannel(_jump.Handle, BassFlags.Default);
-        Bass.ChannelSetAttribute(_jumpChannel, ChannelAttribute.Volume, 0.10f);
+        _jump = Engine.Game.Instance.ChunkManager["jump"];
     }
 
     public PlayerState State { get; private set; }
 
     public bool Descending => YSpeed < 0;
+
+    public int FallSpeed => _umbrellaFrames > 0 ? YTerminalSpeed / 2 : YTerminalSpeed;
 
     public Rectangle Collision => new(Position.X - PlatformCollisionWidth / 2,
         Position.Y - PlatformCollisionHeight / 2, PlatformCollisionWidth, PlatformCollisionHeight);
@@ -62,15 +67,32 @@ internal abstract class Player
 
     protected abstract void ResetSpecialFields();
 
-    public void Update(Platforms platforms, GameInput input)
+    public void Update(PlatformManager platformManager, GameInput input)
     {
-        UpdateMovement(platforms, input);
+        UpdateMovement(platformManager, input);
         UpdateAngle();
         UpdateFlip();
         ++_stateTimer;
     }
 
-    private void UpdateMovement(Platforms platforms, GameInput input)
+    private void DecreaseTimers()
+    {
+        if (_umbrellaFrames > 0) _umbrellaFrames--;
+    }
+
+    public void UseUmbrella()
+    {
+        _umbrellaFrames = UmbrellaTime;
+    }
+
+    public void SetItemManager(ItemManager manager)
+    {
+        ItemManager = manager;
+    }
+
+    protected abstract void OnPressSpecial();
+
+    private void UpdateMovement(PlatformManager platformManager, GameInput input)
     {
         switch (State)
         {
@@ -78,7 +100,8 @@ internal abstract class Player
                 UpdatePosition();
                 break;
             case PlayerState.InGame:
-                MoveX(platforms, input);
+                if ((input & GameInput.Special) != 0) OnPressSpecial();
+                MoveX(platformManager, input);
                 UpdatePosition();
                 break;
             case PlayerState.Lost:
@@ -87,6 +110,8 @@ internal abstract class Player
             case PlayerState.Won:
                 Position.Y += (int)_stateTimer;
                 break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 
@@ -143,7 +168,7 @@ internal abstract class Player
     {
         if (Position.Y < 0 && State != PlayerState.Lost) Jump(null, true);
         Position.X = Math.Min(GameField.Width, Math.Max(0, Position.X + XSpeed));
-        YSpeed = Math.Max(YTerminalSpeed, YSpeed - YDrag);
+        YSpeed = Math.Max(FallSpeed, YSpeed - YDrag);
         Position.Y += YSpeed;
     }
 
@@ -159,7 +184,7 @@ internal abstract class Player
         renderer.CopyEx(_texture, null, dst, _angle, null, _flip);
     }
 
-    protected abstract void MoveX(Platforms platforms, GameInput input);
+    protected abstract void MoveX(PlatformManager platformManager, GameInput input);
 
     public void Jump(Platform platform = null, bool ground = false, int jumpMultiplier = 1)
     {
@@ -168,7 +193,7 @@ internal abstract class Player
         Position.Y = platform == null ? ground ? 0 : Position.Y : platform.Position.Y + Platform.PlatformHeight;
         YSpeed = YJumpSpeed * jumpMultiplier;
 
-        Bass.ChannelPlay(_jumpChannel, true);
+        _jump.Play(-1, 0);
     }
 
     protected abstract void OnJump(Platform platform);
@@ -181,10 +206,25 @@ internal abstract class Player
         {
             case PlayerState.Lost:
                 XSpeed = 0;
+                RemovePowerups();
                 Jump();
                 break;
+            case PlayerState.GetReady:
+                break;
+            case PlayerState.InGame:
+                break;
+            case PlayerState.Won:
+                RemovePowerups();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(state), state, null);
         }
 
         _stateTimer = 0;
+    }
+
+    private void RemovePowerups()
+    {
+        _umbrellaFrames = 0;
     }
 }

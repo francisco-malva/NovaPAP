@@ -2,6 +2,7 @@
 using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Engine.Wrappers.SDL2;
 using DuckDuckJump.Scenes.Game.Gameplay.Banners;
+using DuckDuckJump.Scenes.Game.Gameplay.Items;
 using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
@@ -21,29 +22,37 @@ internal class GameField : IDisposable
     private readonly BannerDisplay _bannerDisplay;
     private readonly Camera _camera;
     private readonly FinishLine _finishLine;
+    private readonly ItemManager _itemManager;
 
-    public readonly Platforms Platforms;
+    private readonly GameScene _owner;
+    private readonly bool _p2;
+
+    public readonly PlatformManager PlatformManager;
     public Scoreboard Scoreboard;
 
-    public GameField(bool p2, GameInfo info)
+    public GameField(DeterministicRandom random, GameScene owner, bool p2, GameInfo info)
     {
-        AiControlled = p2 ? info.P2Ai : info.P1Ai;
+        _owner = owner;
+        _p2 = p2;
 
-        var random = new DeterministicRandom();
-        random.Setup(info.RandomSeed);
+        AiControlled = p2 ? info.P2Ai : info.P1Ai;
 
         Player = AiControlled ? new AIPlayer(info.Difficulty, random) : new HumanPlayer(random);
 
         Scoreboard = new Scoreboard(Player, info.RoundsToWin);
-        Platforms = new Platforms(Player, random, info.PlatformCount);
+        PlatformManager = new PlatformManager(Player, random, info.PlatformCount);
 
         _backgroundTexture = Engine.Game.Instance.TextureManager["Game/background"];
         _backgroundTexture.SetBlendMode(SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
         _bannerDisplay = new BannerDisplay();
-        _finishLine = new FinishLine(Player, Platforms.FinishingY);
+        _finishLine = new FinishLine(Player, PlatformManager.FinishingY);
 
-        _camera = new Camera(new Point(Width, Height), new Rectangle(0, 0, Width, Platforms.FinishingY));
+        _camera = new Camera(new Point(Width, Height), new Rectangle(0, 0, Width, PlatformManager.FinishingY));
+
+        _itemManager = new ItemManager(this, Player, PlatformManager, random);
+
+        Player.SetItemManager(_itemManager);
 
         OutputTexture = new Texture(Engine.Game.Instance.Renderer, SDL.SDL_PIXELFORMAT_RGBA8888,
             (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
@@ -59,6 +68,16 @@ internal class GameField : IDisposable
 
     public bool PlayerWonRound => _finishLine.CrossedFinishLine;
 
+    public bool IsWinning
+    {
+        get
+        {
+            if (_p2) return _owner.WinningSide == Winner.P2;
+
+            return _owner.WinningSide == Winner.P1;
+        }
+    }
+
     public void Dispose()
     {
         OutputTexture?.Dispose();
@@ -68,7 +87,8 @@ internal class GameField : IDisposable
     {
         _finishLine.Decreasing = false;
         _bannerDisplay.Raise(BannerType.GetReady, GameScene.GetReadyTime);
-        Platforms.GeneratePlatforms();
+        PlatformManager.GeneratePlatforms();
+        _itemManager.GenerateItems();
         Player.GetReady();
         UpdateCamera();
     }
@@ -98,8 +118,8 @@ internal class GameField : IDisposable
 
     public void Update(GameInput input)
     {
-        Player.Update(Platforms, input);
-        Platforms.Update();
+        Player.Update(PlatformManager, input);
+        PlatformManager.Update();
 
         _bannerDisplay.Update();
         _finishLine.Update();
@@ -108,6 +128,7 @@ internal class GameField : IDisposable
         {
             case PlayerState.InGame:
                 UpdateCamera();
+                _itemManager.Update();
                 break;
             case PlayerState.Won:
                 Scoreboard.Update();
@@ -134,6 +155,7 @@ internal class GameField : IDisposable
         DrawBackground();
         DrawGameElements();
         Scoreboard.Draw();
+        _itemManager.DrawUi();
         _bannerDisplay.Draw();
 
         renderer.SetTarget(null);
@@ -142,7 +164,8 @@ internal class GameField : IDisposable
     private void DrawGameElements()
     {
         Player.Draw(_camera);
-        Platforms.Draw(_camera);
+        PlatformManager.Draw(_camera);
+        _itemManager.Draw(_camera);
         _finishLine.Draw(_camera);
     }
 
@@ -151,7 +174,7 @@ internal class GameField : IDisposable
         var renderer = Engine.Game.Instance.Renderer;
 
         var nightExposure = Mathematics.Lerp(0.0f, 255.0f,
-            Platforms.GetClimbingProgress(_camera.Position.Y == 0 ? 0 : Player.Position.Y));
+            PlatformManager.GetClimbingProgress());
 
         //Drawing the day
         _backgroundTexture.SetAlphaMod(255);

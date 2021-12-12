@@ -16,7 +16,7 @@ internal class SelectionGroup
         _selections = selections;
     }
 
-    private Selection _currentSelection => _selections[_selected];
+    private Selection CurrentSelection => _selections[_selected];
 
     public void Tick()
     {
@@ -29,15 +29,15 @@ internal class SelectionGroup
         if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_DOWN))
             _selected = (sbyte)((_selected + 1) % _selections.Length);
 
-        while (!_currentSelection.Selectable)
+        while (!CurrentSelection.Selectable)
         {
             var selection = _selected + 1;
             _selected = (sbyte)(selection < 0 ? _selections.Length - 1 : selection);
         }
 
-        _currentSelection.OnHovered?.Invoke();
+        CurrentSelection.OnHovered?.Invoke();
 
-        if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_Z)) _currentSelection.OnSelect?.Invoke();
+        if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_Z)) CurrentSelection.OnSelect?.Invoke();
     }
 
     public void Draw()

@@ -1,17 +1,15 @@
 ﻿using System;
 using System.IO;
-using DuckDuckJump.Engine.Assets.Audio;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Scenes;
 using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2.Mixer;
 using DuckDuckJump.Scenes.Game.Gameplay;
 using DuckDuckJump.Scenes.Game.Gameplay.Announcer;
-using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
 using DuckDuckJump.Scenes.Game.Input;
 using DuckDuckJump.Scenes.Game.Local;
 using DuckDuckJump.Scenes.MainMenu;
-using ManagedBass;
 using SDL2;
 
 namespace DuckDuckJump.Scenes.Game;
@@ -25,12 +23,13 @@ internal abstract class GameScene : Scene
     public const byte GetReadyTime = 120;
     public const byte RoundEndTime = 120;
 
+    public static Replay CurrentReplay;
+
     private readonly Announcer _announcer;
 
     private readonly Texture _gameBorder;
 
-    private readonly AudioClip _music;
-    private readonly int _musicChannel;
+    private readonly Music _music;
 
     protected readonly GameField P1Field;
     protected readonly GameField P2Field;
@@ -41,8 +40,6 @@ internal abstract class GameScene : Scene
     private byte _stateTimer;
     private Winner _winner;
 
-    public static Replay CurrentReplay;
-
     protected GameScene(GameInfo info)
     {
         FrameCount = 0;
@@ -51,14 +48,11 @@ internal abstract class GameScene : Scene
         Random = new DeterministicRandom();
         Random.Setup(info.RandomSeed);
 
-        P1Field = new GameField(false, info);
-        P2Field = new GameField(true, info);
+        P1Field = new GameField(Random, this, false, info);
+        P2Field = new GameField(Random, this, true, info);
 
-        _music = Engine.Game.Instance.AudioManager["mus-test"];
-
-        _musicChannel = Bass.SampleGetChannel(_music.Handle, BassFlags.Loop);
-        Bass.ChannelPlay(_musicChannel);
-
+        _music = Engine.Game.Instance.MusicManager["mus-test"];
+        _music.Play();
 
         _announcer = new Announcer();
 
@@ -68,6 +62,18 @@ internal abstract class GameScene : Scene
     protected ulong FrameCount { get; private set; }
 
     protected bool CanPause => _state == GameState.InGame;
+
+    public Winner WinningSide
+    {
+        get
+        {
+            if (P1Field.PlatformManager.GetClimbingProgress() > P2Field.PlatformManager.GetClimbingProgress())
+                return Winner.P1;
+            return P2Field.PlatformManager.GetClimbingProgress() > P1Field.PlatformManager.GetClimbingProgress()
+                ? Winner.P2
+                : Winner.Both;
+        }
+    }
 
     protected void SetRoundsToWin(byte roundsToWin)
     {
@@ -131,19 +137,19 @@ internal abstract class GameScene : Scene
         switch (_state)
         {
             case GameState.GetReady:
-                Bass.ChannelSetAttribute(_musicChannel, ChannelAttribute.Volume, 0.25f);
+                //Bass.ChannelSetAttribute(_musicChannel, ChannelAttribute.Volume, 0.25f);
                 _announcer.Say(AnnouncementType.GetReady);
                 P1Field.GetReady();
                 P2Field.GetReady();
                 break;
             case GameState.InGame:
-                Bass.ChannelSetAttribute(_musicChannel, ChannelAttribute.Volume, 0.50f);
+                //Bass.ChannelSetAttribute(_musicChannel, ChannelAttribute.Volume, 0.50f);
                 _announcer.Say(AnnouncementType.Go);
                 P1Field.BeginRound();
                 P2Field.BeginRound();
                 break;
             case GameState.PlayerWon:
-                Bass.ChannelSetAttribute(_musicChannel, ChannelAttribute.Volume, 0.25f);
+                //Bass.ChannelSetAttribute(_musicChannel, ChannelAttribute.Volume, 0.25f);
                 DecideWinner();
                 break;
             case GameState.GameOver:
@@ -205,13 +211,12 @@ internal abstract class GameScene : Scene
                 PlayerWonUpdate(p1Input, p2Input);
                 break;
             case GameState.GameOver:
-                using (FileStream file = File.Create("replay.rpy"))
+                using (var file = File.Create("replay.rpy"))
                 {
-                    using (BinaryWriter writer = new BinaryWriter(file))
-                    {
-                        CurrentReplay.Save(writer);
-                    }
+                    using var writer = new BinaryWriter(file);
+                    CurrentReplay.Save(writer);
                 }
+
                 Engine.Game.Instance.SceneManager.Set(new MainMenuScene());
                 break;
             default:
@@ -251,6 +256,6 @@ internal abstract class GameScene : Scene
 
     protected virtual void OnGameEnd()
     {
-        Bass.ChannelStop(_musicChannel);
+        Music.Halt();
     }
 }

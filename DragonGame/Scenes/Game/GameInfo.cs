@@ -5,17 +5,17 @@ namespace DuckDuckJump.Scenes.Game.Gameplay;
 
 internal class GameInfo
 {
-    public readonly ushort PlatformCount;
-    public readonly byte RoundsToWin;
+    public readonly AiDifficulty Difficulty;
 
     public readonly bool P1Ai;
     public readonly bool P2Ai;
+    public readonly ushort PlatformCount;
 
     public readonly int RandomSeed;
+    public readonly byte RoundsToWin;
 
-    public readonly AiDifficulty Difficulty;
-
-    public GameInfo(ushort platformCount, byte roundsToWin, bool p1Ai, bool p2Ai, int randomSeed, AiDifficulty difficulty)
+    public GameInfo(ushort platformCount, byte roundsToWin, bool p1Ai, bool p2Ai, int randomSeed,
+        AiDifficulty difficulty)
     {
         PlatformCount = platformCount;
         RoundsToWin = roundsToWin;

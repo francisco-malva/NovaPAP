@@ -1,6 +1,4 @@
-﻿using DuckDuckJump.Engine.GUI;
-using DuckDuckJump.Engine.Input;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+﻿using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Scenes.Game.Gameplay;
 using DuckDuckJump.Scenes.Game.Input;
 using SDL2;
@@ -9,10 +7,10 @@ namespace DuckDuckJump.Scenes.Game.Local;
 
 internal sealed class OfflineGameScene : PausableGameScene
 {
+    private readonly GameInfo _info;
 
     private GameInput _p1CurrentInput;
     private GameInput _p2CurrentInput;
-    private GameInfo _info;
 
     public OfflineGameScene(GameInfo info) : base(info)
     {
@@ -29,7 +27,7 @@ internal sealed class OfflineGameScene : PausableGameScene
     {
         ProcessInputs();
         SimulateAndDraw(_p1CurrentInput, _p2CurrentInput);
-        CurrentReplay.Enqueue(new Engine.Utilities.Pair<GameInput>(_p1CurrentInput, _p2CurrentInput));
+        CurrentReplay.Enqueue(new Pair<GameInput>(_p1CurrentInput, _p2CurrentInput));
     }
 
 

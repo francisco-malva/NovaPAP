@@ -12,12 +12,8 @@ internal class TextureManager : ResourceManager<Texture>
 
     protected override Texture LoadAsset(string path)
     {
-        using (var file = File.OpenRead(path))
-        {
-            using (var surface = new Surface(ImageResult.FromStream(file, ColorComponents.RedGreenBlueAlpha)))
-            {
-                return new Texture(Game.Instance.Renderer, surface);
-            }
-        }
+        using var file = File.OpenRead(path);
+        using var surface = new Surface(ImageResult.FromStream(file, ColorComponents.RedGreenBlueAlpha));
+        return new Texture(Game.Instance.Renderer, surface);
     }
 }

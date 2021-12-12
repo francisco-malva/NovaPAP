@@ -5,7 +5,7 @@ namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming;
 
 internal class SimplePlatform : Platform
 {
-    public SimplePlatform(ushort id, Point position, Player player) : base(id, position, player)
+    public SimplePlatform(Point position, Player player) : base(position, player)
     {
     }
 

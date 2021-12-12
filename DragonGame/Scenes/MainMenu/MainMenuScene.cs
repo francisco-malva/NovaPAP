@@ -1,10 +1,10 @@
+using System;
 using DuckDuckJump.Engine.GUI;
 using DuckDuckJump.Engine.Scenes;
 using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay;
 using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
 using DuckDuckJump.Scenes.Game.Local;
-using DuckDuckJump.Scenes.Game.Network;
-using System;
 
 namespace DuckDuckJump.Scenes.MainMenu;
 
@@ -27,15 +27,21 @@ internal class MainMenuScene : Scene
             new Selection("VS CPU",
                 () =>
                 {
-                    Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(new Game.Gameplay.GameInfo(50, 3, false, true, Environment.TickCount, AiDifficulty.Nightmare)));
+                    Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(new GameInfo(50, 3, false, true,
+                        Environment.TickCount, AiDifficulty.Nightmare)));
                 }, null),
             new Selection("VS PLAYER",
                 () =>
                 {
-                    Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(new Game.Gameplay.GameInfo(50, 3, false, false, Environment.TickCount, AiDifficulty.Nightmare)));
+                    Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(new GameInfo(50, 3, false, false,
+                        Environment.TickCount, AiDifficulty.Nightmare)));
                 }, null),
             new Selection("WATCH MODE",
-            () => {Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(new Game.Gameplay.GameInfo(50,3,true,true,Environment.TickCount, AiDifficulty.Nightmare)));}, null),
+                () =>
+                {
+                    Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(new GameInfo(50, 3, true, true,
+                        Environment.TickCount, AiDifficulty.Nightmare)));
+                }, null),
             new Selection("NETWORK", () => { _selector.Push(_networkGamesSelection); }, null),
             new Selection("QUIT", ShowQuitPrompt, null)
         };
