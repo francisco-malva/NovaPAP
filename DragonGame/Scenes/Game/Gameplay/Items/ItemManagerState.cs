@@ -4,5 +4,6 @@ internal enum ItemManagerState
 {
     NoItem,
     Shuffling,
-    GotItem
+    GotItem,
+    UsingItem
 }

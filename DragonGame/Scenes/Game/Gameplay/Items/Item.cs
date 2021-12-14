@@ -3,5 +3,6 @@
 internal enum Item
 {
     Umbrella,
-    DoubleJump
+    DoubleJump,
+    Flip
 }

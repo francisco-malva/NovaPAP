@@ -29,6 +29,7 @@ internal class GameField : IDisposable
 
     public readonly PlatformManager PlatformManager;
     public Scoreboard Scoreboard;
+    public bool Flipped;
 
     public GameField(DeterministicRandom random, GameScene owner, bool p2, GameInfo info)
     {
@@ -50,13 +51,18 @@ internal class GameField : IDisposable
 
         _camera = new Camera(new Point(Width, Height), new Rectangle(0, 0, Width, PlatformManager.FinishingY));
 
-        _itemManager = new ItemManager(this, Player, PlatformManager, random);
+        if (info.HasItems)
+        {
+            _itemManager = new ItemManager(this, Player, PlatformManager, random);
+        }
 
         Player.SetItemManager(_itemManager);
 
         OutputTexture = new Texture(Engine.Game.Instance.Renderer, SDL.SDL_PIXELFORMAT_RGBA8888,
             (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
     }
+
+    public void SetOther(GameField other) => _itemManager?.SetOther(other);
 
     public Player Player { get; }
 
@@ -88,7 +94,7 @@ internal class GameField : IDisposable
         _finishLine.Decreasing = false;
         _bannerDisplay.Raise(BannerType.GetReady, GameScene.GetReadyTime);
         PlatformManager.GeneratePlatforms();
-        _itemManager.GenerateItems();
+        _itemManager?.GenerateItems();
         Player.GetReady();
         UpdateCamera();
     }
@@ -107,6 +113,8 @@ internal class GameField : IDisposable
 
         _bannerDisplay.Raise(draw ? BannerType.Draw : BannerType.Winner, GameScene.RoundEndTime);
         Scoreboard.WinRound(draw, GameScene.RoundEndTime);
+
+        _itemManager?.EndItemEffect();
     }
 
     public void LoseRound()
@@ -114,6 +122,8 @@ internal class GameField : IDisposable
         _finishLine.Decreasing = true;
         _bannerDisplay.Raise(BannerType.YouLose, GameScene.RoundEndTime);
         Player.SetState(PlayerState.Lost);
+
+        _itemManager?.EndItemEffect();
     }
 
     public void Update(GameInput input)
@@ -128,7 +138,7 @@ internal class GameField : IDisposable
         {
             case PlayerState.InGame:
                 UpdateCamera();
-                _itemManager.Update();
+                _itemManager?.Update();
                 break;
             case PlayerState.Won:
                 Scoreboard.Update();
@@ -155,7 +165,7 @@ internal class GameField : IDisposable
         DrawBackground();
         DrawGameElements();
         Scoreboard.Draw();
-        _itemManager.DrawUi();
+        _itemManager?.DrawUi();
         _bannerDisplay.Draw();
 
         renderer.SetTarget(null);
@@ -165,7 +175,7 @@ internal class GameField : IDisposable
     {
         Player.Draw(_camera);
         PlatformManager.Draw(_camera);
-        _itemManager.Draw(_camera);
+        _itemManager?.Draw(_camera);
         _finishLine.Draw(_camera);
     }
 
@@ -186,10 +196,5 @@ internal class GameField : IDisposable
         renderer.Copy(_backgroundTexture,
             new Rectangle(250, 0, 250 * 2, 250 * 2),
             new Rectangle(0, 0, 250 * 2, 250 * 2));
-    }
-
-    public static int TransformY(int y, int yScroll)
-    {
-        return Height - y + yScroll;
     }
 }

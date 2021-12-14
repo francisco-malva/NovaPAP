@@ -55,7 +55,7 @@ internal class OnlineGameScene : GameScene
 
             SimulateAndDraw(_onLeftSide ? gameInput : foreignInput, _onLeftSide ? foreignInput : gameInput);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             Engine.Game.Instance.SceneManager.Set(new MainMenuScene());
         }

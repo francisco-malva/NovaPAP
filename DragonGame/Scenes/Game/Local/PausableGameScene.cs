@@ -18,24 +18,24 @@ internal abstract class PausableGameScene : GameScene
     {
         _pauseSelection = new[]
         {
-            new Selection("PAUSED", null, null, false),
-            new Selection("RESUME", () => { _paused = false; }, null),
-            new Selection("RESET",
+            new Selection("PAUSED", null, null, null, false),
+            new Selection("RESUME", null, (sel) => { _paused = false; }, null),
+            new Selection("RESET", null,
                 OnReset, null),
-            new Selection("QUIT", () => { _pauseSelector.Push(_quitYouSureSelection); }, null)
+            new Selection("QUIT", null, (sel) => { _pauseSelector.Push(_quitYouSureSelection); }, null)
         };
 
         _quitYouSureSelection = new[]
         {
-            new Selection("ARE YOU SURE YOU WANT TO QUIT?", null, null, false),
-            new Selection("YES!", () => { Game.Instance.SceneManager.Set(new MainMenuScene()); }, null),
-            new Selection("NO!", () => { _pauseSelector.Pop(); }, null)
+            new Selection("ARE YOU SURE YOU WANT TO QUIT?", null, null, null, false),
+            new Selection("YES!", null, (sel) => { Game.Instance.SceneManager.Set(new MainMenuScene()); }, null),
+            new Selection("NO!", null, (sel) => { _pauseSelector.Pop(); }, null)
         };
 
         _pauseSelector.Push(_pauseSelection);
     }
 
-    protected abstract void OnReset();
+    protected abstract void OnReset(Selection selection);
 
     public override void OnTick()
     {

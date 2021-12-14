@@ -51,6 +51,9 @@ internal abstract class GameScene : Scene
         P1Field = new GameField(Random, this, false, info);
         P2Field = new GameField(Random, this, true, info);
 
+        P1Field.SetOther(P2Field);
+        P2Field.SetOther(P1Field);
+
         _music = Engine.Game.Instance.MusicManager["mus-test"];
         _music.Play();
 
@@ -239,8 +242,11 @@ internal abstract class GameScene : Scene
         renderer.SetDrawColor(Color.Black);
         renderer.Clear();
         renderer.Copy(_gameBorder, null, null);
-        renderer.Copy(P1Field.OutputTexture, null, p1Dest);
-        renderer.Copy(P2Field.OutputTexture, null, p2Dest);
+
+        renderer.CopyEx(P1Field.OutputTexture, null, p1Dest, 0.0, null, P1Field.Flipped ? SDL.SDL_RendererFlip.SDL_FLIP_VERTICAL : SDL.SDL_RendererFlip.SDL_FLIP_NONE);
+        renderer.CopyEx(P2Field.OutputTexture, null, p2Dest, 0.0, null, P2Field.Flipped ? SDL.SDL_RendererFlip.SDL_FLIP_VERTICAL : SDL.SDL_RendererFlip.SDL_FLIP_NONE);
+        //renderer.Copy(P1Field.OutputTexture, null, p1Dest);
+        //renderer.Copy(P2Field.OutputTexture, null, p2Dest);
 
         postRenderCallback?.Invoke(renderer);
 

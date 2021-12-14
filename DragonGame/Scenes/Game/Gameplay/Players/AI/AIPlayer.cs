@@ -45,7 +45,7 @@ internal class AIPlayer : Player
                 SteerAi();
                 break;
             case AiState.SelectingPlatform:
-                ItemManager.UseItem();
+                ItemManager?.UseItem();
                 var newTarget = platformManager.GetAiTarget(this);
 
                 if (newTarget != null) _target = newTarget;

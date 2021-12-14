@@ -17,7 +17,6 @@ internal abstract class Player
     private const int YJumpSpeed = 20;
     private const int YDrag = 1;
     protected const int XMoveSpeed = 8;
-    private const ushort UmbrellaTime = 300;
 
     private readonly Chunk _jump;
 
@@ -31,13 +30,12 @@ internal abstract class Player
 
     private ulong _stateTimer;
 
-
-    private ushort _umbrellaFrames;
-
     protected ItemManager ItemManager;
     public Point Position;
 
     protected int XSpeed, YSpeed;
+
+    public bool Umbrella;
 
     protected Player(DeterministicRandom random)
     {
@@ -50,7 +48,7 @@ internal abstract class Player
 
     public bool Descending => YSpeed < 0;
 
-    public int FallSpeed => _umbrellaFrames > 0 ? YTerminalSpeed / 2 : YTerminalSpeed;
+    public int FallSpeed => Umbrella ? YTerminalSpeed / 2 : YTerminalSpeed;
 
     public Rectangle Collision => new(Position.X - PlatformCollisionWidth / 2,
         Position.Y - PlatformCollisionHeight / 2, PlatformCollisionWidth, PlatformCollisionHeight);
@@ -73,16 +71,6 @@ internal abstract class Player
         UpdateAngle();
         UpdateFlip();
         ++_stateTimer;
-    }
-
-    private void DecreaseTimers()
-    {
-        if (_umbrellaFrames > 0) _umbrellaFrames--;
-    }
-
-    public void UseUmbrella()
-    {
-        _umbrellaFrames = UmbrellaTime;
     }
 
     public void SetItemManager(ItemManager manager)
@@ -206,7 +194,6 @@ internal abstract class Player
         {
             case PlayerState.Lost:
                 XSpeed = 0;
-                RemovePowerups();
                 Jump();
                 break;
             case PlayerState.GetReady:
@@ -214,17 +201,11 @@ internal abstract class Player
             case PlayerState.InGame:
                 break;
             case PlayerState.Won:
-                RemovePowerups();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(state), state, null);
         }
 
         _stateTimer = 0;
-    }
-
-    private void RemovePowerups()
-    {
-        _umbrellaFrames = 0;
     }
 }

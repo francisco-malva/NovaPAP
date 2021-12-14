@@ -18,7 +18,9 @@ internal class Selector
 
     public void Push(Selection[] selections)
     {
-        _selectionStack.Push(new SelectionGroup(selections));
+        var group = new SelectionGroup(selections);
+        group.Init();
+        _selectionStack.Push(group);
     }
 
     public void Set(Selection[] selections)

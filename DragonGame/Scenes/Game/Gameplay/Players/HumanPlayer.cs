@@ -26,7 +26,7 @@ internal class HumanPlayer : Player
 
     protected override void OnPressSpecial()
     {
-        ItemManager.UseItem();
+        ItemManager?.UseItem();
     }
 
     protected override void ResetSpecialFields()

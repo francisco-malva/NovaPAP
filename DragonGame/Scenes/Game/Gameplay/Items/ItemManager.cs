@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Scenes.Game.Gameplay.Items;
+using DuckDuckJump.Scenes.Game.Gameplay.Items.Behaviors;
 using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 
@@ -37,12 +39,17 @@ internal class ItemManager
 
     private readonly Player _player;
     private readonly DeterministicRandom _random;
-    private Item _currentItem;
-
-    private bool _p2;
+    private ItemBehavior _currentItem;
 
     private ItemManagerState _state;
     private ushort _timer;
+
+    private GameField _other;
+
+    public void SetOther(GameField other) => _other = other;
+
+
+    private float _fade = 0.0f;
 
     public ItemManager(GameField owner, Player player, PlatformManager platformManager, DeterministicRandom random)
     {
@@ -70,6 +77,7 @@ internal class ItemManager
         UpdateItemBoxes();
 
         if (_timer > 0) _timer--;
+        _fade += 0.1f;
 
         switch (_state)
         {
@@ -77,6 +85,9 @@ internal class ItemManager
                 break;
             case ItemManagerState.Shuffling:
                 ShufflingUpdate();
+                break;
+            case ItemManagerState.UsingItem:
+                UsingItemUpdate();
                 break;
             case ItemManagerState.GotItem:
                 break;
@@ -88,23 +99,29 @@ internal class ItemManager
     public void UseItem()
     {
         if (_state != ItemManagerState.GotItem) return;
-
-        ActivateItemEffect();
-        SetState(ItemManagerState.NoItem);
+        SetState(ItemManagerState.UsingItem);
     }
 
-    private void ActivateItemEffect()
+
+    private void UsingItemUpdate()
     {
-        switch (_currentItem)
+        if (_currentItem.IsDone())
         {
-            case Item.Umbrella:
-                _player.UseUmbrella();
-                break;
-            case Item.DoubleJump:
-                _player.Jump();
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            EndItemEffect();
+        }
+        else
+        {
+            _currentItem.Update();
+        }
+    }
+
+    public void EndItemEffect()
+    {
+        if (_currentItem != null)
+        {
+            _currentItem.OnItemOver();
+            _currentItem = null;
+            SetState(ItemManagerState.NoItem);
         }
     }
 
@@ -143,18 +160,36 @@ internal class ItemManager
                 _timer = ShufflingTime;
                 break;
             case ItemManagerState.GotItem:
-                ChooseItem();
+                _currentItem = GetRandomItem();
+                break;
+            case ItemManagerState.UsingItem:
+                _currentItem.OnUse();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(state), state, null);
         }
     }
 
-    private void ChooseItem()
+    private ItemBehavior GetRandomItem()
     {
-        if (_owner.IsWinning) _currentItem = WinningTable[_random.GetInteger(WinningTable.Length)];
+        if (_owner.IsWinning) return _currentItem = GetItemBehavior(WinningTable[_random.GetInteger(WinningTable.Length)]);
 
-        _currentItem = LosingTable[_random.GetInteger(LosingTable.Length)];
+        return GetItemBehavior(LosingTable[_random.GetInteger(LosingTable.Length)]);
+    }
+
+
+    private ItemBehavior GetItemBehavior(Item item)
+    {
+        switch (item)
+        {
+            case Item.DoubleJump:
+                return new DoubleJump(_player, _other);
+            case Item.Umbrella:
+                return new Umbrella(_player, _other);
+            case Item.Flip:
+                return new Flip(_player, _other);
+        }
+        return null;
     }
 
     public void Draw(Camera camera)
@@ -174,19 +209,24 @@ internal class ItemManager
             case ItemManagerState.NoItem:
                 break;
             case ItemManagerState.Shuffling:
-                DrawItem(renderer, (Item)(_timer % 2));
+                //DrawItem(renderer, (Item)(_timer % 2));
                 break;
             case ItemManagerState.GotItem:
-                DrawItem(renderer, _currentItem);
+                DrawItem(renderer, _currentItem, false);
+                break;
+            case ItemManagerState.UsingItem:
+                DrawItem(renderer, _currentItem, true);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
     }
 
-    private void DrawItem(Renderer renderer, Item item)
+    private void DrawItem(Renderer renderer, ItemBehavior item, bool blinking)
     {
-        renderer.Copy(_itemTextureTable[(int)item], null,
+        var a = blinking ? (byte)((MathF.Cos(_fade) + 1.0f) * 0.5f * 255) : (byte)255;
+        item.Texture.SetAlphaMod(a);
+        renderer.Copy(item.Texture, null,
             new Rectangle(GameField.Width - _itemUi.Width - 8 + 2, 8 + 2, _itemUi.Width - 4, _itemUi.Height - 4));
     }
 }

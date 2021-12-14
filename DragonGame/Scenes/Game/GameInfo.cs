@@ -13,9 +13,11 @@ internal class GameInfo
 
     public readonly int RandomSeed;
     public readonly byte RoundsToWin;
+    public readonly bool HasItems;
+
 
     public GameInfo(ushort platformCount, byte roundsToWin, bool p1Ai, bool p2Ai, int randomSeed,
-        AiDifficulty difficulty)
+        AiDifficulty difficulty, bool hasItems)
     {
         PlatformCount = platformCount;
         RoundsToWin = roundsToWin;
@@ -23,6 +25,7 @@ internal class GameInfo
         P2Ai = p2Ai;
         RandomSeed = randomSeed;
         Difficulty = difficulty;
+        HasItems = hasItems;
     }
 
     public GameInfo(BinaryReader reader)
@@ -33,6 +36,7 @@ internal class GameInfo
         P2Ai = reader.ReadBoolean();
         RandomSeed = reader.ReadInt32();
         Difficulty = (AiDifficulty)reader.ReadByte();
+        HasItems = reader.ReadBoolean();
     }
 
     public void Save(BinaryWriter writer)
@@ -43,5 +47,6 @@ internal class GameInfo
         writer.Write(P2Ai);
         writer.Write(RandomSeed);
         writer.Write((byte)Difficulty);
+        writer.Write(HasItems);
     }
 }

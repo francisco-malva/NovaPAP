@@ -2,16 +2,18 @@
 
 namespace DuckDuckJump.Engine.GUI;
 
-internal struct Selection
+internal class Selection
 {
-    public readonly string Label;
-    public readonly Action OnSelect;
-    public readonly Action OnHovered;
+    public string Label;
+    public readonly Action<Selection> OnPush;
+    public readonly Action<Selection> OnSelect;
+    public readonly Action<Selection> OnHovered;
     public readonly bool Selectable;
 
-    public Selection(string label, Action onSelect, Action onHovered, bool selectable = true)
+    public Selection(string label, Action<Selection> onPush, Action<Selection> onSelect, Action<Selection> onHovered, bool selectable = true)
     {
         Label = label;
+        OnPush = onPush;
         OnSelect = onSelect;
         OnHovered = onHovered;
         Selectable = selectable;

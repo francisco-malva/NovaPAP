@@ -1,6 +1,7 @@
 ﻿using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Scenes.Game.Gameplay;
 using DuckDuckJump.Scenes.Game.Input;
+using DuckDuckJump.Engine.GUI;
 using SDL2;
 
 namespace DuckDuckJump.Scenes.Game.Local;
@@ -18,7 +19,7 @@ internal sealed class OfflineGameScene : PausableGameScene
         _info = info;
     }
 
-    protected override void OnReset()
+    protected override void OnReset(Selection selection)
     {
         Engine.Game.Instance.SceneManager.Set(new OfflineGameScene(_info));
     }
