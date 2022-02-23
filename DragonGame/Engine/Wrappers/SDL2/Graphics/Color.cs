@@ -1,6 +1,8 @@
-namespace DuckDuckJump.Engine.Wrappers.SDL2;
+using SDL2;
 
-internal struct Color
+namespace DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+
+public struct Color
 {
     public static readonly Color White = new(255, 255, 255);
     public static readonly Color Black = new(0, 0, 0);
@@ -9,32 +11,31 @@ internal struct Color
     public static readonly Color Green = new(0, 255, 0);
     public static readonly Color Yellow = new(255, 255, 0);
 
+    public readonly SDL.SDL_Color Value;
+
     /// <summary>
     ///     The red channel.
     /// </summary>
-    public byte R;
+    public byte R => Value.r;
 
     /// <summary>
     ///     The green channel.
     /// </summary>
-    public byte G;
+    public byte G => Value.g;
 
     /// <summary>
     ///     The blue channel.
     /// </summary>
-    public byte B;
+    public byte B => Value.b;
 
     /// <summary>
     ///     The alpha channel.
     /// </summary>
-    public byte A;
+    public byte A => Value.a;
 
 
     public Color(byte r, byte g, byte b, byte a = 255)
     {
-        R = r;
-        G = g;
-        B = b;
-        A = a;
+        Value = new SDL.SDL_Color {r = r, g = g, b = b, a = a};
     }
 }

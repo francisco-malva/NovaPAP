@@ -1,12 +1,15 @@
-using DuckDuckJump.Engine.Utilities;
+using System;
+using DuckDuckJump.Scenes.Game.Gameplay.Items;
 using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
+using DuckDuckJump.Scenes.Game.Gameplay.Resources;
 using DuckDuckJump.Scenes.Game.Input;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Players;
 
 internal class HumanPlayer : Player
 {
-    public HumanPlayer(DeterministicRandom random) : base(random)
+    public HumanPlayer(Random random, GameplayResources resources, ItemManager itemManager) : base(random, resources,
+        itemManager)
     {
     }
 
@@ -20,7 +23,7 @@ internal class HumanPlayer : Player
             XSpeed = 0;
     }
 
-    protected override void OnJump(Platform platform)
+    protected override void OnJump(Platform? platform)
     {
     }
 

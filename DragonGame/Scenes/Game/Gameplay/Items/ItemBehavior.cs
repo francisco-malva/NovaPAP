@@ -1,14 +1,12 @@
-using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Items;
 
 internal abstract class ItemBehavior
 {
-    protected Player Player;
     protected GameField Other;
-
-    public Texture Texture { get; protected set; }
+    protected Player Player;
 
     public ItemBehavior(Player player, GameField other)
     {
@@ -16,8 +14,10 @@ internal abstract class ItemBehavior
         Other = other;
     }
 
+    public Texture Texture { get; protected set; }
+
     public abstract void OnUse();
-    
+
     public abstract void Update();
 
     public abstract bool IsDone();

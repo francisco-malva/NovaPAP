@@ -1,17 +1,13 @@
-using DuckDuckJump.Engine.Wrappers.SDL2;
+using System.Diagnostics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
+using DuckDuckJump.Scenes.Game.Gameplay.Resources;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Banners;
 
 internal class BannerDisplay
 {
-    private readonly Texture[] _banners =
-    {
-        Engine.Game.Instance.TextureManager["Game/Banners/get-ready"],
-        Engine.Game.Instance.TextureManager["Game/Banners/go"],
-        Engine.Game.Instance.TextureManager["Game/Banners/winner"],
-        Engine.Game.Instance.TextureManager["Game/Banners/you-lose"],
-        Engine.Game.Instance.TextureManager["Game/Banners/draw"]
-    };
+    private readonly Texture[] _bannerTextures;
 
     private ushort _bannerDuration;
 
@@ -19,8 +15,13 @@ internal class BannerDisplay
 
     private BannerType _currentBanner;
 
-    private Texture BannerTexture => _banners[(int)_currentBanner];
+    public BannerDisplay(GameplayResources resources)
+    {
+        _bannerTextures = resources.BannerTextures;
+    }
 
+    private Texture BannerTexture => _bannerTextures[(int) _currentBanner];
+    private TextureInfo BannerTextureInfo => BannerTexture.QueryTexture();
 
     public void Raise(BannerType type, ushort duration)
     {
@@ -37,13 +38,15 @@ internal class BannerDisplay
 
     public void Draw()
     {
-        if (_bannerTimer != 0)
-        {
-            BannerTexture.SetAlphaMod((byte)(_bannerTimer / (float)_bannerDuration * 255.0f));
-            Engine.Game.Instance.Renderer.Copy(BannerTexture, null,
-                new Rectangle(GameField.Width / 2 - BannerTexture.Width / 2,
-                    GameField.Height / 2 - BannerTexture.Height / 2, BannerTexture.Width, BannerTexture.Height));
-            --_bannerTimer;
-        }
+        if (_bannerTimer == 0) return;
+
+        var textureInfo = BannerTextureInfo;
+
+        BannerTexture.SetAlphaMod((byte) (_bannerTimer / (float) _bannerDuration * 255.0f));
+        Debug.Assert(Engine.Game.Instance != null, "Engine.Game.Instance != null");
+        Engine.Game.Instance.Renderer.Copy(BannerTexture, null,
+            new Rectangle(GameField.Width / 2 - textureInfo.Width / 2,
+                GameField.Height / 2 - textureInfo.Height / 2, textureInfo.Width, textureInfo.Height));
+        --_bannerTimer;
     }
 }

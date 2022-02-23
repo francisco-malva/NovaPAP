@@ -1,10 +1,10 @@
 ﻿using System;
-using DuckDuckJump.Engine.Assets.Audio;
-using DuckDuckJump.Engine.Assets.Textures;
+using DuckDuckJump.Engine.Assets;
 using DuckDuckJump.Engine.Events;
+using DuckDuckJump.Engine.Exceptions;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Scenes;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
 using DuckDuckJump.Scenes.MainMenu;
 using SDL2;
 
@@ -12,74 +12,56 @@ namespace DuckDuckJump.Engine;
 
 internal class Game : IDisposable
 {
+    public static Game? Instance;
+    private readonly EventPump _eventPump;
+    private readonly Window _window;
+    public readonly Renderer Renderer;
+    public readonly ResourceProviders ResourceProviders;
+    public readonly SceneManager SceneManager;
     private bool _running;
-    public ChunkManager ChunkManager;
-
-    public EventPump EventPump;
-    public MusicManager MusicManager;
-    public Renderer Renderer;
-    public SceneManager SceneManager;
-
-    public TextureManager TextureManager;
-    public Window Window;
 
     public Game()
     {
-        CreateSingleton();
-        Initialize();
-    }
-
-    public static Game Instance { get; private set; }
-
-    public void Dispose()
-    {
-        SceneManager?.Clear();
-        Window?.Dispose();
-        Renderer?.Dispose();
-        TextureManager?.Dispose();
-        ChunkManager?.Dispose();
-        MusicManager?.Dispose();
-    }
-
-    private void CreateSingleton()
-    {
         if (Instance != null) throw new Exception("Multiple instances of the Game class are now allowed!");
         Instance = this;
-    }
 
-    private void Initialize()
-    {
-        Window = new Window("Duck Duck Jump", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
+        _window = new Window("Duck Duck Jump", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED,
             640, 480, 0);
-        Renderer = new Renderer(Window, -1,
+        Renderer = new Renderer(_window, -1,
             SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL.SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE);
 
         Renderer.SetLogicalSize(new Point(640, 480));
 
-        EventPump = new EventPump();
-        EventPump.Subscribe(SDL.SDL_EventType.SDL_QUIT, _ => Exit());
+        _eventPump = new EventPump();
+        _eventPump.Subscribe(SDL.SDL_EventType.SDL_QUIT, _ => Exit());
 
-        TextureManager = new TextureManager();
+        if (SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 1024) != 0)
+            throw new GameInitException($"Could not open audio. SDL Mixer Error: {SDL_mixer.Mix_GetError()}");
 
-        SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 1024);
-
-        ChunkManager = new ChunkManager();
-        MusicManager = new MusicManager();
+        ResourceProviders = new ResourceProviders(Renderer);
 
         SceneManager = new SceneManager();
         SceneManager.Set(new MainMenuScene());
     }
 
+    public void Dispose()
+    {
+        SceneManager.Clear();
+        _window.Dispose();
+        Renderer.Dispose();
+        ResourceProviders.Dispose();
+    }
+
     public void Run(uint fps)
     {
-        var ms = (uint)(1.0f / fps * 1000.0f);
+        var ms = (uint) (1.0 / fps * 1000.0);
         _running = true;
 
         while (_running)
         {
             var start = SDL.SDL_GetTicks();
 
-            EventPump.Dispatch();
+            _eventPump.HandleEvents();
             Keyboard.Update();
 
             SceneManager.Tick();
@@ -92,7 +74,7 @@ internal class Game : IDisposable
         }
     }
 
-    public void Exit()
+    private void Exit()
     {
         _running = false;
     }

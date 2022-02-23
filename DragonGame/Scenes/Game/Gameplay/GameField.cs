@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using DuckDuckJump.Engine.Utilities;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Scenes.Game.Gameplay.Banners;
 using DuckDuckJump.Scenes.Game.Gameplay.Items;
 using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
+using DuckDuckJump.Scenes.Game.Gameplay.Resources;
 using DuckDuckJump.Scenes.Game.Gameplay.Score;
 using DuckDuckJump.Scenes.Game.Input;
 using SDL2;
@@ -28,43 +31,43 @@ internal class GameField : IDisposable
     private readonly bool _p2;
 
     public readonly PlatformManager PlatformManager;
-    public Scoreboard Scoreboard;
+    public readonly Scoreboard Scoreboard;
     public bool Flipped;
 
-    public GameField(DeterministicRandom random, GameScene owner, bool p2, GameInfo info)
+    public GameField(Random random, GameScene owner, bool p2, GameInfo info, GameplayResources resources)
     {
         _owner = owner;
         _p2 = p2;
 
         AiControlled = p2 ? info.P2Ai : info.P1Ai;
 
-        Player = AiControlled ? new AIPlayer(info.Difficulty, random) : new HumanPlayer(random);
+        PlatformManager = new PlatformManager(random, info.PlatformCount, resources);
 
-        Scoreboard = new Scoreboard(Player, info.RoundsToWin);
-        PlatformManager = new PlatformManager(Player, random, info.PlatformCount);
+        if (info.HasItems) _itemManager = new ItemManager(this, PlatformManager, random, resources);
 
-        _backgroundTexture = Engine.Game.Instance.TextureManager["Game/background"];
+        Player = AiControlled
+            ? new AiPlayer(info.Difficulty, random, resources, _itemManager)
+            : new HumanPlayer(random, resources, _itemManager);
+
+        Scoreboard = new Scoreboard(Player, info.RoundsToWin, resources);
+
+        _backgroundTexture = resources.BackgroundTexture;
         _backgroundTexture.SetBlendMode(SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
-        _bannerDisplay = new BannerDisplay();
-        _finishLine = new FinishLine(Player, PlatformManager.FinishingY);
+        _bannerDisplay = new BannerDisplay(resources);
+        _finishLine = new FinishLine(Player, PlatformManager.FinishingY, resources);
 
         _camera = new Camera(new Point(Width, Height), new Rectangle(0, 0, Width, PlatformManager.FinishingY));
 
-        if (info.HasItems)
-        {
-            _itemManager = new ItemManager(this, Player, PlatformManager, random);
-        }
 
-        Player.SetItemManager(_itemManager);
-
+        Debug.Assert(Engine.Game.Instance != null, "Engine.Game.Instance != null");
         OutputTexture = new Texture(Engine.Game.Instance.Renderer, SDL.SDL_PIXELFORMAT_RGBA8888,
-            (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
+            (int) SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Width, Height);
     }
 
-    public void SetOther(GameField other) => _itemManager?.SetOther(other);
+    public float PlayerClimbingProgress => PlatformManager.GetClimbingProgress(Player);
 
-    public Player Player { get; }
+    private Player Player { get; }
 
     public bool AiControlled { get; }
 
@@ -87,6 +90,11 @@ internal class GameField : IDisposable
     public void Dispose()
     {
         OutputTexture?.Dispose();
+    }
+
+    public void SetOther(GameField other)
+    {
+        _itemManager?.SetOther(other);
     }
 
     public void GetReady()
@@ -129,7 +137,7 @@ internal class GameField : IDisposable
     public void Update(GameInput input)
     {
         Player.Update(PlatformManager, input);
-        PlatformManager.Update();
+        PlatformManager.Update(Player);
 
         _bannerDisplay.Update();
         _finishLine.Update();
@@ -160,7 +168,7 @@ internal class GameField : IDisposable
     public void Draw()
     {
         var renderer = Engine.Game.Instance.Renderer;
-        renderer.SetTarget(OutputTexture);
+        renderer.SetRenderTarget(OutputTexture);
 
         DrawBackground();
         DrawGameElements();
@@ -168,7 +176,7 @@ internal class GameField : IDisposable
         _itemManager?.DrawUi();
         _bannerDisplay.Draw();
 
-        renderer.SetTarget(null);
+        renderer.SetRenderTarget(null);
     }
 
     private void DrawGameElements()
@@ -184,7 +192,7 @@ internal class GameField : IDisposable
         var renderer = Engine.Game.Instance.Renderer;
 
         var nightExposure = Mathematics.Lerp(0.0f, 255.0f,
-            PlatformManager.GetClimbingProgress());
+            PlayerClimbingProgress);
 
         //Drawing the day
         _backgroundTexture.SetAlphaMod(255);
@@ -192,7 +200,7 @@ internal class GameField : IDisposable
             new Rectangle(0, 0, 250, 250),
             new Rectangle(0, 0, 250 * 2, 250 * 2));
 
-        _backgroundTexture.SetAlphaMod((byte)nightExposure);
+        _backgroundTexture.SetAlphaMod((byte) nightExposure);
         renderer.Copy(_backgroundTexture,
             new Rectangle(250, 0, 250 * 2, 250 * 2),
             new Rectangle(0, 0, 250 * 2, 250 * 2));

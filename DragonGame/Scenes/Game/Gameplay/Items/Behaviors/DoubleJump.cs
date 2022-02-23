@@ -1,12 +1,13 @@
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
+using DuckDuckJump.Scenes.Game.Gameplay.Resources;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Items.Behaviors;
 
 internal class DoubleJump : ItemBehavior
 {
-    public DoubleJump(Player player, GameField other) : base(player, other)
+    public DoubleJump(Player player, GameField other, GameplayResources resources) : base(player, other)
     {
-        Texture = Engine.Game.Instance.TextureManager["Game/double-jump"];
+        Texture = resources.GetItemTexture(Item.DoubleJump);
     }
 
     public override bool IsDone()

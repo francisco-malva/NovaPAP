@@ -1,6 +1,6 @@
-using DuckDuckJump.Engine.Utilities;
-using DuckDuckJump.Engine.Wrappers.SDL2;
-using DuckDuckJump.Scenes.Game.Gameplay.Players;
+using System;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming;
 
@@ -9,10 +9,9 @@ internal class MovingPlatform : Platform
     private const int PlatformMoveSpeed = 3;
     private bool _moveLeft;
 
-    public MovingPlatform(Point position, DeterministicRandom random, Player player) : base(position,
-        player)
+    public MovingPlatform(Point position, Random random, Texture platformTexture) : base(position, platformTexture)
     {
-        _moveLeft = random.GetFloat() >= 0.5f;
+        _moveLeft = random.NextSingle() >= 0.5f;
     }
 
     protected override void OnPlayerJump()
@@ -40,7 +39,7 @@ internal class MovingPlatform : Platform
         }
     }
 
-    public override bool TargetableByAi()
+    public override bool CanBeTargetedByAi()
     {
         return true;
     }

@@ -1,11 +1,12 @@
 ﻿using System.IO;
 using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
 
-namespace DuckDuckJump.Scenes.Game.Gameplay;
+namespace DuckDuckJump.Scenes.Game;
 
 internal class GameInfo
 {
     public readonly AiDifficulty Difficulty;
+    public readonly bool HasItems;
 
     public readonly bool P1Ai;
     public readonly bool P2Ai;
@@ -13,7 +14,6 @@ internal class GameInfo
 
     public readonly int RandomSeed;
     public readonly byte RoundsToWin;
-    public readonly bool HasItems;
 
 
     public GameInfo(ushort platformCount, byte roundsToWin, bool p1Ai, bool p2Ai, int randomSeed,
@@ -35,7 +35,7 @@ internal class GameInfo
         P1Ai = reader.ReadBoolean();
         P2Ai = reader.ReadBoolean();
         RandomSeed = reader.ReadInt32();
-        Difficulty = (AiDifficulty)reader.ReadByte();
+        Difficulty = (AiDifficulty) reader.ReadByte();
         HasItems = reader.ReadBoolean();
     }
 
@@ -46,7 +46,7 @@ internal class GameInfo
         writer.Write(P1Ai);
         writer.Write(P2Ai);
         writer.Write(RandomSeed);
-        writer.Write((byte)Difficulty);
+        writer.Write((byte) Difficulty);
         writer.Write(HasItems);
     }
 }

@@ -1,45 +1,53 @@
-﻿using DuckDuckJump.Engine.Utilities;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+﻿using System;
+using System.Linq;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
+using DuckDuckJump.Scenes.Game.Gameplay.Resources;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming;
 
 internal class PlatformManager
 {
-    public const int InitialPlatformHeight = 100;
-    public const int PlatformYStep = 150;
+    private const int InitialPlatformHeight = 100;
+    private const int PlatformYStep = 150;
 
-    private readonly Player _player;
+    private readonly ushort _platformCount;
 
-    private readonly DeterministicRandom _random;
 
-    public readonly ushort PlatformCount;
+    private readonly Texture _platformTexture;
 
-    public readonly Platform[] Platforms;
+
+    private readonly Random _random;
+
+    public readonly Platform?[] Platforms;
 
     private PlatformType _lastPlatformType = PlatformType.None;
 
-
-    public PlatformManager(Player player, DeterministicRandom random, ushort platformCount)
+    public PlatformManager(Random random, ushort platformCount, GameplayResources resources)
     {
-        PlatformCount = platformCount;
-        _player = player;
+        _platformCount = platformCount;
 
-        Platforms = new Platform[PlatformCount];
+        Platforms = new Platform?[_platformCount];
         _random = random;
+
+        _platformTexture = resources.PlatformTexture;
     }
 
-    public int FinishingY => InitialPlatformHeight + PlatformCount * PlatformYStep;
+    public int FinishingY => InitialPlatformHeight + _platformCount * PlatformYStep;
 
-    public bool PlayerFinishedCourse => _player.Position.Y + Player.PlatformCollisionHeight > FinishingY;
+    public Platform? this[short id] => Platforms[id];
 
-    public Platform this[short id] => Platforms[id];
-
-
-    public float GetClimbingProgress()
+    public bool HasPlayerFinishedCourse(Player player)
     {
-        return _player.Position.Y == 0 ? 0.0f : _player.Position.Y / (float)FinishingY;
+        return player.Position.Y + Player.PlatformCollisionHeight > FinishingY;
+    }
+
+
+    public float GetClimbingProgress(Player player)
+    {
+        return player.Position.Y == 0 ? 0.0f : player.Position.Y / (float) FinishingY;
     }
 
     private PlatformType GetRandomPlatformType()
@@ -48,7 +56,7 @@ internal class PlatformManager
 
         do
         {
-            var randomNum = _random.GetFloat();
+            var randomNum = _random.NextSingle();
 
             type = randomNum switch
             {
@@ -64,48 +72,41 @@ internal class PlatformManager
         return type;
     }
 
-    private Platform GetPlatform(PlatformType type, Point position)
+    private Platform? GetPlatform(PlatformType type, Point position)
     {
         return type switch
         {
-            PlatformType.SimplePlatform => new SimplePlatform(position, _player),
-            PlatformType.MovingPlatform => new MovingPlatform(position, _random, _player),
-            PlatformType.TeleportingPlatform => new TeleportingPlatform(position, _random, _player),
-            PlatformType.CooldownPlatform => new CooldownPlatform(position, _player),
+            PlatformType.SimplePlatform => new SimplePlatform(position, _platformTexture),
+            PlatformType.MovingPlatform => new MovingPlatform(position, _random, _platformTexture),
+            PlatformType.TeleportingPlatform => new TeleportingPlatform(position, _random, _platformTexture),
+            PlatformType.CooldownPlatform => new CooldownPlatform(position, _platformTexture),
             _ => null
         };
     }
 
     public void GeneratePlatforms()
     {
-        for (ushort i = 0; i < PlatformCount; i++)
+        for (ushort i = 0; i < _platformCount; i++)
             Platforms[i] = GetPlatform(GetRandomPlatformType(), new Point(
-                _random.GetInteger(Platform.PlatformWidth / 2, GameField.Width - Platform.PlatformWidth / 2),
+                _random.Next(Platform.PlatformWidth / 2, GameField.Width - Platform.PlatformWidth / 2),
                 InitialPlatformHeight + PlatformYStep * i));
     }
 
-    public void Update()
+    public void Update(Player player)
     {
-        foreach (var platform in Platforms) platform.Update();
+        foreach (var platform in Platforms) platform?.Update(player);
     }
 
     public void Draw(Camera camera)
     {
-        foreach (var platform in Platforms) platform.Draw(camera);
+        foreach (var platform in Platforms) platform?.Draw(camera);
     }
 
-    public Platform GetAiTarget(AIPlayer player)
+    public Platform? GetAiTarget(AiPlayer player)
     {
-        foreach (var platform in Platforms)
-        {
-            var yDiff = platform.Position.Y - player.Position.Y;
-
-            if (yDiff <= 0)
-                continue;
-
-            return platform;
-        }
-
-        return null;
+        return (from platform in Platforms
+            let yDiff = platform.Position.Y - player.Position.Y
+            where yDiff > 0
+            select platform).FirstOrDefault();
     }
 }

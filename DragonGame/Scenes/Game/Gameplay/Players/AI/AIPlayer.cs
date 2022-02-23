@@ -1,18 +1,20 @@
 using System;
-using DuckDuckJump.Engine.Utilities;
+using DuckDuckJump.Scenes.Game.Gameplay.Items;
 using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
+using DuckDuckJump.Scenes.Game.Gameplay.Resources;
 using DuckDuckJump.Scenes.Game.Input;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
 
-internal class AIPlayer : Player
+internal class AiPlayer : Player
 {
     private readonly AiDifficulty _difficulty;
     private AiState _state;
-    private Platform _target;
+    private Platform? _target;
     private ushort _timer;
 
-    public AIPlayer(AiDifficulty difficulty, DeterministicRandom random) : base(random)
+    public AiPlayer(AiDifficulty difficulty, Random random, GameplayResources resources, ItemManager manager) : base(
+        random, resources, manager)
     {
         _difficulty = difficulty;
     }
@@ -21,19 +23,14 @@ internal class AIPlayer : Player
     {
         get
         {
-            switch (_difficulty)
+            return _difficulty switch
             {
-                case AiDifficulty.Easy:
-                    return 60;
-                case AiDifficulty.Normal:
-                    return 30;
-                case AiDifficulty.Hard:
-                    return 25;
-                case AiDifficulty.Nightmare:
-                    return 0;
-            }
-
-            return 0;
+                AiDifficulty.Easy => 60,
+                AiDifficulty.Normal => 30,
+                AiDifficulty.Hard => 25,
+                AiDifficulty.Nightmare => 0,
+                _ => 0
+            };
         }
     }
 
@@ -60,7 +57,7 @@ internal class AIPlayer : Player
 
     private void SteerAi()
     {
-        if (_target == null || !_target.TargetableByAi() || _target.InZone(this))
+        if (_target == null || !_target.CanBeTargetedByAi() || _target.InZone(this))
         {
             XSpeed = 0;
             return;
@@ -84,7 +81,7 @@ internal class AIPlayer : Player
         }
     }
 
-    protected override void OnJump(Platform platform)
+    protected override void OnJump(Platform? platform)
     {
         if (_timer == 0) SetAiState(AiState.SelectingPlatform);
     }

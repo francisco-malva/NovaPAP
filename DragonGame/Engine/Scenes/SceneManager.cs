@@ -4,6 +4,9 @@ namespace DuckDuckJump.Engine.Scenes;
 
 internal class SceneManager
 {
+    /// <summary>
+    ///     The scene stack.
+    /// </summary>
     private readonly Stack<Scene> _scenes = new();
 
     public void Tick()
@@ -23,13 +26,13 @@ internal class SceneManager
     /// <summary>
     ///     Adds a new scene to the stack, making it the top scene.
     /// </summary>
-    public void Push(Scene scene)
+    private void Push(Scene scene)
     {
         _scenes.Push(scene);
     }
 
     /// <summary>
-    ///     Remove the top scene from the stack, unloading it from memory.
+    ///     Remove and unload the scene on top of the stack.
     /// </summary>
     private void Pop()
     {
@@ -37,6 +40,9 @@ internal class SceneManager
         _scenes.Pop();
     }
 
+    /// <summary>
+    ///     Remove all scenes from the stack.
+    /// </summary>
     public void Clear()
     {
         while (_scenes.Count > 0) Pop();

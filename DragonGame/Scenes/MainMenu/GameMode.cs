@@ -5,4 +5,4 @@ internal enum GameMode
     VsCpu,
     VsPlayer,
     Watch
-};
+}

@@ -1,20 +1,19 @@
 using DuckDuckJump.Engine.Wrappers.SDL2.Mixer;
+using DuckDuckJump.Scenes.Game.Gameplay.Resources;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Announcer;
 
 internal class Announcer
 {
-    private readonly Chunk[] _clips =
+    private readonly Chunk[] _clips;
+
+    public Announcer(GameplayResources resources)
     {
-        Engine.Game.Instance.ChunkManager["get-ready"],
-        Engine.Game.Instance.ChunkManager["go"],
-        Engine.Game.Instance.ChunkManager["p1-wins"],
-        Engine.Game.Instance.ChunkManager["p2-wins"],
-        Engine.Game.Instance.ChunkManager["draw"]
-    };
+        _clips = resources.AnnouncerClips;
+    }
 
     public void Say(AnnouncementType announcement)
     {
-        _ = _clips[(int)announcement].Play(-1, 0);
+        _ = _clips[(int) announcement].Play(-1, 0);
     }
 }

@@ -2,9 +2,12 @@
 
 namespace DuckDuckJump.Engine.Assets.Audio;
 
-internal class MusicManager : ResourceManager<Music>
+/// <summary>
+///     A class that handles the loading and caching of music.
+/// </summary>
+internal class MusicProvider : ResourceProvider<Music>
 {
-    public MusicManager() : base("Assets/Music", "ogg")
+    public MusicProvider() : base("Music", "ogg")
     {
     }
 

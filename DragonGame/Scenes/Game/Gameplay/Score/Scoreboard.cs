@@ -1,5 +1,8 @@
-using DuckDuckJump.Engine.Wrappers.SDL2;
+using System.Diagnostics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
+using DuckDuckJump.Scenes.Game.Gameplay.Resources;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Score;
 
@@ -18,9 +21,9 @@ internal sealed class Scoreboard
     private byte _roundsWon;
     public byte RoundsToWin;
 
-    public Scoreboard(Player player, byte roundsToWin)
+    public Scoreboard(Player player, byte roundsToWin, GameplayResources resources)
     {
-        _checkmark = Engine.Game.Instance.TextureManager["Game/checkmark"];
+        _checkmark = resources.CheckmarkTexture;
         _player = player;
         RoundsToWin = roundsToWin;
         _roundsWon = 0;
@@ -55,6 +58,7 @@ internal sealed class Scoreboard
         if (RoundsToWin == 1)
             return;
 
+        Debug.Assert(Engine.Game.Instance != null, "Engine.Game.Instance != null");
         var renderer = Engine.Game.Instance.Renderer;
 
         for (var i = 0; i < RoundsToWin; i++)

@@ -1,5 +1,6 @@
 ﻿using System;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 using SDL2;
 
@@ -23,22 +24,24 @@ internal class ItemBox
     private const ushort CooldownTime = 120;
     private const ushort AppearingTime = 10;
 
-    private readonly Texture _itemBox;
+    private readonly Texture _itemBoxTexture;
+    private readonly TextureInfo _itemBoxTextureInfo;
 
     private readonly Player _player;
 
     private byte _alpha = 255;
+    private Point _position;
     private ItemBoxState _state;
 
     private ushort _timer;
-    public Point Position;
 
-    public ItemBox(Player player, Point position)
+    public ItemBox(Player player, Point position, Texture itemBoxTexture)
     {
         _player = player;
-        Position = position;
-        _itemBox = Engine.Game.Instance.TextureManager["Game/itembox"];
-        _itemBox.SetBlendMode(SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+        _position = position;
+        _itemBoxTexture = itemBoxTexture;
+        _itemBoxTextureInfo = _itemBoxTexture.QueryTexture();
+        _itemBoxTexture.SetBlendMode(SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
     }
 
     public bool CanCatch
@@ -50,7 +53,7 @@ internal class ItemBox
         }
     }
 
-    private Rectangle Collision => new(Position.X - CollisionWidth / 2, Position.Y - CollisionHeight / 2,
+    private Rectangle Collision => new(_position.X - CollisionWidth / 2, _position.Y - CollisionHeight / 2,
         CollisionWidth, CollisionHeight);
 
     private void SetState(ItemBoxState state)
@@ -111,7 +114,7 @@ internal class ItemBox
         }
         else
         {
-            _alpha = (byte)((float)_timer / CaughtTime * byte.MaxValue);
+            _alpha = (byte) ((float) _timer / CaughtTime * byte.MaxValue);
         }
     }
 
@@ -129,22 +132,23 @@ internal class ItemBox
         }
         else
         {
-            _alpha = (byte)(byte.MaxValue - (byte)((float)_timer / CaughtTime * byte.MaxValue));
+            _alpha = (byte) (byte.MaxValue - (byte) ((float) _timer / CaughtTime * byte.MaxValue));
         }
     }
 
     public void Draw(Camera camera)
     {
-        var transformedPoint = camera.TransformPoint(Position);
+        var transformedPoint = camera.TransformPoint(_position);
 
-        var dst = new Rectangle(transformedPoint.X - _itemBox.Width / 2, transformedPoint.Y - _itemBox.Height / 2,
-            _itemBox.Width, _itemBox.Height);
+        var dst = new Rectangle(transformedPoint.X - _itemBoxTextureInfo.Width / 2,
+            transformedPoint.Y - _itemBoxTextureInfo.Height / 2,
+            _itemBoxTextureInfo.Width, _itemBoxTextureInfo.Height);
 
         if (!camera.OnScreen(dst))
             return;
 
-        _itemBox.SetAlphaMod(_alpha);
-        Engine.Game.Instance.Renderer.Copy(_itemBox, null,
+        _itemBoxTexture.SetAlphaMod(_alpha);
+        Engine.Game.Instance.Renderer.Copy(_itemBoxTexture, null,
             dst);
     }
 }

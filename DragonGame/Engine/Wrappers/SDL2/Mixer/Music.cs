@@ -9,7 +9,7 @@ internal class Music : IDisposable
 
     public Music(string file)
     {
-        Handle = SDL_mixer.Mix_LoadMUS(file);
+        //Handle = SDL_mixer.Mix_LoadMUS(file);
     }
 
     public IntPtr Handle { get; private set; }

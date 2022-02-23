@@ -1,7 +1,7 @@
 ﻿using System;
 using SDL2;
 
-namespace DuckDuckJump.Engine.Wrappers.SDL2;
+namespace DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
 
 internal class Window : IDisposable
 {
@@ -20,8 +20,6 @@ internal class Window : IDisposable
 
     private void ReleaseUnmanagedResources()
     {
-        if (Handle == IntPtr.Zero) return;
-
         SDL.SDL_DestroyWindow(Handle);
         Handle = IntPtr.Zero;
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using DuckDuckJump.Engine.Wrappers.SDL2.Mixer.Exceptions;
 using SDL2;
 
 namespace DuckDuckJump.Engine.Wrappers.SDL2.Mixer;
@@ -12,7 +13,7 @@ internal class Chunk : IDisposable
         Handle = SDL_mixer.Mix_LoadWAV(file);
     }
 
-    public IntPtr Handle { get; private set; }
+    private IntPtr Handle { get; set; }
 
     public int Volume
     {
@@ -20,7 +21,9 @@ internal class Chunk : IDisposable
         set
         {
             _volume = value;
-            _ = SDL_mixer.Mix_VolumeChunk(Handle, _volume);
+            if (SDL_mixer.Mix_VolumeChunk(Handle, _volume) != 0)
+                throw new ChunkException(
+                    $"Could not set the chunk's volume. SDL Mixer Error: {SDL_mixer.Mix_GetError()}");
         }
     }
 

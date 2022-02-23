@@ -1,11 +1,12 @@
-using DuckDuckJump.Engine.Wrappers.SDL2;
-using DuckDuckJump.Scenes.Game.Gameplay.Players;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming;
 
 internal class SimplePlatform : Platform
 {
-    public SimplePlatform(Point position, Player player) : base(position, player)
+    public SimplePlatform(Point position, Texture platformTexture) : base(position,
+        platformTexture)
     {
     }
 
@@ -22,7 +23,7 @@ internal class SimplePlatform : Platform
     {
     }
 
-    public override bool TargetableByAi()
+    public override bool CanBeTargetedByAi()
     {
         return true;
     }

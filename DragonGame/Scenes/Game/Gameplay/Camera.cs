@@ -1,5 +1,5 @@
 using DuckDuckJump.Engine.Utilities;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay;
 

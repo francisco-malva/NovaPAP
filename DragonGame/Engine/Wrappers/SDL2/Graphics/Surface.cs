@@ -2,20 +2,19 @@
 using SDL2;
 using StbImageSharp;
 
-namespace DuckDuckJump.Engine.Wrappers.SDL2;
+namespace DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
 
 internal class Surface : IDisposable
 {
-    public Surface(string bmpPath)
-    {
-        Handle = SDL.SDL_LoadBMP(bmpPath);
-    }
-
+    /// <summary>
+    ///     Create a surface from a decoded image.
+    /// </summary>
+    /// <param name="result">the decoded image.</param>
     public unsafe Surface(ImageResult result)
     {
         fixed (byte* pixels = result.Data)
         {
-            Handle = SDL.SDL_CreateRGBSurfaceFrom((IntPtr)pixels,
+            Handle = SDL.SDL_CreateRGBSurfaceFrom((IntPtr) pixels,
                 result.Width,
                 result.Height,
                 32,
@@ -25,6 +24,11 @@ internal class Surface : IDisposable
                 0x00FF0000,
                 0xFF000000);
         }
+    }
+
+    public Surface(IntPtr handle)
+    {
+        Handle = handle;
     }
 
     public IntPtr Handle { get; private set; }

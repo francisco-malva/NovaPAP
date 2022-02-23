@@ -1,6 +1,6 @@
 using System;
-using DuckDuckJump.Engine.Utilities;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming;
@@ -11,21 +11,21 @@ internal class TeleportingPlatform : Platform
     private const ushort DissapearingTime = 30;
     private const ushort AppearingTime = 30;
 
-    private readonly DeterministicRandom _random;
+    private readonly Random _random;
     private TeleportingPlatformState _state;
 
     private ushort _stateTimer;
 
-    public TeleportingPlatform(Point position, DeterministicRandom random, Player player) : base(position, player)
+    public TeleportingPlatform(Point position, Random random, Texture platformTexture) : base(position, platformTexture)
     {
         _random = random;
         SetState(TeleportingPlatformState.Static);
-        _stateTimer = (ushort)_random.GetInteger(10, StaticTime);
+        _stateTimer = (ushort) _random.Next(10, StaticTime);
     }
 
-    protected override bool CanJumpOnPlatform()
+    protected override bool ShouldPlayerTriggerJump(Player player)
     {
-        return base.CanJumpOnPlatform() && _state == TeleportingPlatformState.Static;
+        return base.ShouldPlayerTriggerJump(player) && _state == TeleportingPlatformState.Static;
     }
 
     protected override void OnPlayerJump()
@@ -37,7 +37,7 @@ internal class TeleportingPlatform : Platform
         switch (_state)
         {
             case TeleportingPlatformState.Static:
-                var color = (byte)((float)_stateTimer / StaticTime * 255.0f);
+                var color = (byte) ((float) _stateTimer / StaticTime * 255.0f);
                 return new Color(color, color, color);
             case TeleportingPlatformState.Dissapearing:
                 return Color.Black;
@@ -57,16 +57,16 @@ internal class TeleportingPlatform : Platform
                 if (_stateTimer == 0) SetState(TeleportingPlatformState.Dissapearing);
                 break;
             case TeleportingPlatformState.Dissapearing:
-                Alpha = (byte)(_stateTimer / (float)DissapearingTime * 255.0f);
+                Alpha = (byte) (_stateTimer / (float) DissapearingTime * 255.0f);
                 if (_stateTimer == 0)
                 {
-                    Position.X = _random.GetInteger(PlatformWidth / 2, GameField.Width - PlatformWidth / 2);
+                    Position.X = _random.Next(PlatformWidth / 2, GameField.Width - PlatformWidth / 2);
                     SetState(TeleportingPlatformState.Appearing);
                 }
 
                 break;
             case TeleportingPlatformState.Appearing:
-                Alpha = (byte)((1.0f - (float)_stateTimer / DissapearingTime) * 255);
+                Alpha = (byte) ((1.0f - (float) _stateTimer / DissapearingTime) * 255);
                 if (_stateTimer == 0) SetState(TeleportingPlatformState.Static);
                 break;
         }
@@ -91,7 +91,7 @@ internal class TeleportingPlatform : Platform
         }
     }
 
-    public override bool TargetableByAi()
+    public override bool CanBeTargetedByAi()
     {
         return _state == TeleportingPlatformState.Static;
     }

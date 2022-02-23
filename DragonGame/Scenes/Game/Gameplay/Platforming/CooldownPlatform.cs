@@ -1,5 +1,6 @@
 using System;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 
 namespace DuckDuckJump.Scenes.Game.Gameplay.Platforming;
@@ -14,7 +15,8 @@ internal sealed class CooldownPlatform : Platform
 
     private ushort _timer;
 
-    public CooldownPlatform(Point position, Player player) : base(position, player)
+    public CooldownPlatform(Point position, Texture platformTexture) : base(position,
+        platformTexture)
     {
         SetState(CooldownPlatformState.Static);
     }
@@ -80,22 +82,22 @@ internal sealed class CooldownPlatform : Platform
 
     private void FadingOutUpdate()
     {
-        Alpha = (byte)(_timer / (float)FadeOutTime * 255.0f);
+        Alpha = (byte) (_timer / (float) FadeOutTime * 255.0f);
         if (ShouldSwitchState) SetState(CooldownPlatformState.Gone);
     }
 
     private void FadingInUpdate()
     {
-        Alpha = (byte)((1.0f - _timer / (float)FadeOutTime) * 255.0f);
+        Alpha = (byte) ((1.0f - _timer / (float) FadeOutTime) * 255.0f);
         if (ShouldSwitchState) SetState(CooldownPlatformState.Static);
     }
 
-    protected override bool CanJumpOnPlatform()
+    protected override bool ShouldPlayerTriggerJump(Player player)
     {
-        return base.CanJumpOnPlatform() && _state == CooldownPlatformState.Static;
+        return base.ShouldPlayerTriggerJump(player) && _state == CooldownPlatformState.Static;
     }
 
-    public override bool TargetableByAi()
+    public override bool CanBeTargetedByAi()
     {
         return _state == CooldownPlatformState.Static;
     }

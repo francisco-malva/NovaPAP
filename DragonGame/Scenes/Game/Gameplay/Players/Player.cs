@@ -1,9 +1,11 @@
 ﻿using System;
-using DuckDuckJump.Engine.Utilities;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+using System.Diagnostics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Engine.Wrappers.SDL2.Mixer;
 using DuckDuckJump.Scenes.Game.Gameplay.Items;
 using DuckDuckJump.Scenes.Game.Gameplay.Platforming;
+using DuckDuckJump.Scenes.Game.Gameplay.Resources;
 using DuckDuckJump.Scenes.Game.Input;
 using SDL2;
 
@@ -18,37 +20,44 @@ internal abstract class Player
     private const int YDrag = 1;
     protected const int XMoveSpeed = 8;
 
-    private readonly Chunk _jump;
+    private readonly Chunk _jumpingSfx;
 
-    private readonly Texture _texture;
+    private readonly Texture _playerTexture;
 
-    protected readonly DeterministicRandom Random;
+    private readonly TextureInfo _playerTextureInfo;
+
+    private readonly Random _random;
 
     private double _angle;
 
     private SDL.SDL_RendererFlip _flip;
 
     private ulong _stateTimer;
+    private int _ySpeed;
 
     protected ItemManager ItemManager;
     public Point Position;
 
-    protected int XSpeed, YSpeed;
-
     public bool Umbrella;
 
-    protected Player(DeterministicRandom random)
+    protected int XSpeed;
+
+    protected Player(Random random, GameplayResources resources, ItemManager itemManager)
     {
-        Random = random;
-        _texture = Engine.Game.Instance.TextureManager["Game/player"];
-        _jump = Engine.Game.Instance.ChunkManager["jump"];
+        _random = random;
+        ItemManager = itemManager;
+
+        _playerTexture = resources.PlayerTexture;
+        _playerTextureInfo = _playerTexture.QueryTexture();
+
+        _jumpingSfx = resources.JumpingSfx;
     }
 
     public PlayerState State { get; private set; }
 
-    public bool Descending => YSpeed < 0;
+    public bool Descending => _ySpeed < 0;
 
-    public int FallSpeed => Umbrella ? YTerminalSpeed / 2 : YTerminalSpeed;
+    private int FallSpeed => Umbrella ? YTerminalSpeed / 2 : YTerminalSpeed;
 
     public Rectangle Collision => new(Position.X - PlatformCollisionWidth / 2,
         Position.Y - PlatformCollisionHeight / 2, PlatformCollisionWidth, PlatformCollisionHeight);
@@ -56,7 +65,7 @@ internal abstract class Player
     public void GetReady()
     {
         XSpeed = 0;
-        YSpeed = 0;
+        _ySpeed = 0;
         Position = new Point(GameField.Width / 2, 0);
         ResetSpecialFields();
 
@@ -71,11 +80,6 @@ internal abstract class Player
         UpdateAngle();
         UpdateFlip();
         ++_stateTimer;
-    }
-
-    public void SetItemManager(ItemManager manager)
-    {
-        ItemManager = manager;
     }
 
     protected abstract void OnPressSpecial();
@@ -96,7 +100,7 @@ internal abstract class Player
                 UpdatePosition();
                 break;
             case PlayerState.Won:
-                Position.Y += (int)_stateTimer;
+                Position.Y += (int) _stateTimer;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -156,35 +160,36 @@ internal abstract class Player
     {
         if (Position.Y < 0 && State != PlayerState.Lost) Jump(null, true);
         Position.X = Math.Min(GameField.Width, Math.Max(0, Position.X + XSpeed));
-        YSpeed = Math.Max(FallSpeed, YSpeed - YDrag);
-        Position.Y += YSpeed;
+        _ySpeed = Math.Max(FallSpeed, _ySpeed - YDrag);
+        Position.Y += _ySpeed;
     }
 
     public void Draw(Camera camera)
     {
+        Debug.Assert(Engine.Game.Instance != null, "Engine.Game.Instance != null");
         var renderer = Engine.Game.Instance.Renderer;
 
-        var screenPosition = camera.TransformPoint(new Point(Position.X - _texture.Width / 2,
-            Position.Y + _texture.Height));
-        var dst = new Rectangle(screenPosition.X, screenPosition.Y, _texture.Width,
-            _texture.Height);
+        var screenPosition = camera.TransformPoint(new Point(Position.X - _playerTextureInfo.Width / 2,
+            Position.Y + _playerTextureInfo.Height));
+        var dst = new Rectangle(screenPosition.X, screenPosition.Y, _playerTextureInfo.Width,
+            _playerTextureInfo.Height);
 
-        renderer.CopyEx(_texture, null, dst, _angle, null, _flip);
+        renderer.CopyEx(_playerTexture, null, dst, _angle, null, _flip);
     }
 
     protected abstract void MoveX(PlatformManager platformManager, GameInput input);
 
-    public void Jump(Platform platform = null, bool ground = false, int jumpMultiplier = 1)
+    public void Jump(Platform? platform = null, bool ground = false, int jumpMultiplier = 1)
     {
         OnJump(platform);
 
         Position.Y = platform == null ? ground ? 0 : Position.Y : platform.Position.Y + Platform.PlatformHeight;
-        YSpeed = YJumpSpeed * jumpMultiplier;
+        _ySpeed = YJumpSpeed * jumpMultiplier;
 
-        _jump.Play(-1, 0);
+        _jumpingSfx.Play(-1, 0);
     }
 
-    protected abstract void OnJump(Platform platform);
+    protected abstract void OnJump(Platform? platform);
 
     public void SetState(PlayerState state)
     {

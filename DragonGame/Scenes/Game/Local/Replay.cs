@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using DuckDuckJump.Engine.Utilities;
-using DuckDuckJump.Scenes.Game.Gameplay;
 using DuckDuckJump.Scenes.Game.Input;
 
 namespace DuckDuckJump.Scenes.Game.Local;
@@ -24,7 +23,7 @@ internal class Replay
         _gameInput = new List<Pair<GameInput>>(reader.ReadInt32());
 
         for (var i = 0; i < _gameInput.Capacity; i++)
-            _gameInput.Add(new Pair<GameInput>((GameInput)reader.ReadByte(), (GameInput)reader.ReadByte()));
+            _gameInput.Add(new Pair<GameInput>((GameInput) reader.ReadByte(), (GameInput) reader.ReadByte()));
     }
 
     public void Enqueue(Pair<GameInput> input)
@@ -46,8 +45,8 @@ internal class Replay
 
         foreach (var input in _gameInput)
         {
-            writer.Write((byte)input.First);
-            writer.Write((byte)input.Second);
+            writer.Write((byte) input.First);
+            writer.Write((byte) input.Second);
         }
     }
 }

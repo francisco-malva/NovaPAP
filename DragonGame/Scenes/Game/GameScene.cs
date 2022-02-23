@@ -2,11 +2,12 @@
 using System.IO;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Scenes;
-using DuckDuckJump.Engine.Utilities;
-using DuckDuckJump.Engine.Wrappers.SDL2;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Engine.Wrappers.SDL2.Mixer;
 using DuckDuckJump.Scenes.Game.Gameplay;
 using DuckDuckJump.Scenes.Game.Gameplay.Announcer;
+using DuckDuckJump.Scenes.Game.Gameplay.Resources;
 using DuckDuckJump.Scenes.Game.Input;
 using DuckDuckJump.Scenes.Game.Local;
 using DuckDuckJump.Scenes.MainMenu;
@@ -23,18 +24,18 @@ internal abstract class GameScene : Scene
     public const byte GetReadyTime = 120;
     public const byte RoundEndTime = 120;
 
-    public static Replay CurrentReplay;
+    protected static Replay CurrentReplay;
 
     private readonly Announcer _announcer;
 
-    private readonly Texture _gameBorder;
+    private readonly GameplayResources _gameAssets;
 
-    private readonly Music _music;
+    private readonly Texture _gameBorder;
 
     protected readonly GameField P1Field;
     protected readonly GameField P2Field;
 
-    protected readonly DeterministicRandom Random;
+    private readonly Random Random;
 
     private GameState _state = GameState.GetReady;
     private byte _stateTimer;
@@ -42,27 +43,23 @@ internal abstract class GameScene : Scene
 
     protected GameScene(GameInfo info)
     {
-        FrameCount = 0;
+        _gameAssets = new GameplayResources(ResourceProviders);
 
-        _gameBorder = Engine.Game.Instance.TextureManager["UI/game-border"];
-        Random = new DeterministicRandom();
-        Random.Setup(info.RandomSeed);
+        _gameBorder = _gameAssets.GameBorder;
+        Random = new Random(info.RandomSeed);
 
-        P1Field = new GameField(Random, this, false, info);
-        P2Field = new GameField(Random, this, true, info);
+        P1Field = new GameField(Random, this, false, info, _gameAssets);
+        P2Field = new GameField(Random, this, true, info, _gameAssets);
 
         P1Field.SetOther(P2Field);
         P2Field.SetOther(P1Field);
 
-        _music = Engine.Game.Instance.MusicManager["mus-test"];
-        _music.Play();
+        _gameAssets.GameplayMusic.Play();
 
-        _announcer = new Announcer();
+        _announcer = new Announcer(_gameAssets);
 
         ChangeState(GameState.GetReady);
     }
-
-    protected ulong FrameCount { get; private set; }
 
     protected bool CanPause => _state == GameState.InGame;
 
@@ -70,9 +67,9 @@ internal abstract class GameScene : Scene
     {
         get
         {
-            if (P1Field.PlatformManager.GetClimbingProgress() > P2Field.PlatformManager.GetClimbingProgress())
+            if (P1Field.PlayerClimbingProgress > P2Field.PlayerClimbingProgress)
                 return Winner.P1;
-            return P2Field.PlatformManager.GetClimbingProgress() > P1Field.PlatformManager.GetClimbingProgress()
+            return P2Field.PlayerClimbingProgress > P1Field.PlayerClimbingProgress
                 ? Winner.P2
                 : Winner.Both;
         }
@@ -94,7 +91,6 @@ internal abstract class GameScene : Scene
     {
         SimulateFrame(p1Input, p2Input);
         Draw();
-        ++FrameCount;
     }
 
     protected static void ProcessInput(ref GameInput input,
@@ -229,9 +225,9 @@ internal abstract class GameScene : Scene
         ++_stateTimer;
     }
 
-    protected void Draw(Action<Renderer> postRenderCallback = null)
+    private void Draw()
     {
-        var renderer = Engine.Game.Instance.Renderer;
+        var renderer = Engine.Game.Instance!.Renderer;
 
         P1Field.Draw();
         P2Field.Draw();
@@ -243,12 +239,10 @@ internal abstract class GameScene : Scene
         renderer.Clear();
         renderer.Copy(_gameBorder, null, null);
 
-        renderer.CopyEx(P1Field.OutputTexture, null, p1Dest, 0.0, null, P1Field.Flipped ? SDL.SDL_RendererFlip.SDL_FLIP_VERTICAL : SDL.SDL_RendererFlip.SDL_FLIP_NONE);
-        renderer.CopyEx(P2Field.OutputTexture, null, p2Dest, 0.0, null, P2Field.Flipped ? SDL.SDL_RendererFlip.SDL_FLIP_VERTICAL : SDL.SDL_RendererFlip.SDL_FLIP_NONE);
-        //renderer.Copy(P1Field.OutputTexture, null, p1Dest);
-        //renderer.Copy(P2Field.OutputTexture, null, p2Dest);
-
-        postRenderCallback?.Invoke(renderer);
+        renderer.CopyEx(P1Field.OutputTexture, null, p1Dest, 0.0, null,
+            P1Field.Flipped ? SDL.SDL_RendererFlip.SDL_FLIP_VERTICAL : SDL.SDL_RendererFlip.SDL_FLIP_NONE);
+        renderer.CopyEx(P2Field.OutputTexture, null, p2Dest, 0.0, null,
+            P2Field.Flipped ? SDL.SDL_RendererFlip.SDL_FLIP_VERTICAL : SDL.SDL_RendererFlip.SDL_FLIP_NONE);
 
         renderer.Present();
     }

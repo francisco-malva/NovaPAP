@@ -1,4 +1,6 @@
-﻿using DuckDuckJump.Engine.Wrappers.SDL2;
+﻿using System.Diagnostics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Scenes.Game.Gameplay.Players;
 using DuckDuckJump.Scenes.Game.Gameplay.Players.AI;
 
@@ -8,77 +10,78 @@ internal abstract class Platform
 {
     public const int PlatformWidth = 68;
     public const int PlatformHeight = 14;
-    private readonly Texture _texture;
+    private readonly Texture _platformTexture;
 
-    protected readonly Player Player;
+    private readonly TextureInfo _platformTextureInfo;
+
     protected byte Alpha = 255;
 
     public Point Position;
 
-    protected Platform(Point position, Player player)
+    protected Platform(Point position, Texture platformTexture)
     {
         Position = position;
-        Player = player;
-        _texture = Engine.Game.Instance.TextureManager["Game/platform"];
+        _platformTexture = platformTexture;
+        _platformTextureInfo = _platformTexture.QueryTexture();
     }
 
     private Rectangle Collision => new(Position.X - PlatformWidth / 2, Position.Y - PlatformHeight / 2,
         PlatformWidth, PlatformHeight);
 
-    private bool PlayerCollidingWithPlatform
+    private bool IsPlayerCollidingWithPlatform(Player player)
     {
-        get
-        {
-            var platformRect = Collision;
-            var playerRect = Player.Collision;
+        var platformRect = Collision;
+        var playerRect = player.Collision;
 
-            return platformRect.HasIntersection(ref playerRect);
-        }
+        return platformRect.HasIntersection(ref playerRect);
     }
 
     public void Draw(Camera camera)
     {
+        Debug.Assert(Engine.Game.Instance != null, "Engine.Game.Instance != null");
         var renderer = Engine.Game.Instance.Renderer;
 
         var screenPosition =
-            camera.TransformPoint(new Point(Position.X - _texture.Width / 2, Position.Y + _texture.Height));
-        var dst = new Rectangle(screenPosition.X, screenPosition.Y, _texture.Width, _texture.Height);
+            camera.TransformPoint(new Point(Position.X - _platformTextureInfo.Width / 2,
+                Position.Y + _platformTextureInfo.Height));
+        var dst = new Rectangle(screenPosition.X, screenPosition.Y, _platformTextureInfo.Width,
+            _platformTextureInfo.Height);
 
         if (!camera.OnScreen(dst)) return;
-        _texture.SetAlphaMod(Alpha);
-        _texture.SetColorMod(GetPlatformDrawColor());
+        _platformTexture.SetAlphaMod(Alpha);
+        _platformTexture.SetColorMod(GetPlatformDrawColor());
 
-        renderer.Copy(_texture, null, dst);
+        renderer.Copy(_platformTexture, null, dst);
     }
 
-    public void Update()
+    public void Update(Player player)
     {
         OnUpdate();
-        PlayerCollision();
+        TestPlayerCollision(player);
     }
 
     protected abstract void OnUpdate();
 
-    protected virtual bool CanJumpOnPlatform()
+    protected virtual bool ShouldPlayerTriggerJump(Player player)
     {
-        return Player.State == PlayerState.InGame && Player.Descending && PlayerCollidingWithPlatform;
+        return player.State == PlayerState.InGame && player.Descending && IsPlayerCollidingWithPlatform(player);
     }
 
-    private void PlayerCollision()
+    private void TestPlayerCollision(Player player)
     {
-        if (!CanJumpOnPlatform()) return;
+        if (!ShouldPlayerTriggerJump(player)) return;
 
         OnPlayerJump();
-        Player.Jump(this);
+        player.Jump(this);
     }
 
     protected abstract void OnPlayerJump();
 
     protected abstract Color GetPlatformDrawColor();
 
-    public abstract bool TargetableByAi();
+    public abstract bool CanBeTargetedByAi();
 
-    public bool InZone(AIPlayer player)
+    public bool InZone(AiPlayer player)
     {
         return player.Position.X >= Position.X - PlatformWidth / 2 + 5 &&
                player.Position.X <= Position.X + PlatformWidth / 2 - 5;

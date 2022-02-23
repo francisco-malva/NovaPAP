@@ -2,9 +2,12 @@
 
 namespace DuckDuckJump.Engine.Assets.Audio;
 
-internal class ChunkManager : ResourceManager<Chunk>
+/// <summary>
+///     A class that handles loading and caching audio chunks.
+/// </summary>
+internal class ChunkProvider : ResourceProvider<Chunk>
 {
-    public ChunkManager() : base("Assets/Audio", "ogg")
+    public ChunkProvider() : base("Audio", "ogg")
     {
     }
 

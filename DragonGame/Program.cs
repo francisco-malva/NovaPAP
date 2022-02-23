@@ -2,7 +2,7 @@
 
 namespace DuckDuckJump;
 
-internal class Program
+internal static class Program
 {
     private static int Main()
     {
