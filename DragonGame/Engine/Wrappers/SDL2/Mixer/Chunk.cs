@@ -11,6 +11,8 @@ internal class Chunk : IDisposable
     public Chunk(string file)
     {
         Handle = SDL_mixer.Mix_LoadWAV(file);
+        if (Handle == IntPtr.Zero)
+            throw new ChunkException($"Could not load chunk. SDL Mixer Error: {SDL_mixer.Mix_GetError()}");
     }
 
     private IntPtr Handle { get; set; }

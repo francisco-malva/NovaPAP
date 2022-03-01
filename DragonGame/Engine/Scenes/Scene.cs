@@ -8,11 +8,11 @@ namespace DuckDuckJump.Engine.Scenes;
 /// </summary>
 internal abstract class Scene : IDisposable
 {
-    protected ResourceProviders ResourceProviders;
+    protected ResourceManager ResourceManager;
 
     public Scene()
     {
-        ResourceProviders = new ResourceProviders(Game.Instance.Renderer);
+        ResourceManager = new ResourceManager(GameContext.Instance.Renderer);
     }
 
     public void Dispose()
@@ -35,6 +35,6 @@ internal abstract class Scene : IDisposable
     {
         if (!disposing) return;
         OnUnload();
-        ResourceProviders.Dispose();
+        ResourceManager.Dispose();
     }
 }

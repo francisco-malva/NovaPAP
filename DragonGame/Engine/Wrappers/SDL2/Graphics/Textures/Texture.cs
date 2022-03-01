@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Exceptions.Textures;
 using SDL2;
 

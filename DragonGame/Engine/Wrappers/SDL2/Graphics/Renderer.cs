@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Exceptions.Renderer;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using SDL2;
@@ -18,6 +19,33 @@ internal class Renderer : IDisposable
     }
 
     public IntPtr Handle { get; private set; }
+
+    public SDL.SDL_BlendMode BlendMode
+    {
+        set
+        {
+            if (SDL.SDL_SetRenderDrawBlendMode(Handle, value) != 0)
+                throw new RendererOperationException($"Could not set renderer blend mode: {SDL.SDL_GetError()}");
+        }
+    }
+
+    public Color DrawColor
+    {
+        get
+        {
+            if (SDL.SDL_GetRenderDrawColor(Handle, out var r, out var g, out var b, out var a) != 0)
+                throw new RendererOperationException(
+                    $"Could not get the renderer's draw color. SDL Error: {SDL.SDL_GetError()}");
+
+            return Color.FromArgb(a, r, g, b);
+        }
+        set
+        {
+            if (SDL.SDL_SetRenderDrawColor(Handle, value.R, value.G, value.B, value.A) != 0)
+                throw new RendererOperationException(
+                    $"Failed to set the renderer's draw color. SDL Error: {SDL.SDL_GetError()}");
+        }
+    }
 
     public void Dispose()
     {
@@ -41,10 +69,10 @@ internal class Renderer : IDisposable
     private static unsafe void TransferManagedRectangle(Rectangle? managed, int* unmanaged)
     {
         if (managed == null) return;
-        unmanaged[0] = managed.Value.Value.x;
-        unmanaged[1] = managed.Value.Value.y;
-        unmanaged[2] = managed.Value.Value.w;
-        unmanaged[3] = managed.Value.Value.h;
+        unmanaged[0] = managed.Value.X;
+        unmanaged[1] = managed.Value.Y;
+        unmanaged[2] = managed.Value.Width;
+        unmanaged[3] = managed.Value.Height;
     }
 
     /// <summary>
@@ -67,7 +95,7 @@ internal class Renderer : IDisposable
     /// <param name="texture">The texture to copy.</param>
     /// <param name="srcRect">The source rectangle. If left null, will copy the entire source region.</param>
     /// <param name="dstRect">The destination rectangle. If left null, will copy to the entire target area.</param>
-    public void Copy(Texture texture, Rectangle? srcRect, Rectangle? dstRect)
+    public void Copy(Texture? texture, Rectangle? srcRect, Rectangle? dstRect)
     {
         unsafe
         {
@@ -82,7 +110,7 @@ internal class Renderer : IDisposable
         }
     }
 
-    public void SetRenderTarget(Texture texture)
+    public void SetRenderTarget(Texture? texture)
     {
         var _ = SDL.SDL_SetRenderTarget(Handle, texture?.Handle ?? IntPtr.Zero);
     }
@@ -99,11 +127,29 @@ internal class Renderer : IDisposable
         SDL.SDL_RenderPresent(Handle);
     }
 
-    public void SetDrawColor(Color color)
+    public void FillRect(Rectangle? rectangle)
     {
-        if (SDL.SDL_SetRenderDrawColor(Handle, color.R, color.G, color.B, color.A) != 0)
-            throw new RendererOperationException(
-                $"Failed to set the renderer's draw color. SDL Error: {SDL.SDL_GetError()}");
+        unsafe
+        {
+            var unmanagedDestinationRectangle = stackalloc int[4];
+
+            TransferManagedRectangle(rectangle, unmanagedDestinationRectangle);
+            if (SDL.SDL_RenderFillRect(Handle,
+                    rectangle.HasValue ? new IntPtr(unmanagedDestinationRectangle) : IntPtr.Zero) != 0)
+                throw new RendererOperationException($"Could not fill rectangle. SDL Error: {SDL.SDL_GetError()}");
+        }
+    }
+    public void DrawRect(Rectangle? rectangle)
+    {
+        unsafe
+        {
+            var unmanagedDestinationRectangle = stackalloc int[4];
+
+            TransferManagedRectangle(rectangle, unmanagedDestinationRectangle);
+            if (SDL.SDL_RenderDrawRect(Handle,
+                    rectangle.HasValue ? new IntPtr(unmanagedDestinationRectangle) : IntPtr.Zero) != 0)
+                throw new RendererOperationException($"Could not draw rectangle. SDL Error: {SDL.SDL_GetError()}");
+        }
     }
 
     public void DrawLine(Point a, Point b)
@@ -112,7 +158,7 @@ internal class Renderer : IDisposable
             throw new RendererOperationException($"Failed to draw a line. SDL Error: {SDL.SDL_GetError()}");
     }
 
-    public void CopyEx(Texture texture, Rectangle? source, Rectangle? dest, double angle, Point? center,
+    public void CopyEx(Texture? texture, Rectangle? source, Rectangle? dest, double angle, Point? center,
         SDL.SDL_RendererFlip flip)
     {
         unsafe
@@ -132,19 +178,21 @@ internal class Renderer : IDisposable
                 unmanagedCenterPoint[1] = center.Value.Y;
             }
 
-            var _ = SDL.SDL_RenderCopyEx(Handle,
-                texture.Handle,
-                source == null ? IntPtr.Zero : new IntPtr(unmanagedSourceRectangle),
-                dest == null ? IntPtr.Zero : new IntPtr(unmanagedDestinationRectangle),
-                angle,
-                center == null ? IntPtr.Zero : new IntPtr(unmanagedCenterPoint),
-                flip);
+            if (SDL.SDL_RenderCopyEx(Handle,
+                    texture?.Handle ?? IntPtr.Zero,
+                    source == null ? IntPtr.Zero : new IntPtr(unmanagedSourceRectangle),
+                    dest == null ? IntPtr.Zero : new IntPtr(unmanagedDestinationRectangle),
+                    angle,
+                    center == null ? IntPtr.Zero : new IntPtr(unmanagedCenterPoint),
+                    flip) != 0)
+                throw new RendererOperationException(
+                    $"Could not perform EX copy operation. SDL ERROR: {SDL.SDL_GetError()}");
         }
     }
 
-    public void SetLogicalSize(Point size)
+    public void SetLogicalSize(Size size)
     {
-        if (SDL.SDL_RenderSetLogicalSize(Handle, size.X, size.Y) != 0)
+        if (SDL.SDL_RenderSetLogicalSize(Handle, size.Width, size.Height) != 0)
             throw new RendererOperationException(
                 $"Failed to set the renderer's logical size. SDL Error: {SDL.SDL_GetError()}");
     }

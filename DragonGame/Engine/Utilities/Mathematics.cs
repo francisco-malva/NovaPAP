@@ -1,5 +1,5 @@
 ﻿using System;
-using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using System.Drawing;
 
 namespace DuckDuckJump.Engine.Utilities;
 
@@ -31,7 +31,7 @@ internal static class Mathematics
         var g = (byte) Lerp(from.G, to.G, t);
         var b = (byte) Lerp(from.B, to.B, t);
         var a = (byte) Lerp(from.A, to.A, t);
-        return new Color(r, g, b, a);
+        return Color.FromArgb(a, r, g, b);
     }
 
     /// <summary>
