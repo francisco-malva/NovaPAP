@@ -18,7 +18,7 @@ internal class GameContext : IDisposable
     public readonly Renderer Renderer;
 
     public readonly SceneManager SceneManager;
-    private bool _running;
+    public bool Running;
 
     public GameContext()
     {
@@ -57,15 +57,17 @@ internal class GameContext : IDisposable
     public void Run(uint fps)
     {
         var ms = (uint) (1.0 / fps * 1000.0);
-        _running = true;
+        Running = true;
 
-        while (_running)
+        while (Running)
         {
             var start = SDL.SDL_GetTicks();
 
             _eventPump.HandleEvents();
             Keyboard.Update();
 
+            if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_P))
+                _window.SetFullscreen((uint) SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP);
             SceneManager.Tick();
 
             var end = SDL.SDL_GetTicks();
@@ -78,6 +80,6 @@ internal class GameContext : IDisposable
 
     private void Exit()
     {
-        _running = false;
+        Running = false;
     }
 }

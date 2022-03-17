@@ -21,8 +21,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha"/>
-        <PackageReference Include="StbImageSharp" Version="2.22.6"/>
+        <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha" />
+        <PackageReference Include="StbImageSharp" Version="2.22.6" />
     </ItemGroup>
 
     <ItemGroup>
@@ -200,10 +200,13 @@
         <None Update="runtimes\win-x64\native\SDL2_ttf.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Assets\Fonts\CecepsHandwriting-vmpKZ.ttf">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Assets\Fonts"/>
+        <ProjectReference Include="..\Common\Common.csproj" />
     </ItemGroup>
 
 </Project>

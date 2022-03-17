@@ -104,9 +104,12 @@ internal class Renderer : IDisposable
 
             TransferManagedDrawingRectangles(srcRect, dstRect, unmanagedSourceRectangle, unmanagedDestinationRectangle);
 
-            var _ = SDL.SDL_RenderCopy(Handle, texture.Handle,
-                srcRect == null ? IntPtr.Zero : new IntPtr(unmanagedSourceRectangle),
-                dstRect == null ? IntPtr.Zero : new IntPtr(unmanagedDestinationRectangle));
+            if (texture != null)
+            {
+                var _ = SDL.SDL_RenderCopy(Handle, texture.Handle,
+                    srcRect == null ? IntPtr.Zero : new IntPtr(unmanagedSourceRectangle),
+                    dstRect == null ? IntPtr.Zero : new IntPtr(unmanagedDestinationRectangle));
+            }
         }
     }
 
@@ -139,6 +142,7 @@ internal class Renderer : IDisposable
                 throw new RendererOperationException($"Could not fill rectangle. SDL Error: {SDL.SDL_GetError()}");
         }
     }
+
     public void DrawRect(Rectangle? rectangle)
     {
         unsafe

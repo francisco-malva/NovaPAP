@@ -3,25 +3,42 @@ using System.Diagnostics;
 using System.Drawing;
 using DuckDuckJump.Engine;
 using DuckDuckJump.Engine.Assets;
-using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
+using DuckDuckJump.Engine.Text;
 
 namespace DuckDuckJump.Scenes.MainMenu;
 
 internal class MainMenuResources : IDisposable
 {
-    private const string FontName = "VeraMono";
+    private const string FontName = "CecepsHandwriting-vmpKZ";
 
+    public readonly TextDrawer TextDrawer;
     private static readonly MenuOption[] Options =
     {
-        new(32, " ", Color.White),
-        new(64, "DUCK DUCK JUMP!", Color.Yellow),
-        new(32, "START", Color.White),
-        new(32, "OPTIONS", Color.White),
-        new(32, "QUIT", Color.White)
+        new(" ", Color.White),
+        new("DUCK DUCK JUMP!", Color.Yellow),
+        new("START", Color.White),
+        new("OPTIONS", Color.White),
+        new("QUIT", Color.White),
+        new("ARE YOU SURE?", Color.Red),
+        new("YES...", Color.White),
+        new("NO!", Color.White),
+        new("MODE SELECTION.", Color.Aqua),
+        new("SINGLE MATCH", Color.White),
+        new("TIME ATTACK", Color.White),
+        new("SURVIVAL", Color.White),
+        new("WATCH MODE", Color.White),
+        new("SELECT HOW YOU WANT TO PLAY A MATCH.", Color.Aqua),
+        new("AGAINST THE CPU", Color.White),
+        new("AGAINST ANOTHER HUMAN", Color.White),
+        new("ONLINE", Color.White),
+        new("BACK", Color.White),
+        new("SELECT THE SETTINGS YOU'D LIKE TO CHANGE", Color.Gray),
+        new("CONTROLLER SETTINGS", Color.White),
+        new("SOUND SETTINGS", Color.White),
+        new("LEADERBOARD", Color.White),
+        new("REPLAYS", Color.White),
+        new("STATISTICS", Color.White)
     };
-
-    private readonly Texture[] _optionTextures;
-    private readonly TextureInfo[] _optionTexturesInfo;
 
     public MainMenuResources(ResourceManager manager)
     {
@@ -29,43 +46,27 @@ internal class MainMenuResources : IDisposable
         var renderer = GameContext.Instance.Renderer;
         var font = manager.Fonts[FontName];
 
-        _optionTextures = new Texture[Options.Length];
-        _optionTexturesInfo = new TextureInfo[Options.Length];
-
-        for (var i = 0; i < _optionTextures.Length; i++)
-        {
-            font.Size = Options[i].Size;
-            using var surface = font.RenderTextBlended(Options[i].Caption, Options[i].Color);
-            _optionTextures[i] = new Texture(renderer, surface);
-            _optionTexturesInfo[i] = _optionTextures[i].QueryTexture();
-        }
+        TextDrawer = new TextDrawer(font, renderer, 32, "ABCDEFGHIJKLMNOPQRSTUVWXYZ!.? ");
     }
 
+    public static MenuOption GetOption(MenuOptionType optionType)
+    {
+        return Options[(int) optionType];
+    }
+    
     public void Dispose()
     {
-        foreach (var texture in _optionTextures) texture.Dispose();
-    }
-
-    public Texture GetOptionTexture(MenuOptionType option)
-    {
-        return _optionTextures[(int) option];
-    }
-
-    public TextureInfo GetOptionTextureInfo(MenuOptionType option)
-    {
-        return _optionTexturesInfo[(int) option];
+        TextDrawer.Dispose();
     }
 }
 
 internal readonly struct MenuOption
 {
-    public readonly int Size;
     public readonly string Caption;
     public readonly Color Color;
 
-    public MenuOption(int size, string caption, Color color)
+    public MenuOption(string caption, Color color)
     {
-        Size = size;
         Caption = caption;
         Color = color;
     }

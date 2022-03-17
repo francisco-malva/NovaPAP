@@ -8,9 +8,9 @@ namespace DuckDuckJump.Engine.Scenes;
 /// </summary>
 internal abstract class Scene : IDisposable
 {
-    protected ResourceManager ResourceManager;
+    protected readonly ResourceManager ResourceManager;
 
-    public Scene()
+    protected Scene()
     {
         ResourceManager = new ResourceManager(GameContext.Instance.Renderer);
     }

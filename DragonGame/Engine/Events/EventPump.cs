@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using SDL2;
 
 namespace DuckDuckJump.Engine.Events;
@@ -37,6 +38,7 @@ internal class EventPump
         if (!_eventCallbacks.ContainsKey(eventType))
             throw new InvalidOperationException();
 
+        Debug.Assert(_eventCallbacks != null, nameof(_eventCallbacks) + " != null");
         _eventCallbacks[eventType] -= callback;
     }
 

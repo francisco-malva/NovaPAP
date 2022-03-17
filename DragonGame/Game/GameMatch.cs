@@ -35,6 +35,8 @@ internal class GameMatch
     private GameState _state = GameState.GetReady;
     private byte _stateTimer;
 
+    public Action? OnGameEnded;
+
     public GameMatch(GameInfo info, GameplayResources resources)
     {
         Debug.Assert(GameContext.Instance != null, "Engine.Game.Instance != null");
@@ -75,6 +77,8 @@ internal class GameMatch
     }
 
     public bool HasMatchEnded => _state == GameState.MatchEnded;
+
+    public bool MatchInCourse => _state == GameState.InGame;
 
     protected void SetRoundsToWin(byte roundsToWin)
     {
@@ -133,6 +137,7 @@ internal class GameMatch
                 AnnounceWinner();
                 break;
             case GameState.MatchEnded:
+                OnGameEnded?.Invoke();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(state));

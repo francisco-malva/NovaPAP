@@ -47,7 +47,7 @@ internal abstract class Player : MessagePoint
         _random = random;
 
         _playerTexture = resources.PlayerTexture;
-        _playerTextureInfo = _playerTexture.QueryTexture();
+        if (_playerTexture != null) _playerTextureInfo = _playerTexture.QueryTexture();
 
         _jumpingSfx = resources.JumpingSfx;
     }

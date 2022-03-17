@@ -18,6 +18,11 @@ internal class Window : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    public void SetFullscreen(uint flags)
+    {
+        if (SDL.SDL_SetWindowFullscreen(Handle, flags) != 0) throw new Exception(SDL.SDL_GetError());
+    }
+
     private void ReleaseUnmanagedResources()
     {
         SDL.SDL_DestroyWindow(Handle);
