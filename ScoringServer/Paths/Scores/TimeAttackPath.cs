@@ -1,6 +1,5 @@
 ﻿using System.Data.SQLite;
 using System.Net;
-using System.Text;
 using System.Text.Json;
 using Common;
 using ScoringServer.Extensions;
@@ -28,7 +27,7 @@ public class TimeAttackPath : IPath
             scores.Add(new TimeAttackScore((string) reader["Name"], (long) reader["TimeTaken"]));
 
         await response.WriteJson(scores);
-        
+
         response.Close();
     }
 

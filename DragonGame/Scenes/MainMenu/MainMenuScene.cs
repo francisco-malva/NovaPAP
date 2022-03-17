@@ -84,6 +84,8 @@ internal class MainMenuScene : Scene
     private readonly int[] _savedSelections = new int[Enum.GetValues(typeof(MainMenuState)).Length];
 
     private int _actualSelection;
+
+    private bool _disposed;
     private int _oldRenderedSelection;
     private MenuOptionType[]? _renderedOptions;
     private int[]? _renderedOptionsIndex;
@@ -173,7 +175,7 @@ internal class MainMenuScene : Scene
     {
         var prev = GetDestination(_oldRenderedSelection);
         var current = GetDestination(_renderedSelection);
-        
+
         _renderer.BlendMode = SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND;
         _renderer.DrawColor = Color.FromArgb(128, Color.Blue.R, Color.Blue.G, Color.Blue.B);
         _renderer.FillRect(new Rectangle(
@@ -185,7 +187,7 @@ internal class MainMenuScene : Scene
 
     private void DrawOptions()
     {
-        if(_renderedOptions == null)
+        if (_renderedOptions == null)
             return;
         for (var i = 0; i < _renderedOptions.Length; i++)
         {
@@ -193,11 +195,11 @@ internal class MainMenuScene : Scene
             var y = CalculateY(i);
 
             var measuredSize = _resources.TextDrawer.MeasureText(option.Caption);
-            
+
             _resources.TextDrawer.DrawText(640 / 2 - measuredSize.Width / 2, y, option.Caption, option.Color);
         }
     }
-    
+
     private void DrawScreen()
     {
         DrawRectangle();
@@ -291,18 +293,13 @@ internal class MainMenuScene : Scene
         }
     }
 
-    private bool _disposed;
-    
     private void Draw()
     {
         _renderer.DrawColor = Color.Black;
         _renderer.Clear();
 
-        if (!_disposed)
-        {
-            DrawScreen();
-        }
-        
+        if (!_disposed) DrawScreen();
+
         _renderer.Present();
     }
 

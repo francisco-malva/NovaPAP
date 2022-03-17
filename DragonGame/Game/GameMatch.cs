@@ -15,7 +15,7 @@ namespace DuckDuckJump.Game;
 
 internal class GameMatch
 {
-    public const int GameBorder = 32;
+    public const int GameBorder = 64;
     public const int Width = 640;
     public const int Height = 480;
 

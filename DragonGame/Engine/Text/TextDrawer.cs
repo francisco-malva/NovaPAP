@@ -25,13 +25,18 @@ internal sealed class TextDrawer : IDisposable
         }
     }
 
+    public void Dispose()
+    {
+        foreach (var cachedSymbol in _symbolCache) cachedSymbol.Value.Dispose();
+    }
+
     public void DrawText(int x, int y, IEnumerable<char> characterSet, Color color)
     {
         var drawX = x;
         foreach (var character in characterSet)
         {
             var symbol = _symbolCache[character];
-            
+
             symbol.Texture.SetColorMod(color);
             _renderer.Copy(symbol.Texture, null, new Rectangle(drawX, y, symbol.Info.Width, symbol.Info.Height));
 
@@ -68,14 +73,6 @@ internal sealed class TextDrawer : IDisposable
         public void Dispose()
         {
             Texture.Dispose();
-        }
-    }
-
-    public void Dispose()
-    {
-        foreach (var cachedSymbol in _symbolCache)
-        {
-            cachedSymbol.Value.Dispose();
         }
     }
 }

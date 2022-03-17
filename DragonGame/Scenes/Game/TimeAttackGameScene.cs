@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Drawing;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Common;
 using DuckDuckJump.Engine;
 using DuckDuckJump.Engine.Scenes;
+using DuckDuckJump.Engine.Text;
+using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.Gameplay.Players.AI;
@@ -17,7 +21,7 @@ namespace DuckDuckJump.Scenes.Game;
 
 internal class TimeAttackGameScene : Scene
 {
-    private const int LevelCount = 1;
+    private const int LevelCount = 8;
 
     private readonly PhysicalInputHandler _inputHandler = new(
         new InputProfile(SDL.SDL_Scancode.SDL_SCANCODE_A, SDL.SDL_Scancode.SDL_SCANCODE_D,
@@ -33,8 +37,13 @@ internal class TimeAttackGameScene : Scene
     private GameMatch? _match;
     private long _timeTaken;
 
+    private readonly TextDrawer _smallDrawer;
+
     public TimeAttackGameScene()
     {
+        Debug.Assert(GameContext.Instance != null, "GameContext.Instance != null");
+        _smallDrawer = new TextDrawer(ResourceManager.Fonts["PublicPixel-0W6DP"], GameContext.Instance.Renderer, 10,
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789'");
         _resources = new GameplayResources(ResourceManager);
         AdvanceLevel();
     }
@@ -47,7 +56,12 @@ internal class TimeAttackGameScene : Scene
 
     private void Restart()
     {
-        _match = new GameMatch(new GameInfo(5, 1, false, true, Environment.TickCount, AiDifficulty.Normal, true),
+        var normalizedLevels = _currentLevel / (double) LevelCount;
+        var difficulty = Mathematics.Lerp((int) AiDifficulty.Easy, (int) AiDifficulty.Nightmare,
+            (float) normalizedLevels);
+        var platformCount = Mathematics.Lerp(50, 100,
+            (float) normalizedLevels);
+        _match = new GameMatch(new GameInfo((ushort) platformCount, 1, false, true, Environment.TickCount, (AiDifficulty)(int)difficulty, true),
             _resources);
     }
 
@@ -87,11 +101,25 @@ internal class TimeAttackGameScene : Scene
         }
 
         _match.Draw();
+
+        var stageText = _currentLevel + 1 == LevelCount ? "FINAL STAGE" : $"STAGE {_currentLevel + 1}";
+        
+        var seconds = _timeTaken / 60;
+        var minutes = seconds / 60;
+        var timeText = $"{minutes}'{seconds % 60}";
+
+        var stageTextMeasurements = _smallDrawer.MeasureText(stageText);
+        var timeTextMeasurements = _smallDrawer.MeasureText(timeText);
+
+        _smallDrawer.DrawText(640 / 2 - stageTextMeasurements.Width / 2, 0, stageText, Color.White);
+        _smallDrawer.DrawText(640 / 2 - timeTextMeasurements.Width / 2, 480 - timeTextMeasurements.Height, timeText,
+            Color.White);
         _renderer.Present();
     }
 
     protected override void OnUnload()
     {
         _resources.Dispose();
+        _smallDrawer.Dispose();
     }
 }

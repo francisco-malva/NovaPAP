@@ -21,8 +21,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha" />
-        <PackageReference Include="StbImageSharp" Version="2.22.6" />
+        <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha"/>
+        <PackageReference Include="StbImageSharp" Version="2.22.6"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -201,12 +201,15 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Fonts\CecepsHandwriting-vmpKZ.ttf">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Fonts\PublicPixel-0W6DP.ttf">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Common\Common.csproj" />
+        <ProjectReference Include="..\Common\Common.csproj"/>
     </ItemGroup>
 
 </Project>

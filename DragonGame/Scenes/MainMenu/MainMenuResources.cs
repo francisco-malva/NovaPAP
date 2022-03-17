@@ -9,9 +9,8 @@ namespace DuckDuckJump.Scenes.MainMenu;
 
 internal class MainMenuResources : IDisposable
 {
-    private const string FontName = "CecepsHandwriting-vmpKZ";
+    private const string FontName = "PublicPixel-0W6DP";
 
-    public readonly TextDrawer TextDrawer;
     private static readonly MenuOption[] Options =
     {
         new(" ", Color.White),
@@ -40,6 +39,8 @@ internal class MainMenuResources : IDisposable
         new("STATISTICS", Color.White)
     };
 
+    public readonly TextDrawer TextDrawer;
+
     public MainMenuResources(ResourceManager manager)
     {
         Debug.Assert(GameContext.Instance != null, "Engine.GameContext.Instance != null");
@@ -49,14 +50,14 @@ internal class MainMenuResources : IDisposable
         TextDrawer = new TextDrawer(font, renderer, 32, "ABCDEFGHIJKLMNOPQRSTUVWXYZ!.? ");
     }
 
-    public static MenuOption GetOption(MenuOptionType optionType)
-    {
-        return Options[(int) optionType];
-    }
-    
     public void Dispose()
     {
         TextDrawer.Dispose();
+    }
+
+    public static MenuOption GetOption(MenuOptionType optionType)
+    {
+        return Options[(int) optionType];
     }
 }
 
