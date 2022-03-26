@@ -80,12 +80,6 @@ internal class GameMatch
 
     public bool MatchInCourse => _state == GameState.InGame;
 
-    protected void SetRoundsToWin(byte roundsToWin)
-    {
-        _p1Field.Scoreboard.RoundsToWin = roundsToWin;
-        _p2Field.Scoreboard.RoundsToWin = roundsToWin;
-    }
-
     private void EndRound(Winner winner)
     {
         Winner = winner;

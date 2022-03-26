@@ -32,12 +32,12 @@ internal class TimeAttackGameScene : Scene
     private readonly Renderer _renderer = GameContext.Instance!.Renderer;
 
     private readonly GameplayResources _resources;
+
+    private readonly TextDrawer _smallDrawer;
     private int _currentLevel = -1;
 
     private GameMatch? _match;
     private long _timeTaken;
-
-    private readonly TextDrawer _smallDrawer;
 
     public TimeAttackGameScene()
     {
@@ -61,7 +61,9 @@ internal class TimeAttackGameScene : Scene
             (float) normalizedLevels);
         var platformCount = Mathematics.Lerp(50, 100,
             (float) normalizedLevels);
-        _match = new GameMatch(new GameInfo((ushort) platformCount, 1, false, true, Environment.TickCount, (AiDifficulty)(int)difficulty, true),
+        _match = new GameMatch(
+            new GameInfo((ushort) platformCount, 1, false, true, Environment.TickCount, (AiDifficulty) (int) difficulty,
+                true),
             _resources);
     }
 
@@ -103,7 +105,7 @@ internal class TimeAttackGameScene : Scene
         _match.Draw();
 
         var stageText = _currentLevel + 1 == LevelCount ? "FINAL STAGE" : $"STAGE {_currentLevel + 1}";
-        
+
         var seconds = _timeTaken / 60;
         var minutes = seconds / 60;
         var timeText = $"{minutes}'{seconds % 60}";

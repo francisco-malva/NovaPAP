@@ -12,6 +12,7 @@ internal sealed class Scoreboard
     private readonly Texture _checkmarkTexture;
 
     private readonly Player _player;
+    public readonly sbyte RoundsToWin;
     private ushort _blinkTimer;
 
     /// <summary>
@@ -19,10 +20,9 @@ internal sealed class Scoreboard
     /// </summary>
     private bool _checkmarkDark;
 
-    private byte _roundsWon;
-    public byte RoundsToWin;
+    private sbyte _roundsWon;
 
-    public Scoreboard(Player player, byte roundsToWin, GameplayResources resources)
+    public Scoreboard(Player player, sbyte roundsToWin, GameplayResources resources)
     {
         Debug.Assert(resources.CheckmarkTexture != null, "resources.CheckmarkTexture != null");
         _checkmarkTexture = resources.CheckmarkTexture;
@@ -35,7 +35,7 @@ internal sealed class Scoreboard
 
     public void WinRound(bool draw, ushort blinkTime)
     {
-        if (draw && _roundsWon == RoundsToWin - 1)
+        if (RoundsToWin < 0 || draw && _roundsWon == RoundsToWin - 1)
             return;
         _roundsWon++;
         _blinkTimer = blinkTime;

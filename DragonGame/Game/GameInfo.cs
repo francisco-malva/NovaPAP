@@ -13,10 +13,10 @@ internal class GameInfo
     public readonly ushort PlatformCount;
 
     public readonly int RandomSeed;
-    public readonly byte RoundsToWin;
+    public readonly sbyte RoundsToWin;
 
 
-    public GameInfo(ushort platformCount, byte roundsToWin, bool p1Ai, bool p2Ai, int randomSeed,
+    public GameInfo(ushort platformCount, sbyte roundsToWin, bool p1Ai, bool p2Ai, int randomSeed,
         AiDifficulty difficulty, bool hasItems)
     {
         PlatformCount = platformCount;
@@ -31,7 +31,7 @@ internal class GameInfo
     public GameInfo(BinaryReader reader)
     {
         PlatformCount = reader.ReadUInt16();
-        RoundsToWin = reader.ReadByte();
+        RoundsToWin = reader.ReadSByte();
         P1Ai = reader.ReadBoolean();
         P2Ai = reader.ReadBoolean();
         RandomSeed = reader.ReadInt32();

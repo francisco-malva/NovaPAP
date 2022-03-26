@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using DuckDuckJump.Game.Gameplay.Players.AI;
 
 namespace DuckDuckJump.Engine.Utilities;
 

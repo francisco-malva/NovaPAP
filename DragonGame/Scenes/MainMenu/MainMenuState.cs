@@ -5,5 +5,7 @@ internal enum MainMenuState
     MainScreen,
     QuitScreen,
     SettingsScreen,
-    ModeSelectionScreen
+    ModeSelectionScreen,
+    LeaderboardSelectionScreen,
+    TimeAttackLeaderboardScreen
 }

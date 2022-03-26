@@ -1,98 +1,84 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Net.Http;
+using System.Net.Http.Json;
+using Common;
 using DuckDuckJump.Engine;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Scenes;
-using DuckDuckJump.Engine.Utilities;
+using DuckDuckJump.Engine.Selector;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
-using DuckDuckJump.Game;
-using DuckDuckJump.Game.Gameplay.Players.AI;
-using DuckDuckJump.Scenes.Game;
 using SDL2;
 
 namespace DuckDuckJump.Scenes.MainMenu;
 
 internal class MainMenuScene : Scene
 {
-    private static readonly MenuOptionType[] MainScreenSelections =
+    private static readonly Selection[] MainScreenSelections =
     {
-        MenuOptionType.Empty,
-        MenuOptionType.Title,
-        MenuOptionType.Empty,
-        MenuOptionType.Empty,
-        MenuOptionType.Empty,
-        MenuOptionType.Start,
-        MenuOptionType.Replays,
-        MenuOptionType.Leaderboard,
-        MenuOptionType.Statistics,
-        MenuOptionType.Settings,
-        MenuOptionType.Quit
+        Selection.Nothing,
+        new("DUCK DUCK JUMP!", Color.Yellow),
+        Selection.Nothing,
+        Selection.Nothing,
+        new("SINGLE PLAYER", Color.White, true),
+        new("LEADERBOARDS", Color.White, true),
+        Selection.Nothing,
+        Selection.Nothing,
+        new("OPTIONS", Color.White, true),
+        new("QUIT", Color.White, true)
     };
 
-    private static readonly int[] MainScreenSelectionsIndex =
+    private static readonly Selection[] QuitScreenSelections =
     {
-        5,
-        9,
-        10
+        Selection.Nothing,
+        new("ARE YOU SURE?", Color.Red),
+        Selection.Nothing,
+        Selection.Nothing,
+        Selection.Nothing,
+        new("YES!", Color.White, true),
+        new("NO...", Color.White, true)
     };
 
-    private static readonly MenuOptionType[] QuitScreenSelections =
+    private static readonly Selection[] LeaderboardSelections =
     {
-        MenuOptionType.Empty,
-        MenuOptionType.AreYouSure,
-        MenuOptionType.Empty,
-        MenuOptionType.Empty,
-        MenuOptionType.Empty,
-        MenuOptionType.Yes,
-        MenuOptionType.No
-    };
-
-    private static readonly int[] QuitScreenSelectionsIndex =
-    {
-        5,
-        6
-    };
-
-    private static readonly MenuOptionType[] ModeSelectScreenSelections =
-    {
-        MenuOptionType.Empty,
-        MenuOptionType.ModeSelect,
-        MenuOptionType.Empty,
-        MenuOptionType.Empty,
-        MenuOptionType.Empty,
-        MenuOptionType.TimeAttack,
-        MenuOptionType.Survival,
-        MenuOptionType.SingleMatch,
-        MenuOptionType.WatchMode,
-        MenuOptionType.Empty,
-        MenuOptionType.Back
-    };
-
-    private static readonly int[] ModeSelectScreenSelectionsIndex =
-    {
-        5,
-        6,
-        7,
-        8,
-        10
+        Selection.Nothing,
+        new("LEADERBOARDS", Color.Yellow),
+        Selection.Nothing,
+        Selection.Nothing,
+        Selection.Nothing,
+        new("TIME ATTACK", Color.White, true),
+        new("SURVIVAL", Color.White, true),
+        Selection.Nothing,
+        new("BACK", Color.White, true)
     };
 
     private readonly Renderer _renderer;
     private readonly MainMenuResources _resources;
+    private readonly TextSelector _selector;
 
-    private readonly int[] _savedSelections = new int[Enum.GetValues(typeof(MainMenuState)).Length];
-
-    private int _actualSelection;
+    private readonly Selection[] _timeAttackLeaderboards =
+    {
+        new("TIME ATTACK", Color.Yellow),
+        Selection.Nothing,
+        new("UP", Color.White, true),
+        Selection.Nothing,
+        Selection.Nothing,
+        Selection.Nothing,
+        new("FETCHING...", Color.White),
+        Selection.Nothing,
+        Selection.Nothing,
+        Selection.Nothing,
+        new("DOWN", Color.White, true),
+        Selection.Nothing,
+        new("BACK", Color.White, true)
+    };
 
     private bool _disposed;
-    private int _oldRenderedSelection;
-    private MenuOptionType[]? _renderedOptions;
-    private int[]? _renderedOptionsIndex;
 
-    private int _renderedSelection;
-    private float _renderedSelectionFadeProgress;
-    private MainMenuState _state;
+    private bool _hasScores;
+    private TimeAttackScore[]? _timeAttackScores;
+    private int _viewableStart;
 
     public MainMenuScene()
     {
@@ -100,17 +86,57 @@ internal class MainMenuScene : Scene
 
         Debug.Assert(GameContext.Instance != null, "Engine.GameContext.Instance != null");
         _renderer = GameContext.Instance.Renderer;
+        _selector = new TextSelector(MainScreenSelections, _renderer, _resources.TextDrawer);
 
         SetState(MainMenuState.MainScreen);
+
+        RequestTimeAttackScores();
     }
 
-    private void SetRenderedSelection(int newSelection)
+    private async void RequestTimeAttackScores()
     {
-        if (newSelection == _renderedSelection)
+        using var client = new HttpClient();
+        try
+        {
+            var result = await client.GetAsync("http://localhost:8000/time-attack");
+            var scores = await result.Content.ReadFromJsonAsync<TimeAttackScore[]>();
+            _hasScores = true;
+            _timeAttackScores = scores;
+
+            UpdateScores();
+        }
+        catch (Exception e)
+        {
+            _timeAttackLeaderboards[6] = new Selection("Connection Failure.", Color.White);
+        }
+    }
+
+
+    private void UpdateScores()
+    {
+        if (!_hasScores || _timeAttackScores == null)
             return;
-        _oldRenderedSelection = _renderedSelection;
-        _renderedSelection = newSelection;
-        _renderedSelectionFadeProgress = 0.0f;
+
+        var displayIndex = 4;
+        for (var i = _viewableStart; i < _viewableStart + 5; i++)
+        {
+            string display;
+
+            if (i < 0 || i >= _timeAttackScores.Length)
+            {
+                display = "------";
+            }
+            else
+            {
+                var score = _timeAttackScores[i];
+                display = $"{i + 1}. {score.Name} {score.TimeTaken}";
+            }
+
+            _timeAttackLeaderboards[displayIndex] = new Selection(display, Color.White);
+            ++displayIndex;
+        }
+
+        _selector.RecalculateSizes();
     }
 
     private void SetState(MainMenuState newState)
@@ -118,179 +144,138 @@ internal class MainMenuScene : Scene
         switch (newState)
         {
             case MainMenuState.MainScreen:
-                _renderedOptions = MainScreenSelections;
-                _renderedOptionsIndex = MainScreenSelectionsIndex;
+                _selector.Selections = MainScreenSelections;
+                _selector.OnSelect = OnMainSelect;
+                _selector.SetSelectionImmediate(4);
                 break;
             case MainMenuState.QuitScreen:
-                _renderedOptions = QuitScreenSelections;
-                _renderedOptionsIndex = QuitScreenSelectionsIndex;
+                _selector.Selections = QuitScreenSelections;
+                _selector.OnSelect = OnQuitSelect;
+                _selector.SetSelectionImmediate(5);
                 break;
             case MainMenuState.SettingsScreen:
                 break;
+            case MainMenuState.LeaderboardSelectionScreen:
+                _selector.Selections = LeaderboardSelections;
+                _selector.OnSelect = OnLeaderboardSelect;
+                _selector.SetSelectionImmediate(5);
+                break;
             case MainMenuState.ModeSelectionScreen:
-                _renderedOptions = ModeSelectScreenSelections;
-                _renderedOptionsIndex = ModeSelectScreenSelectionsIndex;
+                break;
+            case MainMenuState.TimeAttackLeaderboardScreen:
+                _viewableStart = 0;
+                UpdateScores();
+                _selector.Selections = _timeAttackLeaderboards;
+                _selector.OnSelect = OnTimeAttackLeaderboardSelect;
+                _selector.SetSelectionImmediate(_timeAttackLeaderboards.Length - 1);
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(newState));
         }
-
-        _savedSelections[(int) _state] = _actualSelection;
-        _state = newState;
-        _actualSelection = _savedSelections[(int) newState];
-
-        _renderedSelectionFadeProgress = 1.0f;
-        if (_renderedOptionsIndex == null) return;
-        _oldRenderedSelection = _renderedOptionsIndex[_actualSelection];
-        _renderedSelection = _renderedOptionsIndex[_actualSelection];
     }
 
-    private int CalculateY(int menuOption)
+    private void OnQuitSelect(int selection)
     {
-        var y = 0;
-
-        if (_renderedOptions == null) return y;
-
-        var option = MainMenuResources.GetOption(_renderedOptions[menuOption]);
-
-        for (var i = 1; i <= menuOption; i++) y += _resources.TextDrawer.MeasureText(option.Caption).Height;
-
-        return y;
-    }
-
-    private Rectangle GetDestination(int menuOption)
-    {
-        if (_renderedOptions == null) return Rectangle.Empty;
-
-        var menu = _renderedOptions[menuOption];
-
-        var size = _resources.TextDrawer.MeasureText(MainMenuResources.GetOption(menu).Caption);
-
-        var destination = new Rectangle(640 / 2 - size.Width / 2, CalculateY(menuOption), size.Width,
-            size.Height);
-        return destination;
-    }
-
-    private void DrawRectangle()
-    {
-        var prev = GetDestination(_oldRenderedSelection);
-        var current = GetDestination(_renderedSelection);
-
-        _renderer.BlendMode = SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND;
-        _renderer.DrawColor = Color.FromArgb(128, Color.Blue.R, Color.Blue.G, Color.Blue.B);
-        _renderer.FillRect(new Rectangle(
-            (int) Mathematics.Lerp(prev.X, current.X, _renderedSelectionFadeProgress),
-            (int) Mathematics.Lerp(prev.Y, current.Y, _renderedSelectionFadeProgress),
-            (int) Mathematics.Lerp(prev.Width, current.Width, _renderedSelectionFadeProgress),
-            (int) Mathematics.Lerp(prev.Height, current.Height, _renderedSelectionFadeProgress)));
-    }
-
-    private void DrawOptions()
-    {
-        if (_renderedOptions == null)
-            return;
-        for (var i = 0; i < _renderedOptions.Length; i++)
+        switch (selection)
         {
-            var option = MainMenuResources.GetOption(_renderedOptions[i]);
-            var y = CalculateY(i);
-
-            var measuredSize = _resources.TextDrawer.MeasureText(option.Caption);
-
-            _resources.TextDrawer.DrawText(640 / 2 - measuredSize.Width / 2, y, option.Caption, option.Color);
+            case 5:
+                if (GameContext.Instance != null) GameContext.Instance.Running = false;
+                break;
+            case 6:
+                SetState(MainMenuState.MainScreen);
+                break;
         }
     }
 
-    private void DrawScreen()
+    private void OnMainSelect(int selection)
     {
-        DrawRectangle();
-        DrawOptions();
+        switch (selection)
+        {
+            case 4:
+                SetState(MainMenuState.ModeSelectionScreen);
+                break;
+            case 5:
+                SetState(MainMenuState.LeaderboardSelectionScreen);
+                break;
+            case 8:
+                break;
+            case 9:
+                SetState(MainMenuState.QuitScreen);
+                break;
+        }
+    }
+
+    private void OnTimeAttackLeaderboardSelect(int selection)
+    {
+        switch (selection)
+        {
+            case 2:
+            {
+                if(_timeAttackScores == null)
+                    return;
+                var intendedView = _viewableStart - 5;
+
+                if (intendedView >= 0)
+                {
+                    _viewableStart = intendedView;
+                    UpdateScores();
+                }
+            }
+                break;
+            case 10:
+            {
+                if(_timeAttackScores == null)
+                    return;
+                var intendedView = _viewableStart + 5;
+
+                if (intendedView < _timeAttackScores.Length)
+                {
+                    _viewableStart = intendedView;
+                    UpdateScores();
+                }
+            }
+                break;
+            case 12:
+                SetState(MainMenuState.LeaderboardSelectionScreen);
+                break;
+        }
+    }
+
+    private void OnLeaderboardSelect(int selection)
+    {
+        switch (selection)
+        {
+            case 5:
+                SetState(MainMenuState.TimeAttackLeaderboardScreen);
+                break;
+            case 6:
+                break;
+            case 8:
+                SetState(MainMenuState.MainScreen);
+                break;
+        }
     }
 
     public override void OnTick()
     {
-        Update();
-        Draw();
+        if (!Update()) Draw();
     }
 
-    private void Update()
+    private bool Update()
     {
-        _renderedSelectionFadeProgress = MathF.Min(1.0f, _renderedSelectionFadeProgress + 0.25f);
-        if (_renderedOptionsIndex == null)
-            return;
+        _selector.Update();
+
         if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_DOWN))
-        {
-            ++_actualSelection;
+            _selector.IncreaseSelection();
+        else if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_UP)) _selector.DecreaseSelection();
 
-            if (_actualSelection == _renderedOptionsIndex.Length)
-                _actualSelection = 0;
-        }
-        else if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_UP))
+        if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_RETURN))
         {
-            --_actualSelection;
-            if (_actualSelection < 0) _actualSelection = _renderedOptionsIndex.Length - 1;
+            _selector.Select();
+            return true;
         }
 
-        if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_RETURN)) OnSelect();
-
-        SetRenderedSelection(_renderedOptionsIndex[_actualSelection]);
-    }
-
-    private void OnSelect()
-    {
-        switch (_state)
-        {
-            case MainMenuState.MainScreen:
-                switch (_actualSelection)
-                {
-                    case 0:
-                        SetState(MainMenuState.ModeSelectionScreen);
-                        break;
-                    case 1:
-                        break;
-                    case 2:
-                        SetState(MainMenuState.QuitScreen);
-                        break;
-                }
-
-                break;
-            case MainMenuState.QuitScreen:
-                switch (_actualSelection)
-                {
-                    case 0:
-                        if (GameContext.Instance != null) GameContext.Instance.Running = false;
-                        break;
-                    case 1:
-                        SetState(MainMenuState.MainScreen);
-                        break;
-                }
-
-                break;
-            case MainMenuState.SettingsScreen:
-                break;
-            case MainMenuState.ModeSelectionScreen:
-                switch (_actualSelection)
-                {
-                    case 0:
-                        GameContext.Instance?.SceneManager.Set(new TimeAttackGameScene());
-                        break;
-                    case 1:
-                        break;
-                    case 2:
-                        GameContext.Instance?.SceneManager.Set(new VersusMatchGameScene(new GameInfo(50, 1, false,
-                            false,
-                            Environment.TickCount, AiDifficulty.Easy, true)));
-                        break;
-                    case 3:
-                        break;
-                    case 4:
-                        SetState(MainMenuState.MainScreen);
-                        break;
-                }
-
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        return false;
     }
 
     private void Draw()
@@ -298,7 +283,7 @@ internal class MainMenuScene : Scene
         _renderer.DrawColor = Color.Black;
         _renderer.Clear();
 
-        if (!_disposed) DrawScreen();
+        if (!_disposed) _selector.Draw();
 
         _renderer.Present();
     }
