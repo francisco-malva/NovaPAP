@@ -162,10 +162,7 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Audio\Game\Player\jump.ogg">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Music\Game\music.ogg">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="runtimes\win-x64\native\SDL2_mixer.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -206,10 +203,29 @@
         <None Update="Assets\Fonts\PublicPixel-0W6DP.ttf">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Assets\Textures\test.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Main Menu\diamond.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\MiniGames\stair.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Music\Game\music.ogg">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Music\MainMenu\music.ogg">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Common\Common.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Assets\Music\MainMenu"/>
     </ItemGroup>
 
 </Project>

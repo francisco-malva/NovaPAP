@@ -111,6 +111,5 @@ internal class VersusMatchGameScene : Scene
     protected override void OnUnload()
     {
         _matchPointsTexture?.Dispose();
-        _resources.Dispose();
     }
 }

@@ -235,7 +235,7 @@ internal class ItemManager : MessagePoint
 
     private void DrawItem(Renderer renderer, ItemBehavior item, bool blinking)
     {
-        var a = blinking ? (byte) ((MathF.Cos(_fade) + 1.0f) * 0.5f * 255) : (byte) 255;
+        var a = blinking ? (byte)((MathF.Cos(_fade) + 1.0f) * 0.5f * 255) : (byte)255;
         item.Texture.SetAlphaMod(a);
         renderer.Copy(item.Texture, null,
             new Rectangle(GameField.Width - _itemUiBorderTextureInfo.Width - 8 + 2, 8 + 2,

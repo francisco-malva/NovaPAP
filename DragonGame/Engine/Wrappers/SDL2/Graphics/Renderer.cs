@@ -205,4 +205,12 @@ internal class Renderer : IDisposable
     {
         ReleaseUnmanagedResources();
     }
+
+    public void RenderGeometry(Texture texture, SDL.SDL_Vertex[] vertices, int verticesLength, int[] indices,
+        int indicesLength)
+    {
+        if (SDL.SDL_RenderGeometry(Handle, texture.Handle, vertices, verticesLength, indices, indicesLength) != 0)
+            throw new RendererOperationException(
+                $"Failed to render geometry. SDL Error: {SDL.SDL_GetError()}");
+    }
 }

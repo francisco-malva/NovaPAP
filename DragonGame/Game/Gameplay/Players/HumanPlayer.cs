@@ -15,11 +15,23 @@ internal class HumanPlayer : Player
     protected override void MoveX(PlatformManager platformManager, GameInput input)
     {
         if (input.HasFlag(GameInput.Left))
-            XSpeed = -XMoveSpeed;
+        {
+            XSpeed -= 10;
+
+            if (XSpeed < -XMoveSpeed)
+                XSpeed = -XMoveSpeed;
+        }
         else if (input.HasFlag(GameInput.Right))
-            XSpeed = XMoveSpeed;
+        {
+            XSpeed += 10;
+
+            if (XSpeed > XMoveSpeed)
+                XSpeed = XMoveSpeed;
+        }
         else
+        {
             XSpeed = 0;
+        }
     }
 
     protected override void OnJump(Platform? platform)

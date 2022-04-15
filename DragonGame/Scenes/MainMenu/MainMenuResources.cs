@@ -19,7 +19,7 @@ internal class MainMenuResources : IDisposable
         var font = manager.Fonts[FontName];
 
         TextDrawer = new TextDrawer(font, renderer, 32,
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-!.? ");
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-!.?: ");
     }
 
     public void Dispose()

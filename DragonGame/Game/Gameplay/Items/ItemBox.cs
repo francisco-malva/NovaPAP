@@ -22,7 +22,7 @@ internal class ItemBox
     private const int CollisionHeight = 32;
 
 
-    private const ushort CaughtTime = 10;
+    private const ushort CaughtTime = 5;
     private const ushort CooldownTime = 120;
     private const ushort AppearingTime = 10;
 
@@ -117,7 +117,7 @@ internal class ItemBox
         }
         else
         {
-            _alpha = (byte) ((float) _timer / CaughtTime * byte.MaxValue);
+            _alpha = (byte)((float)_timer / CaughtTime * byte.MaxValue);
         }
     }
 
@@ -135,7 +135,7 @@ internal class ItemBox
         }
         else
         {
-            _alpha = (byte) (byte.MaxValue - (byte) ((float) _timer / CaughtTime * byte.MaxValue));
+            _alpha = (byte)(byte.MaxValue - (byte)((float)_timer / CaughtTime * byte.MaxValue));
         }
     }
 

@@ -10,6 +10,7 @@ using DuckDuckJump.Engine.Scenes;
 using DuckDuckJump.Engine.Text;
 using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Engine.Wrappers.SDL2.Mixer;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.Gameplay.Players.AI;
 using DuckDuckJump.Game.Gameplay.Resources;
@@ -37,6 +38,7 @@ internal class TimeAttackGameScene : Scene
     private int _currentLevel = -1;
 
     private GameMatch? _match;
+
     private long _timeTaken;
 
     public TimeAttackGameScene()
@@ -46,6 +48,9 @@ internal class TimeAttackGameScene : Scene
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789'");
         _resources = new GameplayResources(ResourceManager);
         AdvanceLevel();
+
+        var music = ResourceManager.Musics["Game/music"];
+        music.Play();
     }
 
     private void AdvanceLevel()
@@ -56,13 +61,13 @@ internal class TimeAttackGameScene : Scene
 
     private void Restart()
     {
-        var normalizedLevels = _currentLevel / (double) LevelCount;
-        var difficulty = Mathematics.Lerp((int) AiDifficulty.Easy, (int) AiDifficulty.Nightmare,
-            (float) normalizedLevels);
+        var normalizedLevels = _currentLevel / (double)LevelCount;
+        var difficulty = Mathematics.Lerp((int)AiDifficulty.Easy, (int)AiDifficulty.Nightmare,
+            (float)normalizedLevels);
         var platformCount = Mathematics.Lerp(50, 100,
-            (float) normalizedLevels);
+            (float)normalizedLevels);
         _match = new GameMatch(
-            new GameInfo((ushort) platformCount, 1, false, true, Environment.TickCount, (AiDifficulty) (int) difficulty,
+            new GameInfo((ushort)platformCount, 1, false, true, Environment.TickCount, (AiDifficulty)(int)difficulty,
                 true),
             _resources);
     }
@@ -121,7 +126,7 @@ internal class TimeAttackGameScene : Scene
 
     protected override void OnUnload()
     {
-        _resources.Dispose();
+        Music.Halt();
         _smallDrawer.Dispose();
     }
 }

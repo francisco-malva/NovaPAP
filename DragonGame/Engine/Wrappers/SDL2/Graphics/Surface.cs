@@ -14,7 +14,7 @@ internal class Surface : IDisposable
     {
         fixed (byte* pixels = result.Data)
         {
-            Handle = SDL.SDL_CreateRGBSurfaceFrom((IntPtr) pixels,
+            Handle = SDL.SDL_CreateRGBSurfaceFrom((IntPtr)pixels,
                 result.Width,
                 result.Height,
                 32,

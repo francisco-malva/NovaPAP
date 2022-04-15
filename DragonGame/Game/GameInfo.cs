@@ -35,7 +35,7 @@ internal class GameInfo
         P1Ai = reader.ReadBoolean();
         P2Ai = reader.ReadBoolean();
         RandomSeed = reader.ReadInt32();
-        Difficulty = (AiDifficulty) reader.ReadByte();
+        Difficulty = (AiDifficulty)reader.ReadByte();
         HasItems = reader.ReadBoolean();
     }
 
@@ -46,7 +46,7 @@ internal class GameInfo
         writer.Write(P1Ai);
         writer.Write(P2Ai);
         writer.Write(RandomSeed);
-        writer.Write((byte) Difficulty);
+        writer.Write((byte)Difficulty);
         writer.Write(HasItems);
     }
 }

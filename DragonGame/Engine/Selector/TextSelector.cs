@@ -50,6 +50,7 @@ internal class TextSelector
 
     public int Selection
     {
+        get => _currentSelection;
         set
         {
             _rectangleT = 0.0f;
@@ -82,10 +83,10 @@ internal class TextSelector
             _rectangleT = 1.0f;
 
         _selectionRectangle = new Rectangle(
-            (int) Mathematics.Lerp(_previousRectangle.X, _currentRectangle.X, _rectangleT),
-            (int) Mathematics.Lerp(_previousRectangle.Y, _currentRectangle.Y, _rectangleT),
-            (int) Mathematics.Lerp(_previousRectangle.Width, _currentRectangle.Width, _rectangleT),
-            (int) Mathematics.Lerp(_previousRectangle.Height, _currentRectangle.Height, _rectangleT));
+            (int)Mathematics.Lerp(_previousRectangle.X, _currentRectangle.X, _rectangleT),
+            (int)Mathematics.Lerp(_previousRectangle.Y, _currentRectangle.Y, _rectangleT),
+            (int)Mathematics.Lerp(_previousRectangle.Width, _currentRectangle.Width, _rectangleT),
+            (int)Mathematics.Lerp(_previousRectangle.Height, _currentRectangle.Height, _rectangleT));
     }
 
     private Rectangle GetSelectionRectangle(int selection)

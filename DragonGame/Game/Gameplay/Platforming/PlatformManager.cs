@@ -47,7 +47,7 @@ internal class PlatformManager
 
     public float GetClimbingProgress(Player player)
     {
-        return player.Position.Y == 0 ? 0.0f : player.Position.Y / (float) FinishingY;
+        return player.Position.Y == 0 ? 0.0f : player.Position.Y / (float)FinishingY;
     }
 
     private PlatformType GetRandomPlatformType()

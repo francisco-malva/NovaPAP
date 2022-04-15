@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using DuckDuckJump.Engine.Events;
 using DuckDuckJump.Engine.Exceptions;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Scenes;
+using DuckDuckJump.Engine.Settings;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
 using DuckDuckJump.Scenes.MainMenu;
 using SDL2;
@@ -41,6 +43,7 @@ internal class GameContext : IDisposable
         if (SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 1024) != 0)
             throw new GameInitException($"Could not open audio. SDL Mixer Error: {SDL_mixer.Mix_GetError()}");
 
+        RuntimeHelpers.RunClassConstructor(typeof(SettingsLoader).TypeHandle);
         SceneManager = new SceneManager();
         SceneManager.Set(new MainMenuScene());
     }
@@ -56,7 +59,7 @@ internal class GameContext : IDisposable
 
     public void Run(uint fps)
     {
-        var ms = (uint) (1.0 / fps * 1000.0);
+        var ms = (uint)(1.0 / fps * 1000.0);
         Running = true;
 
         while (Running)
@@ -67,7 +70,7 @@ internal class GameContext : IDisposable
             Keyboard.Update();
 
             if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_P))
-                _window.SetFullscreen((uint) SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP);
+                _window.SetFullscreen((uint)SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP);
             SceneManager.Tick();
 
             var end = SDL.SDL_GetTicks();

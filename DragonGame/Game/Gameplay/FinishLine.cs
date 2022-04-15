@@ -35,16 +35,16 @@ internal class FinishLine
         {
             if (_alpha > 0)
             {
-                var alpha = (short) Math.Max(_alpha - 5, 0);
-                _alpha = (byte) alpha;
+                var alpha = (short)Math.Max(_alpha - 5, 0);
+                _alpha = (byte)alpha;
             }
         }
         else
         {
             if (_alpha < byte.MaxValue)
             {
-                var alpha = (short) Math.Min(_alpha + 5, byte.MaxValue);
-                _alpha = (byte) alpha;
+                var alpha = (short)Math.Min(_alpha + 5, byte.MaxValue);
+                _alpha = (byte)alpha;
             }
         }
     }

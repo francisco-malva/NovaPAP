@@ -14,6 +14,6 @@ internal class Announcer
 
     public void Say(AnnouncementType announcement)
     {
-        _ = _clips[(int) announcement].Play(-1, 0);
+        _ = _clips[(int)announcement].Play(-1, 0);
     }
 }

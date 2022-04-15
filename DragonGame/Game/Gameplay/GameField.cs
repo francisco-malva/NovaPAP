@@ -196,7 +196,7 @@ internal class GameField
             new Rectangle(0, 0, 250, 250),
             new Rectangle(0, 0, 250 * 2, 250 * 2));
 
-        _backgroundTexture.SetAlphaMod((byte) nightExposure);
+        _backgroundTexture.SetAlphaMod((byte)nightExposure);
         renderer.Copy(_backgroundTexture,
             new Rectangle(250, 0, 250 * 2, 250 * 2),
             new Rectangle(0, 0, 250 * 2, 250 * 2));

@@ -53,8 +53,6 @@ internal class GameMatch
         _p1Field.SetOther(_p2Field);
         _p2Field.SetOther(_p1Field);
 
-        resources.GameplayMusic.Play();
-
         _announcer = new Announcer(resources);
 
         ChangeState(GameState.GetReady);

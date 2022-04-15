@@ -7,5 +7,6 @@ internal enum MainMenuState
     SettingsScreen,
     ModeSelectionScreen,
     LeaderboardSelectionScreen,
-    TimeAttackLeaderboardScreen
+    TimeAttackLeaderboardScreen,
+    AudioSettingsScreen
 }

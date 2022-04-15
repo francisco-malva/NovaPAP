@@ -8,7 +8,7 @@ namespace DuckDuckJump.Engine.Input;
 /// </summary>
 internal static class Keyboard
 {
-    private const int ScancodeCount = (int) SDL.SDL_Scancode.SDL_NUM_SCANCODES;
+    private const int ScancodeCount = (int)SDL.SDL_Scancode.SDL_NUM_SCANCODES;
     private static readonly unsafe bool* KeyState;
 
     private static readonly bool[] PreviousState = new bool[ScancodeCount];
@@ -16,7 +16,7 @@ internal static class Keyboard
 
     static unsafe Keyboard()
     {
-        KeyState = (bool*) SDL.SDL_GetKeyboardState(out _);
+        KeyState = (bool*)SDL.SDL_GetKeyboardState(out _);
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ internal static class Keyboard
     /// <returns>A boolean that answers the query.</returns>
     public static bool KeyDown(SDL.SDL_Scancode scancode)
     {
-        return !PreviousState[(int) scancode] && CurrentState[(int) scancode];
+        return !PreviousState[(int)scancode] && CurrentState[(int)scancode];
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ internal static class Keyboard
     /// <returns>A boolean that answers the query.</returns>
     public static bool KeyUp(SDL.SDL_Scancode scancode)
     {
-        return PreviousState[(int) scancode] && !CurrentState[(int) scancode];
+        return PreviousState[(int)scancode] && !CurrentState[(int)scancode];
     }
 
     /// <summary>
@@ -60,6 +60,6 @@ internal static class Keyboard
     /// <returns>A boolean that answers this query.</returns>
     public static bool KeyHeld(SDL.SDL_Scancode scancode)
     {
-        return CurrentState[(int) scancode];
+        return CurrentState[(int)scancode];
     }
 }

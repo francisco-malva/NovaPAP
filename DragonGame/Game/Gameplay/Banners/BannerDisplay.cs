@@ -21,7 +21,7 @@ internal class BannerDisplay
         _bannerTextures = resources.BannerTextures;
     }
 
-    private Texture? BannerTexture => _bannerTextures[(int) _currentBanner];
+    private Texture? BannerTexture => _bannerTextures[(int)_currentBanner];
     private TextureInfo BannerTextureInfo => BannerTexture.QueryTexture();
 
     public void Raise(BannerType type, ushort duration)
@@ -43,7 +43,7 @@ internal class BannerDisplay
 
         var textureInfo = BannerTextureInfo;
 
-        BannerTexture.SetAlphaMod((byte) (_bannerTimer / (float) _bannerDuration * 255.0f));
+        BannerTexture.SetAlphaMod((byte)(_bannerTimer / (float)_bannerDuration * 255.0f));
         Debug.Assert(GameContext.Instance != null, "Engine.Game.Instance != null");
         GameContext.Instance.Renderer.Copy(BannerTexture, null,
             new Rectangle(GameField.Width / 2 - textureInfo.Width / 2,

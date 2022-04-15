@@ -21,7 +21,7 @@ internal class TeleportingPlatform : Platform
     {
         _random = random;
         SetState(TeleportingPlatformState.Static);
-        _stateTimer = (ushort) _random.Next(10, StaticTime);
+        _stateTimer = (ushort)_random.Next(10, StaticTime);
     }
 
     protected override bool ShouldPlayerTriggerJump(Player player)
@@ -38,7 +38,7 @@ internal class TeleportingPlatform : Platform
         switch (_state)
         {
             case TeleportingPlatformState.Static:
-                var color = (byte) ((float) _stateTimer / StaticTime * 255.0f);
+                var color = (byte)((float)_stateTimer / StaticTime * 255.0f);
                 return Color.FromArgb(color, color, color);
             case TeleportingPlatformState.Dissapearing:
                 return Color.Black;
@@ -58,7 +58,7 @@ internal class TeleportingPlatform : Platform
                 if (_stateTimer == 0) SetState(TeleportingPlatformState.Dissapearing);
                 break;
             case TeleportingPlatformState.Dissapearing:
-                Alpha = (byte) (_stateTimer / (float) DissapearingTime * 255.0f);
+                Alpha = (byte)(_stateTimer / (float)DissapearingTime * 255.0f);
                 if (_stateTimer == 0)
                 {
                     Position.X = _random.Next(PlatformWidth / 2, GameField.Width - PlatformWidth / 2);
@@ -67,7 +67,7 @@ internal class TeleportingPlatform : Platform
 
                 break;
             case TeleportingPlatformState.Appearing:
-                Alpha = (byte) ((1.0f - (float) _stateTimer / DissapearingTime) * 255);
+                Alpha = (byte)((1.0f - (float)_stateTimer / DissapearingTime) * 255);
                 if (_stateTimer == 0) SetState(TeleportingPlatformState.Static);
                 break;
         }

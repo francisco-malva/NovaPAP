@@ -3,18 +3,25 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Numerics;
 using Common;
 using DuckDuckJump.Engine;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Scenes;
 using DuckDuckJump.Engine.Selector;
+using DuckDuckJump.Engine.Settings;
+using DuckDuckJump.Engine.Sprites;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using DuckDuckJump.Scenes.Game;
 using SDL2;
 
 namespace DuckDuckJump.Scenes.MainMenu;
 
 internal class MainMenuScene : Scene
 {
+    private const int DiamondCount = 32;
+    private const int Alpha = 255 / DiamondCount;
+
     private static readonly Selection[] MainScreenSelections =
     {
         Selection.Nothing,
@@ -25,7 +32,7 @@ internal class MainMenuScene : Scene
         new("LEADERBOARDS", Color.White, true),
         Selection.Nothing,
         Selection.Nothing,
-        new("OPTIONS", Color.White, true),
+        new("SETTINGS", Color.White, true),
         new("QUIT", Color.White, true)
     };
 
@@ -53,6 +60,29 @@ internal class MainMenuScene : Scene
         new("BACK", Color.White, true)
     };
 
+    private static readonly Selection[] SettingsSelections =
+    {
+        Selection.Nothing,
+        new("SETTINGS", Color.Yellow),
+        Selection.Nothing,
+        new("AUDIO SETTINGS", Color.White, true),
+        Selection.Nothing,
+        new("BACK", Color.White, true)
+    };
+
+    private readonly Selection[] _audioSettingSelections =
+    {
+        Selection.Nothing,
+        new("SETTINGS", Color.Yellow),
+        Selection.Nothing,
+        new("", Color.White, true),
+        new("", Color.White, true),
+        Selection.Nothing,
+        new("BACK", Color.White, true)
+    };
+
+    private readonly SpriteDrawer _drawer = new(GameContext.Instance!.Renderer);
+
     private readonly Renderer _renderer;
     private readonly MainMenuResources _resources;
     private readonly TextSelector _selector;
@@ -77,11 +107,16 @@ internal class MainMenuScene : Scene
     private bool _disposed;
 
     private bool _hasScores;
+
+    private float _rectangleRotation;
+
+    private MainMenuState _state;
     private TimeAttackScore[]? _timeAttackScores;
     private int _viewableStart;
 
     public MainMenuScene()
     {
+        var music = ResourceManager.Musics["MainMenu/music"];
         _resources = new MainMenuResources(ResourceManager);
 
         Debug.Assert(GameContext.Instance != null, "Engine.GameContext.Instance != null");
@@ -90,7 +125,19 @@ internal class MainMenuScene : Scene
 
         SetState(MainMenuState.MainScreen);
 
+        music.Play();
+
         RequestTimeAttackScores();
+    }
+
+
+    private void UpdateSoundSettingsSelections()
+    {
+        _audioSettingSelections[3] =
+            new Selection($"MUSIC VOLUME: {SettingsLoader.Current.MusicVolume}", Color.White, true);
+        _audioSettingSelections[4] =
+            new Selection($"SFX VOLUME: {SettingsLoader.Current.SfxVolume}", Color.White, true);
+        _selector.RecalculateSizes();
     }
 
     private async void RequestTimeAttackScores()
@@ -105,12 +152,15 @@ internal class MainMenuScene : Scene
 
             UpdateScores();
         }
-        catch (Exception e)
+        catch (Exception)
         {
             _timeAttackLeaderboards[6] = new Selection("Connection Failure.", Color.White);
         }
+        finally
+        {
+            _selector.RecalculateSizes();
+        }
     }
-
 
     private void UpdateScores()
     {
@@ -139,8 +189,37 @@ internal class MainMenuScene : Scene
         _selector.RecalculateSizes();
     }
 
+    private void OnAudioSettingsSelect(int selection)
+    {
+        switch (selection)
+        {
+            case 3:
+                break;
+            case 4:
+                break;
+            case 6:
+                SetState(MainMenuState.SettingsScreen);
+                break;
+        }
+    }
+
+    private void OnSettingsSelect(int selection)
+    {
+        switch (selection)
+        {
+            case 3:
+                SetState(MainMenuState.AudioSettingsScreen);
+                break;
+            case 5:
+                SettingsLoader.Save();
+                SetState(MainMenuState.MainScreen);
+                break;
+        }
+    }
+
     private void SetState(MainMenuState newState)
     {
+        _state = newState;
         switch (newState)
         {
             case MainMenuState.MainScreen:
@@ -154,6 +233,9 @@ internal class MainMenuScene : Scene
                 _selector.SetSelectionImmediate(5);
                 break;
             case MainMenuState.SettingsScreen:
+                _selector.Selections = SettingsSelections;
+                _selector.OnSelect = OnSettingsSelect;
+                _selector.SetSelectionImmediate(3);
                 break;
             case MainMenuState.LeaderboardSelectionScreen:
                 _selector.Selections = LeaderboardSelections;
@@ -168,6 +250,12 @@ internal class MainMenuScene : Scene
                 _selector.Selections = _timeAttackLeaderboards;
                 _selector.OnSelect = OnTimeAttackLeaderboardSelect;
                 _selector.SetSelectionImmediate(_timeAttackLeaderboards.Length - 1);
+                break;
+            case MainMenuState.AudioSettingsScreen:
+                UpdateSoundSettingsSelections();
+                _selector.Selections = _audioSettingSelections;
+                _selector.OnSelect = OnAudioSettingsSelect;
+                _selector.SetSelectionImmediate(3);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(newState));
@@ -192,12 +280,13 @@ internal class MainMenuScene : Scene
         switch (selection)
         {
             case 4:
-                SetState(MainMenuState.ModeSelectionScreen);
+                GameContext.Instance?.SceneManager.Set(new TimeAttackGameScene());
                 break;
             case 5:
                 SetState(MainMenuState.LeaderboardSelectionScreen);
                 break;
             case 8:
+                SetState(MainMenuState.SettingsScreen);
                 break;
             case 9:
                 SetState(MainMenuState.QuitScreen);
@@ -211,7 +300,7 @@ internal class MainMenuScene : Scene
         {
             case 2:
             {
-                if(_timeAttackScores == null)
+                if (_timeAttackScores == null)
                     return;
                 var intendedView = _viewableStart - 5;
 
@@ -224,7 +313,7 @@ internal class MainMenuScene : Scene
                 break;
             case 10:
             {
-                if(_timeAttackScores == null)
+                if (_timeAttackScores == null)
                     return;
                 var intendedView = _viewableStart + 5;
 
@@ -263,6 +352,7 @@ internal class MainMenuScene : Scene
 
     private bool Update()
     {
+        _rectangleRotation += 0.025f;
         _selector.Update();
 
         if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_DOWN))
@@ -275,13 +365,86 @@ internal class MainMenuScene : Scene
             return true;
         }
 
+        switch (_state)
+        {
+            case MainMenuState.MainScreen:
+                break;
+            case MainMenuState.QuitScreen:
+                break;
+            case MainMenuState.SettingsScreen:
+                break;
+            case MainMenuState.ModeSelectionScreen:
+                break;
+            case MainMenuState.LeaderboardSelectionScreen:
+                break;
+            case MainMenuState.TimeAttackLeaderboardScreen:
+                break;
+            case MainMenuState.AudioSettingsScreen:
+                switch (_selector.Selection)
+                {
+                    case 3:
+                        if (Keyboard.KeyHeld(SDL.SDL_Scancode.SDL_SCANCODE_RIGHT))
+                        {
+                            ++SettingsLoader.Current.MusicVolume;
+                            UpdateSoundSettingsSelections();
+                        }
+                        else if (Keyboard.KeyHeld(SDL.SDL_Scancode.SDL_SCANCODE_LEFT))
+                        {
+                            --SettingsLoader.Current.MusicVolume;
+                            UpdateSoundSettingsSelections();
+                        }
+
+                        break;
+                    case 4:
+                        if (Keyboard.KeyHeld(SDL.SDL_Scancode.SDL_SCANCODE_RIGHT))
+                        {
+                            ++SettingsLoader.Current.SfxVolume;
+                            UpdateSoundSettingsSelections();
+                        }
+                        else if (Keyboard.KeyHeld(SDL.SDL_Scancode.SDL_SCANCODE_LEFT))
+                        {
+                            --SettingsLoader.Current.SfxVolume;
+                            UpdateSoundSettingsSelections();
+                        }
+
+                        break;
+                }
+
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
         return false;
+    }
+
+    private void DrawRectangles()
+    {
+        for (var i = 0; i < DiamondCount; i++)
+        {
+            _drawer.PushMatrix();
+
+            var rotation = _rectangleRotation + i / 4.0f;
+
+            if (i + 1 % 2 == 0) rotation = -rotation;
+
+            var matrix =
+                Matrix3x2.CreateScale(2.0f + MathF.Cos(rotation), MathF.Sin(rotation), new Vector2(64.0f, 64.0f)) *
+                Matrix3x2.CreateRotation(rotation, new Vector2(64.0f, 64.0f)) *
+                Matrix3x2.CreateTranslation(640.0f / 2.0f - 64.0f, 480.0f / 2.0f - 64.0f);
+            _drawer.MultiplyMatrix(matrix);
+
+            _drawer.Draw(ResourceManager.Textures["Main Menu/Diamond"], Color.FromArgb(Alpha, 0, 0, 255), null);
+            _drawer.PopMatrix();
+        }
     }
 
     private void Draw()
     {
         _renderer.DrawColor = Color.Black;
         _renderer.Clear();
+
+        DrawRectangles();
 
         if (!_disposed) _selector.Draw();
 

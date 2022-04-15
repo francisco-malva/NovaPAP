@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using DuckDuckJump.Engine;
 using DuckDuckJump.Engine.Assets;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
@@ -9,12 +8,11 @@ using SDL2;
 
 namespace DuckDuckJump.Game.Gameplay.Resources;
 
-internal class GameplayResources : IDisposable
+internal class GameplayResources
 {
     private const string GameBorderPath = "UI/game-border";
     private const string PlayerTexturePath = "Game/Field/player";
     private const string JumpingSfxPath = "Game/Player/jump";
-    private const string GameplayMusicPath = "Game/music";
     private const string FinishLineTexturePath = "Game/Field/finish-line";
     private const string ItemUiBorderTexturePath = "Game/Items/item-ui";
     private const string BackgroundTexturePath = "Game/Backgrounds/sky";
@@ -60,8 +58,6 @@ internal class GameplayResources : IDisposable
     public readonly Texture? FinishLineTexture;
     public readonly Texture? GameBorder;
 
-    public readonly Music GameplayMusic;
-
     public readonly Texture? ItemBoxTexture;
 
     public readonly Texture? ItemUiBorderTexture;
@@ -94,7 +90,7 @@ internal class GameplayResources : IDisposable
 
         Debug.Assert(GameContext.Instance != null, "Engine.Game.Instance != null");
         OutputTexture = new Texture(GameContext.Instance.Renderer, SDL.SDL_PIXELFORMAT_RGBA8888,
-            (int) SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, GameField.Width, GameField.Height);
+            (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, GameField.Width, GameField.Height);
 
         BannerTextures = new Texture?[BannerTexturePaths.Length];
         for (var i = 0; i < BannerTexturePaths.Length; i++)
@@ -106,34 +102,10 @@ internal class GameplayResources : IDisposable
         AnnouncerClips = new Chunk[AnnouncerClipPaths.Length];
         for (var i = 0; i < AnnouncerClipPaths.Length; i++)
             AnnouncerClips[i] = resourceManager.Chunks[AnnouncerClipPaths[i]];
-
-        GameplayMusic = resourceManager.Musics[GameplayMusicPath];
-    }
-
-    public void Dispose()
-    {
-        BackgroundTexture?.Dispose();
-        CheckmarkTexture?.Dispose();
-        FinishLineTexture?.Dispose();
-        GameBorder?.Dispose();
-        GameplayMusic.Dispose();
-        ItemBoxTexture?.Dispose();
-        ItemUiBorderTexture?.Dispose();
-        JumpingSfx.Dispose();
-        PlatformTexture?.Dispose();
-        PlayerTexture?.Dispose();
-
-        foreach (var itemTexture in _itemTextures) itemTexture?.Dispose();
-
-        foreach (var announcerClip in AnnouncerClips) announcerClip.Dispose();
-
-        foreach (var bannerTexture in BannerTextures) bannerTexture?.Dispose();
-
-        OutputTexture.Dispose();
     }
 
     public Texture? GetItemTexture(Item itemType)
     {
-        return _itemTextures[(int) itemType];
+        return _itemTextures[(int)itemType];
     }
 }

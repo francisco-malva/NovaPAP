@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace ScoringServer;
+namespace ScoringServer.Paths;
 
 public interface IPath
 {

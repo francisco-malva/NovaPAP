@@ -40,43 +40,44 @@ internal class Font : IDisposable
     public Surface RenderTextSolid(string text, Color color)
     {
         return new Surface(SDL_ttf.TTF_RenderText_Solid(_handle, text,
-            new SDL.SDL_Color {r = color.R, g = color.G, b = color.B, a = color.A}));
+            new SDL.SDL_Color { r = color.R, g = color.G, b = color.B, a = color.A }));
     }
 
     public Surface RenderTextShaded(string text, Color foregroundColor, Color backgroundColor)
     {
         return new Surface(SDL_ttf.TTF_RenderText_Shaded(_handle, text,
             new SDL.SDL_Color
-                {r = foregroundColor.R, g = foregroundColor.G, b = foregroundColor.B, a = foregroundColor.A},
+                { r = foregroundColor.R, g = foregroundColor.G, b = foregroundColor.B, a = foregroundColor.A },
             new SDL.SDL_Color
-                {r = foregroundColor.R, g = foregroundColor.G, b = foregroundColor.B, a = foregroundColor.A}));
+                { r = foregroundColor.R, g = foregroundColor.G, b = foregroundColor.B, a = foregroundColor.A }));
     }
 
     public Surface RenderTextBlended(string text, Color foregroundColor)
     {
         return new Surface(SDL_ttf.TTF_RenderText_Blended(_handle, text, new SDL.SDL_Color
-            {r = foregroundColor.R, g = foregroundColor.G, b = foregroundColor.B, a = foregroundColor.A}));
+            { r = foregroundColor.R, g = foregroundColor.G, b = foregroundColor.B, a = foregroundColor.A }));
     }
 
     public Surface RenderTextBlendedWrapped(string text, Color color, uint wrapped)
     {
         return new Surface(SDL_ttf.TTF_RenderText_Blended_Wrapped(_handle, text,
-            new SDL.SDL_Color {r = color.R, g = color.G, b = color.B, a = color.A}, wrapped));
+            new SDL.SDL_Color { r = color.R, g = color.G, b = color.B, a = color.A }, wrapped));
     }
 
     public Surface RenderTextSolidWrapped(string text, Color color, uint wrapped)
     {
         return new Surface(SDL_ttf.TTF_RenderText_Solid_Wrapped(_handle, text,
-            new SDL.SDL_Color {r = color.R, g = color.G, b = color.B, a = color.A}, wrapped));
+            new SDL.SDL_Color { r = color.R, g = color.G, b = color.B, a = color.A }, wrapped));
     }
 
     public Surface RenderTextShadedWrapped(string text, Color foregroundColor, Color backgroundColor, uint wrapped)
     {
         return new Surface(SDL_ttf.TTF_RenderText_Shaded_Wrapped(_handle, text,
             new SDL.SDL_Color
-                {r = foregroundColor.R, g = foregroundColor.G, b = foregroundColor.B, a = foregroundColor.A},
+                { r = foregroundColor.R, g = foregroundColor.G, b = foregroundColor.B, a = foregroundColor.A },
             new SDL.SDL_Color
-                {r = foregroundColor.R, g = foregroundColor.G, b = foregroundColor.B, a = foregroundColor.A}, wrapped));
+                { r = foregroundColor.R, g = foregroundColor.G, b = foregroundColor.B, a = foregroundColor.A },
+            wrapped));
     }
 
     private void ReleaseUnmanagedResources()

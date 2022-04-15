@@ -117,7 +117,7 @@ internal abstract class Player : MessagePoint
                 UpdatePosition();
                 break;
             case PlayerState.Won:
-                Position.Y += (int) _stateTimer;
+                Position.Y += (int)_stateTimer;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
