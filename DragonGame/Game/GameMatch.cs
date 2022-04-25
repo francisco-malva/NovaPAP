@@ -1,226 +1,215 @@
-﻿using System;
-using System.Diagnostics;
+﻿#region
+
+using System;
 using System.Drawing;
-using DuckDuckJump.Engine;
-using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using System.Numerics;
+using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
-using DuckDuckJump.Game.Gameplay;
-using DuckDuckJump.Game.Gameplay.Announcer;
-using DuckDuckJump.Game.Gameplay.Resources;
 using DuckDuckJump.Game.Input;
-using DuckDuckJump.Game.Input.InputHandlers;
-using SDL2;
+
+#endregion
 
 namespace DuckDuckJump.Game;
 
-internal class GameMatch
+internal static partial class Match
 {
-    public const int GameBorder = 64;
-    public const int Width = 640;
-    public const int Height = 480;
+    public const int PlayerCount = 2;
+    private static MatchState _state;
+    private static GameInfo _info;
 
-    public const byte GetReadyTime = 120;
-    public const byte RoundEndTime = 120;
+    private static float _fade;
+    private static Winner _winner;
 
-    private readonly Announcer _announcer;
+    private static byte _currentRound;
 
-    private readonly Texture? _gameBorder;
-    private readonly Texture _outputTexture;
-
-    private readonly GameField _p1Field;
-    private readonly GameField _p2Field;
-
-    private readonly Renderer _renderer;
-
-    private GameState _state = GameState.GetReady;
-    private byte _stateTimer;
-
-    public Action? OnGameEnded;
-
-    public GameMatch(GameInfo info, GameplayResources resources)
+    private static readonly string[] WinMessages =
     {
-        Debug.Assert(GameContext.Instance != null, "Engine.Game.Instance != null");
-        _renderer = GameContext.Instance.Renderer;
+        "P1 Wins",
+        "P2 Wins",
+        "Draw"
+    };
 
-        _outputTexture = resources.OutputTexture;
+    private static readonly Color[] WinColors =
+    {
+        Color.Goldenrod,
+        Color.Goldenrod,
+        Color.DodgerBlue
+    };
 
-        _gameBorder = resources.GameBorder;
-        var random = new Random(info.RandomSeed);
+    private static int _matchWinner;
 
-        _p1Field = new GameField(random, this, false, info, resources);
-        _p2Field = new GameField(random, this, true, info, resources);
+    public static bool IsOver { get; private set; }
+    public static int MatchWinner => _matchWinner;
 
-        _p1Field.SetOther(_p2Field);
-        _p2Field.SetOther(_p1Field);
 
-        _announcer = new Announcer(resources);
+    public static void Initialize(GameInfo info)
+    {
+        IsOver = false;
+        _info = info;
+        _currentRound = 0;
+        _matchWinner = 0;
 
-        ChangeState(GameState.GetReady);
+        _fade = 1.0f;
+
+        ScoreWork.Reset();
+        RandomWork.Reset();
+
+        SetState(MatchState.GetReady);
     }
 
-    public Winner Winner { get; private set; }
-
-    protected bool CanPause => _state == GameState.InGame;
-
-    public Winner WinningSide
+    private static void SetState(MatchState state)
     {
-        get
+        _state = state;
+
+        switch (_state)
         {
-            if (_p1Field.PlayerClimbingProgress > _p2Field.PlayerClimbingProgress)
-                return Winner.P1;
-            return _p2Field.PlayerClimbingProgress > _p1Field.PlayerClimbingProgress
-                ? Winner.P2
-                : Winner.Neither;
-        }
-    }
+            case MatchState.GetReady:
+                _winner = Winner.None;
+                _currentRound++;
+                BannerWork.Reset();
+                CameraWork.Reset();
+                PlayerWork.Reset();
+                PlatformWork.Reset();
+                TimerWork.Reset();
 
-    public bool HasMatchEnded => _state == GameState.MatchEnded;
-
-    public bool MatchInCourse => _state == GameState.InGame;
-
-    private void EndRound(Winner winner)
-    {
-        Winner = winner;
-        ChangeState(GameState.PlayerWon);
-    }
-
-    private void AnnounceWinner()
-    {
-        switch (Winner)
-        {
-            case Winner.Neither:
-                _p1Field.WinRound(true);
-                _p2Field.WinRound(true);
-                _announcer.Say(AnnouncementType.Draw);
+                if (_info.ScoreCount > 1)
+                    BannerWork.SetMessage($"Round {_currentRound}", Color.White, 1.0f);
                 break;
-            case Winner.P1:
-                _p1Field.WinRound();
-                _p2Field.LoseRound();
-                _announcer.Say(AnnouncementType.P1Wins);
+            case MatchState.InGame:
                 break;
-            case Winner.P2:
-                _p2Field.WinRound();
-                _p1Field.LoseRound();
-                _announcer.Say(AnnouncementType.P2Wins);
+            case MatchState.Winner:
+                if (_winner != Winner.Draw && _winner != Winner.None)
+                {
+                    var winner = (int) _winner;
+                    ScoreWork.IncreaseScore(winner);
+
+                    ref var player = ref PlayerWork.Get(winner);
+                    CameraWork.Target =
+                        new Vector2(player.Position.X + player.PushBox.Width / 2.0f - Graphics.Midpoint.X,
+                            player.Position.Y + player.PushBox.Height / 2.0f - Graphics.Midpoint.Y);
+                }
+
+                if (ScoreWork.GetWinner(out _matchWinner))
+                    // ReSharper disable once TailRecursiveCall
+                    SetState(MatchState.Over);
+                else
+                    BannerWork.SetMessage(WinMessages[(int) _winner], WinColors[(int) _winner], 1.0f);
+                break;
+            case MatchState.NotInitialized:
+            case MatchState.Over:
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
     }
 
-    private void ChangeState(GameState state)
+    public static void Update(Span<GameInput> inputs)
     {
-        _stateTimer = 0;
-        _state = state;
-
+        if (_state == MatchState.NotInitialized)
+            return;
         switch (_state)
         {
-            case GameState.GetReady:
-                _announcer.Say(AnnouncementType.GetReady);
-                _p1Field.GetReady();
-                _p2Field.GetReady();
+            case MatchState.GetReady:
+                if (BannerWork.IsDone())
+                {
+                    _fade -= 0.05f;
+                    if (_fade <= 0.0f)
+                    {
+                        _fade = 0.0f;
+                        SetState(MatchState.InGame);
+                    }
+                }
+
                 break;
-            case GameState.InGame:
-                _announcer.Say(AnnouncementType.Go);
-                _p1Field.BeginRound();
-                _p2Field.BeginRound();
+            case MatchState.InGame:
+                DecideWinner();
+
+                if (_winner >= 0) SetState(MatchState.Winner);
                 break;
-            case GameState.PlayerWon:
-                AnnounceWinner();
+            case MatchState.Winner:
+                if (BannerWork.IsDone())
+                {
+                    _fade += 0.05f;
+                    if (_fade >= 1.0f) SetState(MatchState.GetReady);
+                }
+
                 break;
-            case GameState.MatchEnded:
-                OnGameEnded?.Invoke();
+            case MatchState.NotInitialized:
+            case MatchState.Over:
+                _fade -= 0.01f;
+                if (_fade <= 0.0f)
+                {
+                    _fade = 0.0f;
+                    SetState(MatchState.NotInitialized);
+                }
+
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(state));
-        }
-    }
-
-    private void GetReadyUpdate(GameInput p1Input, GameInput p2Input)
-    {
-        if (_stateTimer == GetReadyTime)
-        {
-            ChangeState(GameState.InGame);
-            return;
+                throw new ArgumentOutOfRangeException();
         }
 
-        _p1Field.Update(p1Input);
-        _p2Field.Update(p2Input);
+        PlatformWork.Update();
+        PlayerWork.UpdateUs(inputs);
+        CameraWork.UpdateMe();
+        BannerWork.Update();
+        TimerWork.UpdateMe();
     }
 
-    private void InGameUpdate(GameInput p1Input, GameInput p2Input)
+    private static void DecideWinner()
     {
-        _p1Field.Update(p1Input);
-        _p2Field.Update(p2Input);
-
-        switch (_p1Field.PlayerWonRound)
+        switch (PlayerWork.First.Lost)
         {
-            case true when _p2Field.PlayerWonRound:
-                EndRound(Winner.Neither);
+            case true when PlayerWork.Last.Lost:
+                _winner = Winner.Draw;
                 break;
             case true:
-                EndRound(Winner.P1);
+                _winner = Winner.P2;
                 break;
             default:
             {
-                if (_p2Field.PlayerWonRound) EndRound(Winner.P2);
+                if (PlayerWork.Last.Lost) _winner = Winner.P1;
                 break;
             }
         }
     }
 
-    private void PlayerWonUpdate(GameInput p1Input, GameInput p2Input)
+    public static void Draw()
     {
-        _p1Field.Update(p1Input);
-        _p2Field.Update(p2Input);
+        if (_state == MatchState.NotInitialized)
+            return;
 
-        if (_stateTimer != RoundEndTime) return;
+        Graphics.Camera = null;
+        Graphics.Draw(Assets.Texture(Assets.TextureIndex.Sky), null, Matrix3x2.CreateScale(2.0f), Color.White);
+        Graphics.Camera = CameraWork.Camera;
 
-        if (_p1Field.PlayerWonGame || _p2Field.PlayerWonGame)
-            ChangeState(GameState.MatchEnded);
-        else
-            ChangeState(GameState.GetReady);
+        PlayerWork.DrawUs();
+        PlatformWork.DrawUs();
+
+        if (!(_fade >= 0.0f)) return;
+
+        Graphics.Camera = null;
+
+        TimerWork.DrawMe();
+        Graphics.Draw(Texture.White, null,
+            Matrix3x2.CreateScale(Graphics.LogicalSize.Width, Graphics.LogicalSize.Height),
+            Color.FromArgb((int) (Math.Min(1.0f, _fade) * byte.MaxValue), 0, 0, 0));
+        BannerWork.DrawMe();
     }
 
-    internal void Update(IInputHandler inputHandler)
+    private enum MatchState : byte
     {
-        var inputs = inputHandler.GetGameInput();
-        switch (_state)
-        {
-            case GameState.GetReady:
-                GetReadyUpdate(inputs.First, inputs.Second);
-                break;
-            case GameState.InGame:
-                InGameUpdate(inputs.First, inputs.Second);
-                break;
-            case GameState.PlayerWon:
-                PlayerWonUpdate(inputs.First, inputs.Second);
-                break;
-            case GameState.MatchEnded:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-
-        ++_stateTimer;
+        NotInitialized,
+        GetReady,
+        InGame,
+        Winner,
+        Over
     }
 
-    internal void Draw()
+    private enum Winner : sbyte
     {
-        var p1Dest = new Rectangle(GameBorder / 2, GameBorder / 2, GameField.Width, GameField.Height);
-        var p2Dest = new Rectangle(Width / 2 + GameBorder / 2, GameBorder / 2, GameField.Width, GameField.Height);
-
-        _renderer.DrawColor = Color.Black;
-        _renderer.Clear();
-        _renderer.Copy(_gameBorder, null, null);
-
-        _p1Field.Draw(_outputTexture);
-        _renderer.SetRenderTarget(null);
-        _renderer.CopyEx(_outputTexture, null, p1Dest, 0.0, null,
-            SDL.SDL_RendererFlip.SDL_FLIP_NONE);
-
-        _p2Field.Draw(_outputTexture);
-        _renderer.SetRenderTarget(null);
-        _renderer.CopyEx(_outputTexture, null, p2Dest, 0.0, null, SDL.SDL_RendererFlip.SDL_FLIP_NONE);
+        None = -1,
+        P1,
+        P2,
+        Draw
     }
 }

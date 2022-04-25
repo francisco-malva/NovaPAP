@@ -1,5 +1,9 @@
-﻿using System;
+﻿#region
+
+using System;
 using SDL2;
+
+#endregion
 
 namespace DuckDuckJump.Engine.Settings;
 

@@ -1,5 +1,9 @@
-﻿using System;
+﻿#region
+
+using System;
 using SDL2;
+
+#endregion
 
 namespace DuckDuckJump.Engine.Wrappers.SDL2.Mixer;
 

@@ -1,14 +1,15 @@
-﻿using DuckDuckJump.Engine;
+﻿#region
+
+using DuckDuckJump.Engine.Subsystems.Flow;
+
+#endregion
 
 namespace DuckDuckJump;
 
 internal static class Program
 {
-    private static int Main()
+    private static void Main()
     {
-        using var game = new GameContext();
-        game.Run(60);
-
-        return 0;
+        GameFlow.Run();
     }
 }

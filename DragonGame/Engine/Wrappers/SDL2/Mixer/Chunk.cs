@@ -1,7 +1,11 @@
-﻿using System;
+﻿#region
+
+using System;
 using DuckDuckJump.Engine.Settings;
 using DuckDuckJump.Engine.Wrappers.SDL2.Mixer.Exceptions;
 using SDL2;
+
+#endregion
 
 namespace DuckDuckJump.Engine.Wrappers.SDL2.Mixer;
 

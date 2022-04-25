@@ -1,21 +1,44 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Drawing;
+using System.IO;
+using DuckDuckJump.Engine.Subsystems.Files;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Exceptions.Textures;
 using SDL2;
+using StbImageSharp;
+
+#endregion
 
 namespace DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 
 internal class Texture : IDisposable
 {
-    public Texture(Renderer renderer, uint format, int access, int w, int h)
+    static Texture()
     {
-        Handle = SDL.SDL_CreateTexture(renderer.Handle, format, access, w, h);
+        White = new Texture("white");
     }
 
-    public Texture(Renderer renderer, Surface surface)
+    public Texture(uint format, int access, int w, int h)
     {
-        Handle = SDL.SDL_CreateTextureFromSurface(renderer.Handle, surface.Handle);
+        Handle = SDL.SDL_CreateTexture(Subsystems.Graphical.Graphics.Renderer, format, access, w, h);
     }
+
+    public Texture(Surface surface)
+    {
+        Handle = SDL.SDL_CreateTextureFromSurface(Subsystems.Graphical.Graphics.Renderer, surface.Handle);
+    }
+
+    public Texture(string path)
+    {
+        path = Path.Combine("Assets", "Textures", $"{path}.png");
+        using var file = FileSystem.Open(path);
+        using var surface = new Surface(ImageResult.FromStream(file, ColorComponents.RedGreenBlueAlpha));
+        Handle = SDL.SDL_CreateTextureFromSurface(Subsystems.Graphical.Graphics.Renderer, surface.Handle);
+    }
+
+    public static Texture White { get; }
+
 
     public IntPtr Handle { get; private set; }
 
@@ -23,6 +46,11 @@ internal class Texture : IDisposable
     {
         ReleaseUnmanagedResources();
         GC.SuppressFinalize(this);
+    }
+
+    ~Texture()
+    {
+        ReleaseUnmanagedResources();
     }
 
     public void SetBlendMode(SDL.SDL_BlendMode blendMode)
@@ -65,10 +93,5 @@ internal class Texture : IDisposable
 
         SDL.SDL_DestroyTexture(Handle);
         Handle = IntPtr.Zero;
-    }
-
-    ~Texture()
-    {
-        ReleaseUnmanagedResources();
     }
 }

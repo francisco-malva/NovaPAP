@@ -1,5 +1,9 @@
-﻿using System.IO;
+﻿#region
+
+using System.IO;
 using System.Xml.Serialization;
+
+#endregion
 
 namespace DuckDuckJump.Engine.Settings;
 
@@ -18,7 +22,7 @@ public static class SettingsLoader
         else
         {
             using var file = File.OpenRead("config.xml");
-            Current = (GameSettings?)serializer.Deserialize(file) ?? new GameSettings(64, 64);
+            Current = (GameSettings) serializer.Deserialize(file) ?? new GameSettings(64, 64);
         }
     }
 

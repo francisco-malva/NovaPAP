@@ -1,52 +1,47 @@
-﻿using System.IO;
-using DuckDuckJump.Game.Gameplay.Players.AI;
+﻿#region
+
+using System;
+using System.IO;
+
+#endregion
 
 namespace DuckDuckJump.Game;
 
-internal class GameInfo
+internal unsafe struct GameInfo
 {
-    public readonly AiDifficulty Difficulty;
-    public readonly bool HasItems;
-
-    public readonly bool P1Ai;
-    public readonly bool P2Ai;
-    public readonly ushort PlatformCount;
-
+    public ComLevels ComLevels;
+    public readonly int PlatformCount;
     public readonly int RandomSeed;
-    public readonly sbyte RoundsToWin;
+    public readonly sbyte ScoreCount;
+    public readonly bool FightMessages;
+    public readonly ulong TimeLeft;
 
-
-    public GameInfo(ushort platformCount, sbyte roundsToWin, bool p1Ai, bool p2Ai, int randomSeed,
-        AiDifficulty difficulty, bool hasItems)
+    public GameInfo(ComLevels levels, int platformCount, int randomSeed, sbyte scoreCount, bool fightMessages,
+        ulong timeLeft)
     {
+        ComLevels = levels;
         PlatformCount = platformCount;
-        RoundsToWin = roundsToWin;
-        P1Ai = p1Ai;
-        P2Ai = p2Ai;
         RandomSeed = randomSeed;
-        Difficulty = difficulty;
-        HasItems = hasItems;
+        ScoreCount = scoreCount;
+        FightMessages = fightMessages;
+        TimeLeft = timeLeft;
     }
 
-    public GameInfo(BinaryReader reader)
+    public void Save(Stream stream)
     {
-        PlatformCount = reader.ReadUInt16();
-        RoundsToWin = reader.ReadSByte();
-        P1Ai = reader.ReadBoolean();
-        P2Ai = reader.ReadBoolean();
-        RandomSeed = reader.ReadInt32();
-        Difficulty = (AiDifficulty)reader.ReadByte();
-        HasItems = reader.ReadBoolean();
+        fixed (GameInfo* ptr = &this)
+        {
+            var store = new Span<byte>(ptr, sizeof(GameInfo));
+            stream.Write(store);
+        }
     }
 
-    public void Save(BinaryWriter writer)
+    public void Load(Stream stream)
     {
-        writer.Write(PlatformCount);
-        writer.Write(RoundsToWin);
-        writer.Write(P1Ai);
-        writer.Write(P2Ai);
-        writer.Write(RandomSeed);
-        writer.Write((byte)Difficulty);
-        writer.Write(HasItems);
+        fixed (GameInfo* ptr = &this)
+        {
+            var store = new Span<byte>(ptr, sizeof(GameInfo));
+            stream.Read(store);
+        }
     }
 }

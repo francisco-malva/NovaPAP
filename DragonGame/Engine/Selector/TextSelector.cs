@@ -1,144 +1,111 @@
-﻿using System;
+﻿#region
+
+using System.Collections.Generic;
 using System.Drawing;
-using DuckDuckJump.Engine.Text;
-using DuckDuckJump.Engine.Utilities;
-using DuckDuckJump.Engine.Wrappers.SDL2.Graphics;
+using System.Numerics;
+using DuckDuckJump.Engine.Assets;
+using DuckDuckJump.Engine.Subsystems.Graphical;
+using SDL2;
+
+#endregion
 
 namespace DuckDuckJump.Engine.Selector;
 
-internal class TextSelector
+public abstract class TextSelector
 {
-    private const float RectangleSpeed = 0.25f;
-    private readonly Renderer _renderer;
+    private readonly List<QueuedDraw> _drawList = new();
+    private readonly Font _font;
+    private uint _currentState;
 
-    private readonly TextDrawer _textDrawer;
+    private float _currentYStride;
 
+    private int _mouseX;
+    private int _mouseY;
 
-    private Size[] _cachedSizes = new Size[1];
-    private Rectangle _currentRectangle;
-    private int _currentSelection;
+    private uint _previousState;
 
-    private Rectangle _previousRectangle;
-
-    private int _previousSelection;
-
-    private float _rectangleT;
-
-    private Rectangle _selectionRectangle;
-    private Selection[] _selections = null!;
-
-    public Action<int>? OnSelect;
-
-    public TextSelector(Selection[] selections, Renderer renderer, TextDrawer textDrawer)
+    protected TextSelector(Font font)
     {
-        _textDrawer = textDrawer;
-        _renderer = renderer;
-        Selections = selections;
-        Selection = 0;
+        _font = font;
     }
 
-    public Selection[] Selections
-    {
-        set
-        {
-            _selections = value;
+    public bool LeftClick =>
+        (_previousState & SDL.SDL_BUTTON_LMASK) == 0 && (_currentState & SDL.SDL_BUTTON_LMASK) != 0;
 
-            Array.Resize(ref _cachedSizes, _selections.Length);
-            RecalculateSizes();
-        }
+    public virtual void Update()
+    {
+        _previousState = _currentState;
+        _currentState = SDL.SDL_GetMouseState(out _mouseX, out _mouseY);
     }
 
-    public int Selection
+    protected void Begin()
     {
-        get => _currentSelection;
-        set
-        {
-            _rectangleT = 0.0f;
-            _previousSelection = _currentSelection;
-            _currentSelection = Math.Clamp(value, 0, _selections.Length - 1);
-
-            _previousRectangle = GetSelectionRectangle(_previousSelection);
-            _currentRectangle = GetSelectionRectangle(_currentSelection);
-        }
+        _drawList.Clear();
+        _currentYStride = 0.0f;
     }
 
-    public void RecalculateSizes()
+    protected void Label(string caption)
     {
-        for (var i = 0; i < _cachedSizes.Length; i++)
-            _cachedSizes[i] = _textDrawer.MeasureText(_selections[i].Caption);
+        Label(caption, Color.White);
     }
 
-    public void SetSelectionImmediate(int selection)
+    protected void Label(string caption, Color color, float scale = 1.0f, Font.OnTextDraw onTextDraw = null)
     {
-        _previousSelection = selection;
-        _currentSelection = selection;
-        _currentRectangle = GetSelectionRectangle(selection);
-        _rectangleT = 1.0f;
+        var size = _font.MeasureString(caption) * scale;
+
+        _drawList.Add(new QueuedDraw(caption, color,
+            new Vector2(Graphics.LogicalSize.Width / 2.0f - size.Width / 2.0f, _currentYStride), scale, onTextDraw));
+
+        _currentYStride += size.Height;
     }
 
-    public void Update()
+    protected void Break(float space)
     {
-        _rectangleT += RectangleSpeed;
-        if (_rectangleT > 1.0f)
-            _rectangleT = 1.0f;
-
-        _selectionRectangle = new Rectangle(
-            (int)Mathematics.Lerp(_previousRectangle.X, _currentRectangle.X, _rectangleT),
-            (int)Mathematics.Lerp(_previousRectangle.Y, _currentRectangle.Y, _rectangleT),
-            (int)Mathematics.Lerp(_previousRectangle.Width, _currentRectangle.Width, _rectangleT),
-            (int)Mathematics.Lerp(_previousRectangle.Height, _currentRectangle.Height, _rectangleT));
+        _currentYStride += space;
     }
 
-    private Rectangle GetSelectionRectangle(int selection)
+    protected bool Button(string caption, float scale = 1.0f, Font.OnTextDraw onTextDraw = null)
     {
-        var x = 640 / 2 - _cachedSizes[selection].Width / 2;
+        var size = _font.MeasureString(caption) * scale;
 
-        var y = _cachedSizes[0].Height;
-        for (var i = 1; i <= selection; i++) y += _cachedSizes[i].Height;
+        var x = Graphics.LogicalSize.Width / 2.0f - size.Width / 2.0f;
+        var y = _currentYStride;
+        var rect = new RectangleF(x, y, size.Width, size.Height);
 
-        return new Rectangle(x, y, _cachedSizes[selection].Width, _cachedSizes[selection].Height);
+        var inMouseRange = rect.Contains(_mouseX, _mouseY);
+
+        Label(caption, inMouseRange ? Color.White : Color.Gray, scale, onTextDraw);
+        return inMouseRange && LeftClick;
+    }
+
+    protected void End()
+    {
     }
 
     public void Draw()
     {
-        _renderer.DrawColor = Color.Blue;
-        _renderer.FillRect(_selectionRectangle);
-
-        for (var i = 0; i < _selections.Length; i++)
+        foreach (var draw in _drawList)
         {
-            var rect = GetSelectionRectangle(i);
-            _textDrawer.DrawText(rect.X, rect.Y, _selections[i].Caption, _selections[i].Color);
+            var transformation = Matrix3x2.CreateScale(draw.Scale) * Matrix3x2.CreateTranslation(draw.Position);
+            _font.Draw(draw.Caption, transformation, draw.Color, draw.OnTextDraw);
         }
     }
 
-    public void IncreaseSelection()
+    private readonly struct QueuedDraw
     {
-        var selection = _currentSelection;
+        public readonly string Caption;
+        public readonly Color Color;
+        public readonly Vector2 Position;
+        public readonly float Scale;
+        public readonly Font.OnTextDraw OnTextDraw;
 
-        do
+        public QueuedDraw(string caption, Color color, Vector2 position, float scale, Font.OnTextDraw onTextDraw)
         {
-            selection = (selection + 1) % _selections.Length;
-        } while (!_selections[selection].Selectable);
-
-        Selection = selection;
-    }
-
-    public void Select()
-    {
-        OnSelect?.Invoke(_currentSelection);
-    }
-
-    public void DecreaseSelection()
-    {
-        var selection = _currentSelection;
-
-        do
-        {
-            --selection;
-
-            if (selection < 0) selection = _selections.Length - 1;
-        } while (!_selections[selection].Selectable);
-
-        Selection = selection;
+            Caption = caption;
+            Color = color;
+            Position = position;
+            Scale = scale;
+            OnTextDraw = onTextDraw;
+        }
     }
 }

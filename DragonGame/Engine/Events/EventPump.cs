@@ -1,7 +1,11 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using SDL2;
+
+#endregion
 
 namespace DuckDuckJump.Engine.Events;
 

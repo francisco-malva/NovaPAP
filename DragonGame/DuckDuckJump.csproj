@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <LangVersion>latest</LangVersion>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable>
         <ApplicationIcon>Assets\game-icon.ico</ApplicationIcon>
         <Company>Mallo</Company>
         <Product>Duck Duck Jump</Product>
@@ -21,8 +21,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha"/>
-        <PackageReference Include="StbImageSharp" Version="2.22.6"/>
+        <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha" />
+        <PackageReference Include="StbImageSharp" Version="2.22.6" />
     </ItemGroup>
 
     <ItemGroup>
@@ -143,9 +143,6 @@
         <None Update="Assets\Textures\Game\Field\platform.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="Assets\Textures\Game\Backgrounds\sky.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
         <None Update="Assets\Audio\Game\Announcer\draw.ogg">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -191,16 +188,10 @@
         <None Update="libvorbisfile-3.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="Assets\Fonts\VeraMono.ttf">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
         <None Update="runtimes\win-x64\native\SDL2_ttf.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="Assets\Fonts\CecepsHandwriting-vmpKZ.ttf">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Fonts\PublicPixel-0W6DP.ttf">
+        <None Update="Assets\Fonts\public-pixel.ttf">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\test.png">
@@ -218,14 +209,30 @@
         <None Update="Assets\Music\MainMenu\music.ogg">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Assets\Music\menu.ogg">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Backgrounds\sky.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\white.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Fonts\terminator-two.ttf">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\test.raw">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Common\Common.csproj"/>
+        <ProjectReference Include="..\Common\Common.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Assets\Music\MainMenu"/>
+        <Folder Include="Engine\Scenes" />
+        <Folder Include="Engine\Sprites" />
     </ItemGroup>
 
 </Project>
