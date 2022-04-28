@@ -7,8 +7,7 @@ using SDL2;
 
 namespace DuckDuckJump.Engine.Settings;
 
-public class GameSettings
-{
+public class Gm{
     private int _sfxVolume;
 
     public GameSettings()

@@ -24,11 +24,11 @@ public static class GameFlow
     public static void Run()
     {
         if (TTF_Init() != 0) Error.Panic($"Could not initialize SDL_TTF. TTF ERROR: {TTF_GetError()}");
-        
+
         FileSystem.Initialize();
         Graphics.Initialize();
         Audio.Initialize();
-        
+
         Set(new MainMenuState());
 
         var running = true;

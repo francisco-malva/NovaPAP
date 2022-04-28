@@ -1,4 +1,11 @@
-﻿namespace DuckDuckJump.Game;
+﻿#region
+
+using System.IO;
+using DuckDuckJump.Engine.Utilities;
+
+#endregion
+
+namespace DuckDuckJump.Game;
 
 internal static partial class Match
 {
@@ -1032,11 +1039,21 @@ internal static partial class Match
             0xf6, 0xaa, 0xa9, 0xd5, 0x7b, 0xdf, 0xa9, 0xf4, 0xf3, 0x24, 0x77, 0xa7, 0x60, 0x7a, 0x94, 0xc0
         };
 
-        private static int _pointer;
+        private static ushort _pointer;
+
+        public static void SaveMe(Stream stream)
+        {
+            stream.Write(_pointer);
+        }
+
+        public static void LoadMe(Stream stream)
+        {
+            _pointer = stream.Read<ushort>();
+        }
 
         public static void Reset()
         {
-            _pointer = _info.RandomSeed % Entropy.Length;
+            _pointer = (ushort) (_info.RandomSeed % Entropy.Length);
         }
 
 
@@ -1065,7 +1082,21 @@ internal static partial class Match
 
         public static int Next(int min, int max)
         {
+            if (min == max)
+                return min;
             return (int) (min + RandomUnsigned() % (max - min));
+        }
+
+        public static short Next(short min, short max)
+        {
+            if (min == max)
+                return min;
+            return (short) (min + RandomUnsigned() % (max - min));
+        }
+
+        public static byte Next(byte min, byte max)
+        {
+            return (byte) (min + RandomByte() % (max - min));
         }
 
         public static float Next(float min, float max)

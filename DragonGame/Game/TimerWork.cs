@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Drawing;
+using System.IO;
 using System.Numerics;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Utilities;
@@ -14,14 +15,16 @@ internal partial class Match
     private static class TimerWork
     {
         private const float DropShadowOffset = 3.0f;
-        private static ulong _timeLeft;
+        private static ushort _timeLeft;
 
         private static float _alpha;
         private static float _alphaVelocity;
 
         private static Size _stringSize;
         private static string _string;
-        private static float TargetAlpha => _state == MatchState.InGame ? 1.0f : 0.0f;
+        private static float TargetAlpha => State == MatchState.InGame ? 1.0f : 0.0f;
+
+        public static bool Over => _timeLeft == 0;
 
         public static void Reset()
         {
@@ -29,10 +32,25 @@ internal partial class Match
             UpdateDisplay();
         }
 
+        public static void SaveMe(Stream stream)
+        {
+            stream.Write(_timeLeft);
+            stream.Write(_alpha);
+            stream.Write(_alphaVelocity);
+        }
+
+        public static void LoadMe(Stream stream)
+        {
+            _timeLeft = stream.Read<ushort>();
+            _alpha = stream.Read<float>();
+            _alphaVelocity = stream.Read<float>();
+            UpdateDisplay();
+        }
+
         public static void UpdateMe()
         {
             _alpha = Mathematics.SmoothDamp(_alpha, TargetAlpha, ref _alphaVelocity, 0.15f);
-            if (_state != MatchState.InGame)
+            if (State != MatchState.InGame)
                 return;
 
             if (_timeLeft > 0) TickDown();

@@ -1,8 +1,12 @@
-﻿using System.Data.SQLite;
+﻿#region
+
+using System.Data.SQLite;
 using System.Net;
 using System.Text.Json;
 using Common;
 using ScoringServer.Extensions;
+
+#endregion
 
 namespace ScoringServer.Paths.Scores;
 

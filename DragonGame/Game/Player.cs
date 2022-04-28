@@ -2,6 +2,7 @@
 
 using System;
 using System.Drawing;
+using System.IO;
 using System.Numerics;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Utilities;
@@ -34,15 +35,17 @@ internal static partial class Match
             };
 
             public bool Lost;
-            private int _myPlayerIndex;
+            private byte _myPlayerIndex;
 
-            public void Reset(int playerIndex)
+            public void Reset(byte playerIndex)
             {
                 _myPlayerIndex = playerIndex;
                 Lost = false;
 
                 if (IsCom) ResetComFields();
 
+
+                _lastJumpedPlatform = -1;
 
                 _velocity = Vector2.Zero;
                 _xVelocity = 0.0f;
@@ -62,9 +65,9 @@ internal static partial class Match
                 Jump();
             }
 
-            public void UpdateMe(int index, GameInput input)
+            public void UpdateMe(GameInput input)
             {
-                switch (_state)
+                switch (State)
                 {
                     case MatchState.InGame:
                         if (IsCom)
@@ -88,6 +91,10 @@ internal static partial class Match
                         break;
                     case MatchState.Over:
                         break;
+                    case MatchState.TimeUp:
+                        break;
+                    case MatchState.BeginningMessage:
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -104,18 +111,26 @@ internal static partial class Match
                 if (!Descending)
                     return;
 
-                if (!PlatformWork.GetIntersectingPlatform(ref this, out var platformIndex)) return;
+                if (!PlatformWork.GetIntersectingPlatform(ref this, out _lastJumpedPlatform)) return;
 
-                ref var platform = ref PlatformWork.GetPlatform(platformIndex);
+                ref var platform = ref PlatformWork.GetPlatform(_lastJumpedPlatform);
 
                 Position.Y = platform.Position.Y - BodyExtents.Height;
 
-                CorrectCameraHeight(ref platform);
+                CorrectCameraHeight(_lastJumpedPlatform);
                 Jump();
             }
 
-            private void CorrectCameraHeight(ref PlatformWork.Platform newTarget)
+            private short _lastJumpedPlatform;
+
+            public short LastJumpedPlatform => _lastJumpedPlatform;
+
+            private void CorrectCameraHeight(short targetId)
             {
+                BackgroundWork.SetTarget(targetId);
+
+                ref var newTarget = ref PlatformWork.GetPlatform(targetId);
+
                 var transformedY = newTarget.Position.Y - Graphics.Midpoint.Y * 1.5f;
                 if (transformedY < CameraWork.Target.Y)
                     CameraWork.Target = new Vector2(CameraWork.Target.X, transformedY);
@@ -125,7 +140,7 @@ internal static partial class Match
 
             private static readonly Vector2 JumpMaxPoint = new(0.0f, 480.0f / 1.35f);
 
-            private Vector2 GetTargetPosition(int targetIndex)
+            private Vector2 GetTargetPosition(short targetIndex)
             {
                 if (targetIndex < 0) return InitialPositions[_myPlayerIndex];
 
@@ -158,8 +173,14 @@ internal static partial class Match
 
             private void Jump(float multiplier = 1.0f)
             {
+                JumpSfx();
                 var velocity = JumpVelocity * multiplier;
                 _yVelocity = velocity;
+            }
+
+            private void JumpSfx()
+            {
+                SoundEffectWork.Queue(Assets.SfxIndex.Jump, 0.25f);
             }
 
             private static readonly Color ComColor = Color.FromArgb(128, 128, 128, 128);
@@ -169,6 +190,24 @@ internal static partial class Match
                 var color = IsCom ? ComColor : Color.White;
                 Graphics.Draw(Assets.Texture(Assets.TextureIndex.Player), null,
                     Matrix3x2.CreateTranslation(Position), color);
+            }
+
+            public unsafe void SaveMe(Stream stream)
+            {
+                fixed (Player* ptr = &this)
+                {
+                    var store = new Span<byte>(ptr, sizeof(Player));
+                    stream.Write(store);
+                }
+            }
+
+            public unsafe void LoadMe(Stream stream)
+            {
+                fixed (Player* ptr = &this)
+                {
+                    var store = new Span<byte>(ptr, sizeof(Player));
+                    stream.Read(store);
+                }
             }
         }
     }

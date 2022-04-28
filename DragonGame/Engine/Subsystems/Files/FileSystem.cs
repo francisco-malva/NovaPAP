@@ -18,6 +18,7 @@ public static class FileSystem
 
     public static Stream Open(string path)
     {
+        path = Path.Combine("Assets", path);
         return File.OpenRead(path);
     }
 }

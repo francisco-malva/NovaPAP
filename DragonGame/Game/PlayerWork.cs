@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.IO;
 using System.Numerics;
 using DuckDuckJump.Game.Input;
 
@@ -16,6 +17,17 @@ internal static partial class Match
         public static ref Player First => ref Get(0);
         public static ref Player Last => ref Get(PlayerCount - 1);
 
+
+        public static void SaveMe(Stream stream)
+        {
+            for (var i = 0; i < PlayerCount; i++) MyPlayers[i].SaveMe(stream);
+        }
+
+        public static void LoadMe(Stream stream)
+        {
+            for (var i = 0; i < PlayerCount; i++) MyPlayers[i].LoadMe(stream);
+        }
+
         public static ref Player Get(int index)
         {
             return ref MyPlayers[index];
@@ -23,14 +35,14 @@ internal static partial class Match
 
         public static void Reset()
         {
-            for (var i = 0; i < PlayerCount; i++) Get(i).Reset(i);
+            for (byte i = 0; i < PlayerCount; i++) Get(i).Reset(i);
         }
 
         public static void UpdateUs(Span<GameInput> inputs)
         {
-            for (var i = 0; i < PlayerCount; i++) Get(i).UpdateMe(i, inputs[i]);
+            for (var i = 0; i < PlayerCount; i++) Get(i).UpdateMe(inputs[i]);
 
-            if (_state != MatchState.InGame) return;
+            if (State != MatchState.InGame) return;
             for (var i = 0; i < PlayerCount; i++) Get(i).ApplySpeed();
 
             if (!_info.ComLevels.HasAi) ApplyPushback();
@@ -64,7 +76,7 @@ internal static partial class Match
         public static void DrawUs()
         {
             for (var i = 0; i < PlayerCount; i++)
-                if (_state == MatchState.Winner)
+                if (State == MatchState.Winner)
                 {
                     if (_winner == (Winner) i)
                         Get(i).DrawMe();

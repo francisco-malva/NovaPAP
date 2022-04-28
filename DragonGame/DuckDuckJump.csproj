@@ -21,6 +21,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="CircularBuffer" Version="1.2.1" />
+        <PackageReference Include="LiteNetLib" Version="1.0.0-rc.1" />
         <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha" />
         <PackageReference Include="StbImageSharp" Version="2.22.6" />
     </ItemGroup>
@@ -47,9 +49,6 @@
         <None Update="Assets\Textures\Game\finish-line.bmp">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="Assets\Textures\UI\game-border.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
         <None Update="libbass.so">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -63,9 +62,6 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\Game\Banners\draw.bmp">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Textures\UI\font.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\Game\Banners\get-ready.bmp">
@@ -158,9 +154,6 @@
         <None Update="Assets\Audio\Game\Announcer\p2-wins.ogg">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="Assets\Audio\Game\Player\jump.ogg">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
         <None Update="runtimes\win-x64\native\SDL2_mixer.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -221,8 +214,19 @@
         <None Update="Assets\Fonts\terminator-two.ttf">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="Assets\test.raw">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <None Update="Assets\Audio\menu.snd">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Audio\gameplay.snd">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Audio\Game\Player\jump.snd">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Remove="Engine\Wrappers\SDL2\Mixer\**" />
+        <None Remove="Engine\Settings\**" />
+        <None Update="Assets\Audio\watch-mode.snd">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 
@@ -231,8 +235,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Engine\Scenes" />
-        <Folder Include="Engine\Sprites" />
+        <Folder Include="Assets\Sound" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="Engine\Wrappers\SDL2\Mixer\**" />
+        <Compile Remove="Engine\Settings\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Remove="Engine\Wrappers\SDL2\Mixer\**" />
+        <EmbeddedResource Remove="Engine\Settings\**" />
     </ItemGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 ﻿#region
 
+using System.IO;
 using System.Numerics;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Utilities;
@@ -22,6 +23,26 @@ internal static partial class Match
         static CameraWork()
         {
             Camera = new Camera();
+        }
+
+        public static void SaveMe(Stream stream)
+        {
+            Camera.Save(stream);
+            stream.Write(Target);
+            stream.Write(_cameraX);
+            stream.Write(_cameraY);
+            stream.Write(_cameraXVelocity);
+            stream.Write(_cameraYVelocity);
+        }
+
+        public static void LoadMe(Stream stream)
+        {
+            Camera.Load(stream);
+            Target = stream.Read<Vector2>();
+            _cameraX = stream.Read<float>();
+            _cameraY = stream.Read<float>();
+            _cameraXVelocity = stream.Read<float>();
+            _cameraYVelocity = stream.Read<float>();
         }
 
         public static void Reset()

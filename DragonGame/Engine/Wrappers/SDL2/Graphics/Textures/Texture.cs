@@ -31,7 +31,7 @@ internal class Texture : IDisposable
 
     public Texture(string path)
     {
-        path = Path.Combine("Assets", "Textures", $"{path}.png");
+        path = Path.Combine("Textures", $"{path}.png");
         using var file = FileSystem.Open(path);
         using var surface = new Surface(ImageResult.FromStream(file, ColorComponents.RedGreenBlueAlpha));
         Handle = SDL.SDL_CreateTextureFromSurface(Subsystems.Graphical.Graphics.Renderer, surface.Handle);

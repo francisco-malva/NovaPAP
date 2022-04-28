@@ -11,17 +11,25 @@ internal static partial class Match
 {
     public static class Assets
     {
-        public enum FontIndex
+        public enum FontIndex : byte
         {
             BannerFont,
             TimerFont
         }
 
-        public enum TextureIndex
+        public enum SfxIndex : byte
+        {
+            None,
+            Jump
+        }
+
+        public enum TextureIndex : byte
         {
             Sky,
             Player,
-            Platform
+            Platform,
+            ScoreIcon,
+            FinishLine
         }
 
         private static readonly FontData[] FontDatas =
@@ -34,16 +42,32 @@ internal static partial class Match
         {
             "Game/Backgrounds/sky",
             "Game/Field/player",
-            "Game/Field/platform"
+            "Game/Field/platform",
+            "Game/Scoreboard/checkmark",
+            "Game/Field/finish-line"
+        };
+
+        private static readonly string[] SfxPaths =
+        {
+            null,
+            "Game/Player/jump"
         };
 
         private static readonly Texture[] Textures = new Texture[TexturePaths.Length];
         private static readonly Font[] Fonts = new Font[FontDatas.Length];
+        private static readonly AudioClip[] SoundEffects = new AudioClip[SfxPaths.Length];
+
+        private static bool _loaded;
 
         public static void Load()
         {
+            if (_loaded)
+                return;
             for (var i = 0; i < Textures.Length; i++) Textures[i] = new Texture(TexturePaths[i]);
             for (var i = 0; i < Fonts.Length; i++) Fonts[i] = new Font(FontDatas[i].Path, FontDatas[i].Size);
+            for (var i = 1; i < SoundEffects.Length; i++) SoundEffects[i] = new AudioClip(SfxPaths[i]);
+
+            _loaded = true;
         }
 
         public static Texture Texture(TextureIndex textureIndex)
@@ -56,10 +80,19 @@ internal static partial class Match
             return Fonts[(int) fontIndex];
         }
 
+        public static AudioClip SoundEffect(SfxIndex sfxIndex)
+        {
+            return SoundEffects[(int) sfxIndex];
+        }
+
         public static void Unload()
         {
+            if (!_loaded)
+                return;
             foreach (var texture in Textures) texture.Dispose();
             foreach (var font in Fonts) font.Dispose();
+            foreach (var clip in SoundEffects) clip?.Dispose();
+            _loaded = false;
         }
 
         private readonly struct FontData

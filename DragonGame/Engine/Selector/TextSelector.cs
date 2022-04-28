@@ -3,7 +3,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
+using System.Text;
 using DuckDuckJump.Engine.Assets;
+using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using SDL2;
 
@@ -19,10 +21,14 @@ public abstract class TextSelector
 
     private float _currentYStride;
 
+    private bool _keepTextAlive;
+
     private int _mouseX;
     private int _mouseY;
 
     private uint _previousState;
+
+    private TextInputData _textInputData;
 
     protected TextSelector(Font font)
     {
@@ -32,6 +38,30 @@ public abstract class TextSelector
     public bool LeftClick =>
         (_previousState & SDL.SDL_BUTTON_LMASK) == 0 && (_currentState & SDL.SDL_BUTTON_LMASK) != 0;
 
+    public void OnEvent(ref SDL.SDL_Event @event)
+    {
+        if (@event.type == SDL.SDL_EventType.SDL_TEXTINPUT && _textInputData != null)
+            unsafe
+            {
+                fixed (byte* textPtr = @event.text.text)
+                {
+                    var length = 0;
+                    var ptr = textPtr;
+
+                    while (*ptr++ != 0) ++length;
+
+                    _textInputData.Text += new string(Encoding.UTF8.GetString(textPtr, length));
+
+
+                    if (_textInputData.Text.Length > _textInputData.MaxLength)
+                    {
+                        _textInputData.Text = _textInputData.Text.Remove(_textInputData.MaxLength);
+                        StopTextInput();
+                    }
+                }
+            }
+    }
+
     public virtual void Update()
     {
         _previousState = _currentState;
@@ -40,6 +70,7 @@ public abstract class TextSelector
 
     protected void Begin()
     {
+        _keepTextAlive = false;
         _drawList.Clear();
         _currentYStride = 0.0f;
     }
@@ -64,6 +95,11 @@ public abstract class TextSelector
         _currentYStride += space;
     }
 
+    public void Refresh()
+    {
+        StopTextInput();
+    }
+
     protected bool Button(string caption, float scale = 1.0f, Font.OnTextDraw onTextDraw = null)
     {
         var size = _font.MeasureString(caption) * scale;
@@ -78,8 +114,38 @@ public abstract class TextSelector
         return inMouseRange && LeftClick;
     }
 
+    private void StopTextInput()
+    {
+        SDL.SDL_StopTextInput();
+        _textInputData = null;
+    }
+
+    protected void Text(TextInputData input, float scale = 1.0f, Font.OnTextDraw onTextDraw = null)
+    {
+        var selected = _textInputData == input;
+        var str = "[" + input.Text + new string(selected ? '_' : ' ', input.MaxLength - input.Text.Length) + "]";
+
+        if (_textInputData == input)
+        {
+            _keepTextAlive = true;
+            if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_BACKSPACE) && _textInputData.Text.Length > 0)
+                _textInputData.Text = _textInputData.Text[..^1];
+            if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_RETURN)) StopTextInput();
+            Label(str, Color.White, scale, onTextDraw);
+        }
+        else
+        {
+            if (!Button(str, scale, onTextDraw)) return;
+
+            SDL.SDL_StartTextInput();
+            _textInputData = input;
+            _keepTextAlive = true;
+        }
+    }
+
     protected void End()
     {
+        if (!_keepTextAlive) StopTextInput();
     }
 
     public void Draw()
@@ -89,6 +155,12 @@ public abstract class TextSelector
             var transformation = Matrix3x2.CreateScale(draw.Scale) * Matrix3x2.CreateTranslation(draw.Position);
             _font.Draw(draw.Caption, transformation, draw.Color, draw.OnTextDraw);
         }
+    }
+
+    protected class TextInputData
+    {
+        public int MaxLength;
+        public string Text;
     }
 
     private readonly struct QueuedDraw

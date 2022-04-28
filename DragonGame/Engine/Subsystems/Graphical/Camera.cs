@@ -1,7 +1,9 @@
 ﻿#region
 
 using System.Drawing;
+using System.IO;
 using System.Numerics;
+using DuckDuckJump.Engine.Utilities;
 
 #endregion
 
@@ -37,5 +39,16 @@ public class Camera
 
             return _matrix;
         }
+    }
+
+    public void Save(Stream stream)
+    {
+        stream.Write(_position);
+    }
+
+    public void Load(Stream stream)
+    {
+        _position = stream.Read<Vector2>();
+        _regenerateMatrix = true;
     }
 }

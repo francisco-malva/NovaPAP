@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Linq;
 using SDL2;
 
 #endregion
@@ -23,6 +24,45 @@ internal static class Keyboard
         KeyState = (bool*) SDL.SDL_GetKeyboardState(out _);
     }
 
+    public static bool AnyHeld(out SDL.SDL_Scancode key)
+    {
+        for (var i = 0; i < CurrentState.Length; i++)
+        {
+            if (!KeyHeld((SDL.SDL_Scancode) i)) continue;
+            key = (SDL.SDL_Scancode) i;
+            return true;
+        }
+
+        key = 0;
+        return false;
+    }
+    
+    public static bool AnyUp(out SDL.SDL_Scancode key)
+    {
+        for (var i = 0; i < CurrentState.Length; i++)
+        {
+            if (!KeyUp((SDL.SDL_Scancode) i)) continue;
+            key = (SDL.SDL_Scancode) i;
+            return true;
+        }
+
+        key = 0;
+        return false;
+    }
+    
+    public static bool AnyDown(out SDL.SDL_Scancode key)
+    {
+        for (var i = 0; i < CurrentState.Length; i++)
+        {
+            if (!KeyDown((SDL.SDL_Scancode) i)) continue;
+            key = (SDL.SDL_Scancode) i;
+            return true;
+        }
+
+        key = 0;
+        return false;
+    }
+    
     /// <summary>
     ///     Updates the internal state of this class.
     /// </summary>

@@ -24,7 +24,7 @@ public class Font : IDisposable
 
     public Font(string path, int ptSize)
     {
-        path = Path.Combine("Assets", "Fonts", $"{path}.ttf");
+        path = Path.Combine("Fonts", $"{path}.ttf");
 
         using var stream = FileSystem.Open(path);
         var size = stream.Length;

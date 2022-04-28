@@ -1,6 +1,10 @@
-﻿using System.Net;
+﻿#region
+
+using System.Net;
 using System.Reflection;
 using ScoringServer.Paths;
+
+#endregion
 
 namespace ScoringServer;
 

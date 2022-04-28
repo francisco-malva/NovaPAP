@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Utilities;
 
 #endregion
@@ -13,132 +14,118 @@ internal static partial class Match
     {
         internal unsafe partial struct Player
         {
-            private enum ComState : byte
-            {
-                Thinking,
-                Acting
-            }
-
             private readonly struct ComActionData
             {
-                public readonly int PlatformRange;
-                public readonly float ClimbingSpeed;
-                public readonly byte ActTimeMax;
+                public readonly byte PlatformRange;
+                public readonly float StoppedChance;
 
-                public ComActionData(int platformRange, float climbingSpeed, byte actTimeMax)
+                public ComActionData(byte platformRange, float stoppedChance)
                 {
                     PlatformRange = platformRange;
-                    ClimbingSpeed = climbingSpeed;
-                    ActTimeMax = actTimeMax;
+                    StoppedChance = stoppedChance;
                 }
             }
 
             private static readonly ComActionData[] ComActionTable =
             {
-                new(1, 0.015f, 5)
+                new(1, 0.5f),
+                new(1, 0.25f),
+                new(2, 0.015f),
+                new(2, 0.005f),
+                new(3, 0.005f),
+                new(3, 0.0025f),
+                new(4, 0.0015f),
+                new(4, 0.0f)
             };
 
             private bool IsCom => _info.ComLevels[_myPlayerIndex] > 0;
             private byte MyComLevel => _info.ComLevels[_myPlayerIndex];
             private ref ComActionData MyComData => ref ComActionTable[MyComLevel - 1];
-            private byte _comActTime;
-            private int _comBegin;
-            private int _comEnd;
+            private short _comPathIndex;
             private float _comProgress;
-            private ComState _comState;
 
 
-            private fixed int _comPath[2048];
-            private int _comPathLength;
+            private const short MaxPathSize = 2048;
+            private fixed short _comPath[MaxPathSize];
+            private fixed float _randomOffsets[MaxPathSize];
+            private short _comPathLength;
 
             private void GenerateComPath()
             {
                 _comPathLength = 0;
+
+                InsertIntoPath(-1);
+                InsertIntoPath(0);
+                short currentProgress = 0;
+
+                while (currentProgress < _info.PlatformCount)
+                {
+                    var shouldStop = MyComData.StoppedChance != 0.0f &&
+                                     RandomWork.Next(0.0f, 1.0f) <= MyComData.StoppedChance;
+
+                    if (shouldStop)
+                    {
+                        GenerateComStopped(currentProgress);
+                    }
+                    else
+                    {
+                        ++currentProgress;
+                        var nextPlatform =
+                            (short) (currentProgress + RandomWork.Next((byte) 1, MyComData.PlatformRange));
+                        InsertIntoPath(currentProgress);
+                        InsertIntoPath(nextPlatform);
+                        currentProgress = nextPlatform;
+                    }
+                }
+
+                for (var i = 0; i < _comPathLength; i++) _randomOffsets[i] = RandomWork.Next(-20.0f, 20.0f);
             }
 
-            private void GenerateComStopped(int position)
+            private void GenerateComStopped(short position)
             {
                 InsertIntoPath(position);
                 InsertIntoPath(position);
             }
 
-            private void InsertIntoPath(int position)
+            private void InsertIntoPath(short position)
             {
                 _comPath[_comPathLength++] = position;
             }
 
             private void ResetComFields()
             {
-                _comBegin = -1;
-                _comEnd = -1;
+                _comPathIndex = 0;
                 _comProgress = 0.0f;
-                _comActTime = MyComData.ActTimeMax;
-                _comState = ComState.Thinking;
-                _comXBeginOffset = 0.0f;
 
                 GenerateComPath();
             }
 
             private void ComGameUpdate()
             {
-                _comProgress += MyComData.ClimbingSpeed;
+                _comProgress += GameFlow.TimeStep;
 
-                if (PlatformWork.GetIntersectingPlatform(ref this, out var index))
-                {
-                    _comXBeginOffset = Position.X;
-                    _comBegin = index;
-                    _comEnd = index + 1;
-                    CorrectCameraHeight(ref PlatformWork.GetPlatform(_comBegin));
-                    SetComState(ComState.Acting);
-                }
+                if (!(_comProgress >= 1.0f)) return;
 
-                if (_comProgress < 1.0f) return;
+                JumpSfx();
+                _comProgress %= 1.0f;
+                ++_comPathIndex;
+                _lastJumpedPlatform = _comPath[_comPathIndex];
 
-                switch (_comState)
-                {
-                    case ComState.Thinking:
-                        ++_comActTime;
-                        if (_comActTime >= MyComData.ActTimeMax)
-                        {
-                            _comActTime = 0;
-                            _comBegin = _comEnd;
-                            _comEnd += Math.Min(RandomWork.Next(1, MyComData.PlatformRange + 1), _info.PlatformCount);
-                            SetComState(ComState.Acting);
-                        }
-                        else
-                        {
-                            _comProgress %= 1.0f;
-                        }
-
-                        break;
-                    case ComState.Acting:
-                        _comXBeginOffset = Position.X;
-                        _comBegin = _comEnd;
-                        SetComState(ComState.Thinking);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                if (_lastJumpedPlatform >= 0)
+                    CorrectCameraHeight(_lastJumpedPlatform);
             }
-
-            private void SetComState(ComState state)
-            {
-                _comState = state;
-                _comProgress = 0.0f;
-                _comActTime = 0;
-            }
-
-            private static float _comXBeginOffset;
 
             private void ApplyComSpeed()
             {
                 var progress = Math.Clamp(_comProgress, 0.0f, 1.0f);
 
-                var begin = GetTargetPosition(_comBegin);
+                var begin = GetTargetPosition(_comPath[_comPathIndex]);
+                begin.X += _randomOffsets[_comPathIndex];
 
-                if (_comXBeginOffset != 0.0f) begin.X = _comXBeginOffset;
+                var endIndex = Math.Clamp(_comPathIndex + 1, 0, _comPathLength - 1);
 
-                var end = GetTargetPosition(_comEnd);
+                var end = GetTargetPosition(_comPath[endIndex]);
+                end.X += _randomOffsets[endIndex];
 
                 var p2 = begin - JumpMaxPoint;
                 var p3 = end - JumpMaxPoint;

@@ -76,6 +76,11 @@ internal static class Mathematics
         return a * (1.0f - clampedT) + b * clampedT;
     }
 
+    public static float Eerp(float a, float b, float t)
+    {
+        return MathF.Pow(a, 1 - t) * MathF.Pow(b, t);
+    }
+
     public static Vector2 Lerp(Vector2 a, Vector2 b, float t)
     {
         return new Vector2(Lerp(a.X, b.X, t), Lerp(a.Y, b.Y, t));
