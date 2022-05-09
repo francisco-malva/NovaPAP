@@ -1,15 +1,13 @@
 ﻿#region
 
-using System;
 using System.Drawing;
 using System.Numerics;
-using DuckDuckJump.Engine.Subsystems.Flow;
 
 #endregion
 
-namespace DuckDuckJump.Engine.Utilities;
+namespace Common.Utilities;
 
-internal static class Mathematics
+public static class Mathematics
 {
     public static float Next(this Random random, float minimum, float maximum)
     {
@@ -18,7 +16,7 @@ internal static class Mathematics
 
     // Gradually changes a value towards a desired goal over time.
     public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime,
-        float maxSpeed = float.PositiveInfinity, float deltaTime = GameFlow.TimeStep)
+        float deltaTime,float maxSpeed = float.PositiveInfinity)
     {
         // Based on Game Programming Gems 4 Chapter 1.10
         smoothTime = Math.Max(0.0001F, smoothTime);

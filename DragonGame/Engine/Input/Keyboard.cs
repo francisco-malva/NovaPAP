@@ -1,7 +1,6 @@
 #region
 
 using System;
-using System.Linq;
 using SDL2;
 
 #endregion
@@ -36,7 +35,7 @@ internal static class Keyboard
         key = 0;
         return false;
     }
-    
+
     public static bool AnyUp(out SDL.SDL_Scancode key)
     {
         for (var i = 0; i < CurrentState.Length; i++)
@@ -49,7 +48,7 @@ internal static class Keyboard
         key = 0;
         return false;
     }
-    
+
     public static bool AnyDown(out SDL.SDL_Scancode key)
     {
         for (var i = 0; i < CurrentState.Length; i++)
@@ -62,7 +61,7 @@ internal static class Keyboard
         key = 0;
         return false;
     }
-    
+
     /// <summary>
     ///     Updates the internal state of this class.
     /// </summary>

@@ -24,7 +24,6 @@
         <PackageReference Include="CircularBuffer" Version="1.2.1" />
         <PackageReference Include="LiteNetLib" Version="1.0.0-rc.1" />
         <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha" />
-        <PackageReference Include="StbImageSharp" Version="2.22.6" />
     </ItemGroup>
 
     <ItemGroup>
@@ -139,21 +138,6 @@
         <None Update="Assets\Textures\Game\Field\platform.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="Assets\Audio\Game\Announcer\draw.ogg">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Audio\Game\Announcer\get-ready.ogg">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Audio\Game\Announcer\go.ogg">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Audio\Game\Announcer\p1-wins.ogg">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Audio\Game\Announcer\p2-wins.ogg">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
         <None Update="runtimes\win-x64\native\SDL2_mixer.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -205,12 +189,6 @@
         <None Update="Assets\Music\menu.ogg">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="Assets\Textures\Game\Backgrounds\sky.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Textures\white.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
         <None Update="Assets\Fonts\terminator-two.ttf">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -227,6 +205,27 @@
         <None Remove="Engine\Settings\**" />
         <None Update="Assets\Audio\watch-mode.snd">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets.zip">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\white.tex">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Backgrounds\sky.tex">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Field\finish-line.tex">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Field\platform.tex">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Field\player.tex">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Scoreboard\checkmark.tex">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 

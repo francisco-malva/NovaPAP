@@ -3,6 +3,8 @@
 using System;
 using System.Drawing;
 using System.Numerics;
+using Common.Utilities;
+using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Utilities;
 
@@ -30,7 +32,7 @@ internal static partial class Match
 
         public static void Update()
         {
-            _progress = Mathematics.SmoothDamp(_progress, _progressTarget, ref _progressSpeed, 0.25f);
+            _progress = Mathematics.SmoothDamp(_progress, _progressTarget, ref _progressSpeed, 0.25f, GameFlow.TimeStep);
         }
 
         public static void SetTarget(short newTarget)

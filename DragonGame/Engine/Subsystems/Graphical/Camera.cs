@@ -3,6 +3,7 @@
 using System.Drawing;
 using System.IO;
 using System.Numerics;
+using Common.Utilities;
 using DuckDuckJump.Engine.Utilities;
 
 #endregion

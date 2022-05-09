@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.IO;
+using Common.Utilities;
 using DuckDuckJump.Engine.Utilities;
 
 #endregion
@@ -1096,6 +1097,8 @@ internal static partial class Match
 
         public static byte Next(byte min, byte max)
         {
+            if (min == max)
+                return min;
             return (byte) (min + RandomByte() % (max - min));
         }
 

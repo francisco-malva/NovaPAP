@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Numerics;
+using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Utilities;
@@ -19,13 +20,14 @@ internal static partial class Match
     public const int PlayerCount = 2;
 
     private static GameInfo _info;
-
-    public static MatchState State { get; private set; }
     private static float _fade;
     private static Winner _winner;
     private static byte _currentRound;
 
-    private static sbyte _matchWinner;
+    private static Winner _matchWinner;
+
+    public static MatchState State { get; private set; }
+    public static Winner MatchWinner => _matchWinner;
 
     public static bool IsOver { get; private set; }
 
@@ -59,7 +61,7 @@ internal static partial class Match
         _fade = stream.Read<float>();
         _winner = stream.Read<Winner>();
         _currentRound = stream.Read<byte>();
-        _matchWinner = stream.Read<sbyte>();
+        _matchWinner = stream.Read<Winner>();
         IsOver = stream.Read<bool>();
 
         CameraWork.LoadMe(stream);
@@ -92,7 +94,7 @@ internal static partial class Match
             ? MatchState.BeginningMessage
             : MatchState.GetReady);
     }
-    
+
     private static void SetState(MatchState state)
     {
         State = state;
@@ -127,7 +129,6 @@ internal static partial class Match
                 }
 
                 if (ScoreWork.GetWinner(out _matchWinner))
-                    // ReSharper disable once TailRecursiveCall
                     SetState(MatchState.Over);
                 else
                     BannerWork.SetMessage(_winner != Winner.Draw
@@ -240,10 +241,7 @@ internal static partial class Match
 
                 break;
             case MatchState.BeginningMessage:
-                if (BannerWork.IsDone())
-                {
-                    SetState(MatchState.GetReady);
-                }
+                if (BannerWork.IsDone()) SetState(MatchState.GetReady);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -291,7 +289,7 @@ internal static partial class Match
         FinishLineWork.DrawMe();
 
         Graphics.Camera = null;
-        if (_info.NotExhibition) DrawGui();
+        if ((_info.GameFlags & GameInfo.Flags.Exhibition) == 0) DrawGui();
         DrawFade();
 
         BannerWork.DrawMe();
@@ -321,7 +319,7 @@ internal static partial class Match
         BeginningMessage
     }
 
-    private enum Winner : sbyte
+    public enum Winner : sbyte
     {
         None = -1,
         P1,

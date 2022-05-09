@@ -22,10 +22,18 @@ namespace DuckDuckJump.States;
 
 public class MainMenuSelector : TextSelector
 {
-    private float _musicVolume;
+    private static readonly string[] ActionNames =
+    {
+        "Left",
+        "Right",
+        "Special"
+    };
 
     private readonly TextInputData _nicknameInput = new()
         {Text = string.Empty, MaxLength = Settings.Nickname.MaxLength};
+
+    private int _currentBoundInput;
+    private float _musicVolume;
 
     private float _sfxVolume;
     private State _state = State.Title;
@@ -70,15 +78,6 @@ public class MainMenuSelector : TextSelector
         }
     }
 
-    private int _currentBoundInput;
-
-    private static readonly string[] ActionNames =
-    {
-        "Left",
-        "Right",
-        "Special"
-    };
-    
     private void UpdateInput()
     {
         Begin();
@@ -87,21 +86,18 @@ public class MainMenuSelector : TextSelector
             Label($"P{i + 1}");
 
             var offset = Settings.MyData.GetInputStartingOffset(i);
-            
+
             for (var j = offset; j < offset + Settings.Data.InputProfileSize; j++)
-            {
                 unsafe
                 {
                     Label(
                         $"{ActionNames[j - offset]}: {SDL.SDL_GetScancodeName((SDL.SDL_Scancode) Settings.MyData.InputProfiles[j])}");
                 }
-            }
         }
 
         Label(
             $"BINDING P{_currentBoundInput / Settings.Data.InputProfileSize + 1} {ActionNames[_currentBoundInput % Settings.Data.InputProfileSize]}");
         if (Keyboard.AnyDown(out var newBinding))
-        {
             unsafe
             {
                 Settings.MyData.InputProfiles[_currentBoundInput] = (int) newBinding;
@@ -113,7 +109,7 @@ public class MainMenuSelector : TextSelector
                     _state = State.Settings;
                 }
             }
-        }
+
         End();
     }
 
@@ -175,7 +171,7 @@ public class MainMenuSelector : TextSelector
         }
 
         Break(20.0f);
-        
+
         if (Button("BACK"))
         {
             Settings.Save();
@@ -184,19 +180,16 @@ public class MainMenuSelector : TextSelector
 
         End();
     }
-    
+
     private void UpdateSettings()
     {
         Begin();
-        
+
         Break(30.0f);
         Label("SETTINGS", Color.Gold);
         Break(30.0f);
-        
-        if (Button("AUDIO"))
-        {
-            _state = State.AudioSettings;
-        }
+
+        if (Button("AUDIO")) _state = State.AudioSettings;
         if (Button("INPUT"))
         {
             _currentBoundInput = 0;
@@ -204,11 +197,8 @@ public class MainMenuSelector : TextSelector
         }
 
         Break(10.0f);
-        
-        if (Button("BACK"))
-        {
-            _state = State.MainScreen;
-        }
+
+        if (Button("BACK")) _state = State.MainScreen;
         End();
     }
 
@@ -220,32 +210,18 @@ public class MainMenuSelector : TextSelector
         Label("MODE SELECTION", Color.Gold);
         Break(80.0f);
 
-        if (Button("TIME ATTACK"))
-        {
-        }
+        if (Button("TIME ATTACK")) GameFlow.Set(new TimeAttackMode());
+        
 
-        if (Button("SURVIVAL"))
-        {
-        }
-
-        if (Button("VS CPU"))
-        {
-            GameFlow.Set(new VersusMode());
-        }
+        if (Button("VS CPU")) GameFlow.Set(new VersusMode());
 
         if (Button("VS PLAYER"))
         {
         }
 
-        if (Button("HOST NETWORK"))
-        {
-            GameFlow.Set(new NetworkMode(true, "localhost"));
-        }
-        
-        if (Button("JOIN NETWORK"))
-        {
-            GameFlow.Set(new NetworkMode(false, "localhost"));
-        }
+        if (Button("HOST NETWORK")) GameFlow.Set(new NetworkMode(true, "localhost"));
+
+        if (Button("JOIN NETWORK")) GameFlow.Set(new NetworkMode(false, "localhost"));
 
         if (Button("WATCH")) GameFlow.Set(new WatchMode());
 
@@ -328,8 +304,8 @@ public class MainMenuState : IGameState
         Audio.PlayMusic(_music);
 
         Match.Assets.Load();
-        Match.Initialize(new GameInfo(new ComLevels(8, 8), 100, Environment.TickCount, 0, false, ushort.MaxValue,
-            Match.BannerWork.MessageIndex.NoBanner));
+        Match.Initialize(new GameInfo(new ComLevels(8, 8), 100, Environment.TickCount, 0, ushort.MaxValue,
+            Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.Exhibition | GameInfo.Flags.NoItems));
     }
 
     public void Exit()

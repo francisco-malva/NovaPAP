@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.IO;
+using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Utilities;
 
@@ -47,7 +48,7 @@ internal partial class Match
 
         public static void UpdateMe()
         {
-            if (!_info.NotExhibition)
+            if ((_info.GameFlags & GameInfo.Flags.Exhibition) != 0)
                 return;
 
             for (var i = 0; i < _queuedSfxCount; i++)

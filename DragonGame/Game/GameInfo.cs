@@ -13,22 +13,31 @@ namespace DuckDuckJump.Game;
 [StructLayout(LayoutKind.Sequential)]
 internal unsafe struct GameInfo : INetSerializable
 {
+    [Flags]
+    public enum Flags : byte
+    {
+        None = 0,
+        Exhibition = 1,
+        NoItems = 2,
+        All = byte.MaxValue
+    }
+    
     public ComLevels ComLevels;
     public readonly ushort PlatformCount;
     public readonly sbyte ScoreCount;
-    public readonly bool NotExhibition;
-    public readonly int RandomSeed;
+    public int RandomSeed;
     public readonly ushort TimeLeft;
     public readonly Match.BannerWork.MessageIndex BeginMessageIndex;
-    
-    public GameInfo(ComLevels levels, ushort platformCount, int randomSeed, sbyte scoreCount, bool notExhibition,
-        ushort timeLeft, Match.BannerWork.MessageIndex beginMessageIndex)
+    public readonly Flags GameFlags;
+
+    public GameInfo(ComLevels levels, ushort platformCount, int randomSeed, sbyte scoreCount,
+        ushort timeLeft, Match.BannerWork.MessageIndex beginMessageIndex, Flags flags)
     {
         ComLevels = levels;
         PlatformCount = platformCount;
         RandomSeed = randomSeed;
         ScoreCount = scoreCount;
-        NotExhibition = notExhibition;
+        GameFlags = flags;
         TimeLeft = timeLeft;
         BeginMessageIndex = beginMessageIndex;
     }
@@ -65,8 +74,10 @@ internal unsafe struct GameInfo : INetSerializable
         fixed (GameInfo* ptr = &this)
         {
             var dest = reader.GetBytesWithLength();
-            fixed(void* dataPtr = dest)
+            fixed (void* dataPtr = dest)
+            {
                 Unsafe.CopyBlock(ptr, dataPtr, (uint) dest.Length);
+            }
         }
     }
 }

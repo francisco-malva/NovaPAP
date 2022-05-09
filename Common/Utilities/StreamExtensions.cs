@@ -1,14 +1,12 @@
 ﻿#region
 
-using System;
 using System.Drawing;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 #endregion
 
-namespace DuckDuckJump.Engine.Utilities;
+namespace Common.Utilities;
 
 public static class StreamExtensions
 {

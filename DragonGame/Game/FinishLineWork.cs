@@ -4,7 +4,8 @@ using System.Drawing;
 using System.IO;
 using System.Numerics;
 using DuckDuckJump.Engine.Subsystems.Graphical;
-using DuckDuckJump.Engine.Utilities;
+using Common.Utilities;
+using DuckDuckJump.Engine.Subsystems.Flow;
 
 #endregion
 
@@ -39,7 +40,7 @@ internal static partial class Match
 
         public static void UpdateMe()
         {
-            _alpha = Mathematics.SmoothDamp(_alpha, State == MatchState.InGame ? 1.0f : 0.0f, ref _alphaSpeed, 0.25f);
+            _alpha = Mathematics.SmoothDamp(_alpha, State == MatchState.InGame ? 1.0f : 0.0f, ref _alphaSpeed, 0.25f, GameFlow.TimeStep);
             if (State != MatchState.InGame)
                 return;
 

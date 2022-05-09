@@ -3,6 +3,7 @@
 using System.Drawing;
 using System.IO;
 using System.Numerics;
+using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Utilities;
 
@@ -63,11 +64,11 @@ internal static partial class Match
             }
         }
 
-        public static bool GetWinner(out sbyte playerIndex)
+        public static bool GetWinner(out Winner playerIndex)
         {
             if (_info.ScoreCount <= 0)
             {
-                playerIndex = -1;
+                playerIndex = Winner.None;
                 return false;
             }
 
@@ -75,11 +76,11 @@ internal static partial class Match
             {
                 if (Scores[i] < _info.ScoreCount) continue;
 
-                playerIndex = i;
+                playerIndex = (Winner)i;
                 return true;
             }
 
-            playerIndex = -1;
+            playerIndex = Winner.None;
             return false;
         }
     }

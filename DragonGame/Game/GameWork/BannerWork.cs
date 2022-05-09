@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Numerics;
+using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Utilities;
@@ -38,7 +39,7 @@ internal static partial class Match
             new("DRAW!", Color.DodgerBlue, 1.0f),
             new("GAME SET!", Color.DarkRed, 2.0f),
             new("TIME'S UP!", Color.Chocolate, 1.0f),
-            new("%n, TRY YOUR BEST!", Color.DarkGoldenrod, 1.0f),
+            new("TIME ATTACK!", Color.DarkGoldenrod, 1.0f),
             new("WATCH MODE!", Color.DarkGoldenrod, 1.0f)
         };
 
@@ -90,8 +91,8 @@ internal static partial class Match
 
         public static void DrawMe()
         {
-            if (State != MatchState.BeginningMessage && (!_info.NotExhibition || IsDone() || _message == null))
-                 return;
+            if (State != MatchState.BeginningMessage && ((_info.GameFlags & GameInfo.Flags.Exhibition) != 0 || IsDone() || _message == null))
+                return;
 
             Assets.Font(Assets.FontIndex.BannerFont).Draw(_message,
                 Matrix3x2.CreateScale(1.0f, _scale) * Matrix3x2.CreateTranslation(

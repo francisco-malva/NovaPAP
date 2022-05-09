@@ -137,7 +137,7 @@ internal static class Audio
                 if (!InUse || Clip == null)
                     return;
 
-                if (Clip.Closed)
+                if (Clip.Disposed)
                 {
                     Stop();
                     return;

@@ -3,10 +3,12 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Runtime.CompilerServices;
+using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Files;
+using DuckDuckJump.Engine.Subsystems.Output;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Exceptions.Textures;
 using SDL2;
-using StbImageSharp;
 
 #endregion
 
@@ -24,17 +26,40 @@ internal class Texture : IDisposable
         Handle = SDL.SDL_CreateTexture(Subsystems.Graphical.Graphics.Renderer, format, access, w, h);
     }
 
-    public Texture(Surface surface)
+    public Texture(string path) : this(FileSystem.Open($"Textures/{path}.tex"), true)
     {
-        Handle = SDL.SDL_CreateTextureFromSurface(Subsystems.Graphical.Graphics.Renderer, surface.Handle);
     }
 
-    public Texture(string path)
+    public Texture(Stream stream, bool freeStream)
     {
-        path = Path.Combine("Textures", $"{path}.png");
-        using var file = FileSystem.Open(path);
-        using var surface = new Surface(ImageResult.FromStream(file, ColorComponents.RedGreenBlueAlpha));
-        Handle = SDL.SDL_CreateTextureFromSurface(Subsystems.Graphical.Graphics.Renderer, surface.Handle);
+        var width = stream.Read<int>();
+        var height = stream.Read<int>();
+        
+        Handle = SDL.SDL_CreateTexture(Subsystems.Graphical.Graphics.Renderer, SDL.SDL_PIXELFORMAT_RGBA8888,
+            (int) SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, stream.Read<int>(), stream.Read<int>());
+
+        if (SDL.SDL_LockTexture(Handle, IntPtr.Zero, out var pixels, out var pitch) != 0)
+        {
+            Error.Panic("Failed to lock texture for writing.");
+        }
+
+        Span<byte> pixelData = new byte[width * height];
+        stream.Read(pixelData);
+
+        unsafe
+        {
+            fixed (byte* dataPtr = pixelData)
+            {
+                Unsafe.CopyBlock((void*) pixels, dataPtr, (uint) (width * height * sizeof(uint)));
+            }
+        }
+        
+        SDL.SDL_UnlockTexture(Handle);
+
+        if (freeStream)
+        {
+            stream.Dispose();
+        }
     }
 
     public static Texture White { get; }

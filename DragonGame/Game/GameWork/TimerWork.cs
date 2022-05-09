@@ -3,6 +3,8 @@
 using System.Drawing;
 using System.IO;
 using System.Numerics;
+using Common.Utilities;
+using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Utilities;
 
@@ -49,7 +51,7 @@ internal partial class Match
 
         public static void UpdateMe()
         {
-            _alpha = Mathematics.SmoothDamp(_alpha, TargetAlpha, ref _alphaVelocity, 0.15f);
+            _alpha = Mathematics.SmoothDamp(_alpha, TargetAlpha, ref _alphaVelocity, 0.15f, GameFlow.TimeStep);
             if (State != MatchState.InGame)
                 return;
 

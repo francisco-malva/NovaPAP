@@ -33,7 +33,8 @@ public class WatchMode : IGameState
 
 
         _size = _captionFont.MeasureString("PRESS ANY KEY TO EXIT");
-        Match.Initialize(new GameInfo(new ComLevels(8, 8), 1024, Environment.TickCount, -1, false, ushort.MaxValue, Match.BannerWork.MessageIndex.WatchModeStart));
+        Match.Initialize(new GameInfo(new ComLevels(8, 8), 1024, Environment.TickCount, -1, ushort.MaxValue,
+            Match.BannerWork.MessageIndex.WatchModeStart, GameInfo.Flags.Exhibition));
     }
 
     public void Exit()
@@ -56,17 +57,16 @@ public class WatchMode : IGameState
 
         Span<GameInput> inputs = stackalloc GameInput[Match.PlayerCount];
         Match.Update(inputs);
-        
-        if(Match.State != Match.MatchState.BeginningMessage)
+
+        if (Match.State != Match.MatchState.BeginningMessage)
             _time += GameFlow.TimeStep;
     }
 
     public void Draw()
     {
-
         var alpha = 1.0f - (MathF.Cos(_time * 1.5f) + 1.0f) * 0.5f;
         Match.Draw();
-        
+
         if (Match.State == Match.MatchState.BeginningMessage)
             return;
         _captionFont.Draw("PRESS ANY KEY TO EXIT",

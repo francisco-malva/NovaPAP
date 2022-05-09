@@ -21,7 +21,8 @@ public class VersusMode : IGameState
     {
         _gameMusic = new AudioClip("gameplay", true);
         Audio.PlayMusic(_gameMusic);
-        Match.Initialize(new GameInfo(new ComLevels(0, 5), 50, Environment.TickCount, 3, true, 99 * 60, Match.BannerWork.MessageIndex.NoBanner));
+        Match.Initialize(new GameInfo(new ComLevels(0, 5), 50, Environment.TickCount, 3, 99 * 60,
+            Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None));
     }
 
     public void Exit()

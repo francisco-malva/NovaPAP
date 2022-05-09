@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿#region
+
+using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using CircularBuffer;
@@ -15,17 +14,28 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using SDL2;
 
+#endregion
+
 namespace DuckDuckJump.States.GameModes;
 
 public class NetworkMode : IGameState
 {
     private const int Port = 9050;
-    private NetDataWriter _writer;
-    private NetManager _endpoint;
-    private EventBasedNetListener _listener;
+    private readonly NetManager _endpoint;
 
-    private bool _isHost;
+    private readonly bool _isHost;
+    private readonly EventBasedNetListener _listener;
+    private readonly NetDataWriter _writer;
+
+    private CircularBuffer<Pair<GameInput>> _buffer = new(16);
+
+    private bool _initialized;
+
+    private ConcurrentQueue<Pair<GameInput>> _inputs = new();
     private string _ip;
+
+    private bool _running = true;
+
     public NetworkMode(bool isHost, string ip)
     {
         _listener = new EventBasedNetListener();
@@ -45,21 +55,31 @@ public class NetworkMode : IGameState
         _listener.NetworkReceiveEvent += OnReceive;
         _listener.NetworkErrorEvent += OnError;
 
-        if (_isHost)
+        _endpoint.StartInManualMode(Port);
+        if (!_isHost)
         {
-            _endpoint.Start(Port);
-        }
-        else
-        {
-            _endpoint.Start();
-            _endpoint.Connect(_ip, Port, nameof(NetworkMode));
         }
     }
 
-    private bool _running = true;
+    public void Exit()
+    {
+        _endpoint.Stop();
+    }
 
-    private CircularBuffer<Pair<GameInput>> _buffer = new(16);
-    
+    public void OnEvent(ref SDL.SDL_Event sdlEvent)
+    {
+    }
+
+    public void Update()
+    {
+        _endpoint.PollEvents();
+    }
+
+    public void Draw()
+    {
+        if (_initialized) Match.Draw();
+    }
+
     private void OnError(IPEndPoint endpoint, SocketError socketerror)
     {
         GameFlow.Set(new MainMenuState());
@@ -67,24 +87,21 @@ public class NetworkMode : IGameState
 
     private void OnPeerConnected(NetPeer peer)
     {
-        if(!_isHost)
+        if (!_isHost)
             return;
-        
+
         _writer.Reset();
 
-        var info = new GameInfo(new ComLevels(0, 0), 100, Environment.TickCount, 4, true, 99 * 60,
-            Match.BannerWork.MessageIndex.NoBanner);
-        
+        var info = new GameInfo(new ComLevels(0, 0), 100, Environment.TickCount, 4, 99 * 60,
+            Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None);
+
         _writer.Put(info);
         _writer.Put((byte) GameInput.None);
         peer.Send(_writer, DeliveryMethod.ReliableOrdered);
-        
+
         Match.Initialize(info);
         _initialized = true;
-
     }
-
-    private bool _initialized;
 
     private void OnReceive(NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliverymethod)
     {
@@ -100,8 +117,6 @@ public class NetworkMode : IGameState
         }
     }
 
-    private ConcurrentQueue<Pair<GameInput>> _inputs = new ConcurrentQueue<Pair<GameInput>>();
-    
     private void EnqueuePendingInputs(NetPeer peer, NetDataReader reader)
     {
         var foreign = (GameInput) reader.GetByte();
@@ -109,52 +124,23 @@ public class NetworkMode : IGameState
         var mine = Settings.MyData.GetInput(0);
 
         _writer.Reset();
-        _writer.Put((byte)mine);
+        _writer.Put((byte) mine);
         peer.Send(_writer, DeliveryMethod.ReliableOrdered);
 
-        _inputs.Enqueue(new Pair<GameInput>(mine, foreign));
+        if (_initialized)
+        {
+            Span<GameInput> inputs = stackalloc GameInput[Match.PlayerCount];
+            inputs[0] = _isHost ? mine : foreign;
+            inputs[1] = _isHost ? foreign : mine;
+            Match.Update(inputs);
+        }
     }
-    
+
     private void OnConnectionRequest(ConnectionRequest request)
     {
-        if(_endpoint.ConnectedPeersCount == 1)
+        if (_endpoint.ConnectedPeersCount == 1)
             request.Reject();
         else
-        {
             request.AcceptIfKey(nameof(NetworkMode));
-        }
-    }
-
-    public void Exit()
-    {
-        _endpoint.Stop();
-    }
-
-    public void OnEvent(ref SDL.SDL_Event sdlEvent)
-    {
-    }
-    
-    public void Update()
-    {
-        _endpoint.PollEvents();
-        if (_initialized)
-        {
-            if (_inputs.TryDequeue(out var pair))
-            {
-                Span<GameInput> inputs = stackalloc GameInput[Match.PlayerCount];
-                inputs[0] = _isHost ? pair.First : pair.Second;
-                inputs[1] = _isHost ? pair.Second : pair.First;
-                Match.Update(inputs);
-            }
-            
-        }
-    }
-
-    public void Draw()
-    {
-        if (_initialized)
-        {
-            Match.Draw();
-        }
     }
 }

@@ -2,6 +2,8 @@
 
 using System.IO;
 using System.Numerics;
+using Common.Utilities;
+using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Utilities;
 
@@ -56,8 +58,8 @@ internal static partial class Match
 
         public static void UpdateMe()
         {
-            _cameraX = Mathematics.SmoothDamp(_cameraX, Target.X, ref _cameraXVelocity, 0.35f);
-            _cameraY = Mathematics.SmoothDamp(_cameraY, Target.Y, ref _cameraYVelocity, 0.35f);
+            _cameraX = Mathematics.SmoothDamp(_cameraX, Target.X, ref _cameraXVelocity, 0.35f, GameFlow.TimeStep);
+            _cameraY = Mathematics.SmoothDamp(_cameraY, Target.Y, ref _cameraYVelocity, 0.35f, GameFlow.TimeStep);
 
             Camera.Position = new Vector2(_cameraX, _cameraY);
         }
