@@ -5,7 +5,6 @@ using System.IO;
 using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Graphical;
-using DuckDuckJump.Engine.Utilities;
 
 #endregion
 

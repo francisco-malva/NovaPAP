@@ -7,7 +7,6 @@ using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
-using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Game.Input;
 
 #endregion
@@ -154,7 +153,8 @@ internal static partial class Match
 
             private void ApplyHumanSpeed()
             {
-                _xVelocity = Mathematics.SmoothDamp(_xVelocity, _targetXVelocity, ref _xVelocityDelta, 0.1f, GameFlow.TimeStep);
+                _xVelocity = Mathematics.SmoothDamp(_xVelocity, _targetXVelocity, ref _xVelocityDelta, 0.1f,
+                    GameFlow.TimeStep);
                 _yVelocity += YDamping;
 
                 _velocity = new Vector2(_xVelocity, _yVelocity);

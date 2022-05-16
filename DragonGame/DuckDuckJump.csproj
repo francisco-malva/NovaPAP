@@ -24,6 +24,7 @@
         <PackageReference Include="CircularBuffer" Version="1.2.1" />
         <PackageReference Include="LiteNetLib" Version="1.0.0-rc.1" />
         <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha" />
+        <PackageReference Include="StbImageSharp" Version="2.27.8" />
     </ItemGroup>
 
     <ItemGroup>
@@ -169,7 +170,7 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Fonts\public-pixel.ttf">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\test.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -190,7 +191,7 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Fonts\terminator-two.ttf">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Audio\menu.snd">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -204,37 +205,39 @@
         <None Remove="Engine\Wrappers\SDL2\Mixer\**" />
         <None Remove="Engine\Settings\**" />
         <None Update="Assets\Audio\watch-mode.snd">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets.zip">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Textures\white.tex">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Textures\Game\Backgrounds\sky.tex">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Textures\Game\Field\finish-line.tex">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Textures\Game\Field\platform.tex">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="Assets\Textures\Game\Field\player.tex">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\Game\Scoreboard\checkmark.tex">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\white.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Fonts\public-pixel.fnt">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Fonts\terminator-two.fnt">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Backgrounds\sky.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Fonts\public-pixel-30.fnt">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Fonts\terminator-two-20.fnt">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Fonts\terminator-two-70.fnt">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Fonts\terminator-two-40.fnt">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Common\Common.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Assets\Sound" />
     </ItemGroup>
 
     <ItemGroup>

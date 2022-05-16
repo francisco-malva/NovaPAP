@@ -7,7 +7,6 @@ using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
-using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Game.Configuration;
 
 #endregion
@@ -68,10 +67,10 @@ internal static partial class Match
         public static void SetMessage(MessageIndex index)
         {
             _currentMessage = index;
-            _message = Messages[(int) index].Message.Replace("%r", _currentRound.ToString())
+            _message = Messages[(int)index].Message.Replace("%r", _currentRound.ToString())
                 .Replace("%w", _winner.ToString()).Replace("%n", Settings.MyData.Nickname.ToString());
-            _color = Messages[(int) index].Color;
-            _time = Messages[(int) index].Time;
+            _color = Messages[(int)index].Color;
+            _time = Messages[(int)index].Time;
             _size = Assets.Font(Assets.FontIndex.BannerFont).MeasureString(_message);
         }
 
@@ -91,7 +90,8 @@ internal static partial class Match
 
         public static void DrawMe()
         {
-            if (State != MatchState.BeginningMessage && ((_info.GameFlags & GameInfo.Flags.Exhibition) != 0 || IsDone() || _message == null))
+            if (State != MatchState.BeginningMessage &&
+                ((_info.GameFlags & GameInfo.Flags.Exhibition) != 0 || IsDone() || _message == null))
                 return;
 
             Assets.Font(Assets.FontIndex.BannerFont).Draw(_message,

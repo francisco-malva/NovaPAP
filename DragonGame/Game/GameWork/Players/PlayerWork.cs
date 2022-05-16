@@ -78,7 +78,7 @@ internal static partial class Match
             for (var i = 0; i < PlayerCount; i++)
                 if (State == MatchState.Winner)
                 {
-                    if (_winner == (Winner) i)
+                    if (_winner == (Winner)i)
                         Get(i).DrawMe();
                 }
                 else

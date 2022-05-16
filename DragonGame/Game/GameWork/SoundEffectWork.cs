@@ -3,7 +3,6 @@
 using System.IO;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Auditory;
-using DuckDuckJump.Engine.Utilities;
 
 #endregion
 

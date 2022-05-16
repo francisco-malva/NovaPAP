@@ -5,7 +5,6 @@ using System.IO;
 using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Graphical;
-using DuckDuckJump.Engine.Utilities;
 
 #endregion
 
@@ -44,7 +43,7 @@ internal static partial class Match
             var spawnY = Graphics.LogicalSize.Height - Platform.Extents.Height - 60.0f;
             for (var i = 0; i < _info.PlatformCount; i++)
             {
-                var progression = (float) i / _info.PlatformCount;
+                var progression = (float)i / _info.PlatformCount;
 
                 var yStep = RandomWork.Next(MinimumStep, MinimumStep + StepRange * progression);
 
@@ -59,7 +58,7 @@ internal static partial class Match
                 Platform.BehaviorType newType;
                 do
                 {
-                    newType = (Platform.BehaviorType) RandomWork.Next(0, (int) Platform.BehaviorType.Max);
+                    newType = (Platform.BehaviorType)RandomWork.Next(0, (int)Platform.BehaviorType.Max);
                 } while (i > 0 && newType == lastType);
 
                 lastType = newType;

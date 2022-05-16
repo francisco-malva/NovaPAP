@@ -6,10 +6,8 @@ using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Files;
 using DuckDuckJump.Engine.Subsystems.Graphical;
-using DuckDuckJump.Engine.Subsystems.Output;
 using DuckDuckJump.States;
 using SDL2;
-using static SDL2.SDL_ttf;
 
 #endregion
 
@@ -23,8 +21,6 @@ public static class GameFlow
 
     public static void Run()
     {
-        if (TTF_Init() != 0) Error.Panic($"Could not initialize SDL_TTF. TTF ERROR: {TTF_GetError()}");
-
         FileSystem.Initialize();
         Graphics.Initialize();
         Audio.Initialize();
@@ -55,13 +51,12 @@ public static class GameFlow
             stopwatch.Stop();
 
             if (stopwatch.ElapsedMilliseconds < 16)
-                Thread.Sleep((int) (16 - stopwatch.ElapsedMilliseconds));
+                Thread.Sleep((int)(16 - stopwatch.ElapsedMilliseconds));
         }
 
         FileSystem.Quit();
         Graphics.Quit();
         Audio.Quit();
-        TTF_Quit();
     }
 
     public static void Set(IGameState state)

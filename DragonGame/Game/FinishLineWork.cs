@@ -3,9 +3,9 @@
 using System.Drawing;
 using System.IO;
 using System.Numerics;
-using DuckDuckJump.Engine.Subsystems.Graphical;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
+using DuckDuckJump.Engine.Subsystems.Graphical;
 
 #endregion
 
@@ -40,7 +40,8 @@ internal static partial class Match
 
         public static void UpdateMe()
         {
-            _alpha = Mathematics.SmoothDamp(_alpha, State == MatchState.InGame ? 1.0f : 0.0f, ref _alphaSpeed, 0.25f, GameFlow.TimeStep);
+            _alpha = Mathematics.SmoothDamp(_alpha, State == MatchState.InGame ? 1.0f : 0.0f, ref _alphaSpeed, 0.25f,
+                GameFlow.TimeStep);
             if (State != MatchState.InGame)
                 return;
 
@@ -61,12 +62,12 @@ internal static partial class Match
         {
             Graphics.Draw(Assets.Texture(Assets.TextureIndex.FinishLine), null,
                 Matrix3x2.CreateTranslation(-Graphics.LogicalSize.Width, _y),
-                Color.FromArgb((int) (_alpha * byte.MaxValue), 255, 255, 255));
+                Color.FromArgb((int)(_alpha * byte.MaxValue), 255, 255, 255));
             Graphics.Draw(Assets.Texture(Assets.TextureIndex.FinishLine), null, Matrix3x2.CreateTranslation(0.0f, _y),
-                Color.FromArgb((int) (_alpha * byte.MaxValue), 255, 255, 255));
+                Color.FromArgb((int)(_alpha * byte.MaxValue), 255, 255, 255));
             Graphics.Draw(Assets.Texture(Assets.TextureIndex.FinishLine), null,
                 Matrix3x2.CreateTranslation(Graphics.LogicalSize.Width, _y),
-                Color.FromArgb((int) (_alpha * byte.MaxValue), 255, 255, 255));
+                Color.FromArgb((int)(_alpha * byte.MaxValue), 255, 255, 255));
         }
 
         private static bool IntersectsPlayer(ref PlayerWork.Player player)

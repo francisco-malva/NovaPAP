@@ -14,18 +14,17 @@ namespace DuckDuckJump.Engine.Subsystems.Graphical;
 
 internal static class Graphics
 {
-    private static IntPtr _renderer, _window;
-
     public static Camera Camera;
 
     public static readonly Size LogicalSize = new(640, 480);
     public static readonly Vector2 Midpoint = new(LogicalSize.Width / 2.0f, LogicalSize.Height / 2.0f);
 
     private static readonly SDL.SDL_Vertex[] Vertices = new SDL.SDL_Vertex[4];
-    private static readonly int[] Indices = {0, 1, 2, 1, 3, 2};
+    private static readonly int[] Indices = { 0, 1, 2, 1, 3, 2 };
 
-    public static IntPtr Window => _window;
-    public static IntPtr Renderer => _renderer;
+    public static IntPtr Window { get; private set; }
+
+    public static IntPtr Renderer { get; private set; }
 
     public static Rectangle? Viewport
     {
@@ -36,13 +35,13 @@ internal static class Graphics
                 int result;
                 if (!value.HasValue)
                 {
-                    result = SDL_RenderSetViewport(_renderer, null);
+                    result = SDL_RenderSetViewport(Renderer, null);
                 }
                 else
                 {
                     var rect = new SDL.SDL_Rect
-                        {x = value.Value.X, y = value.Value.Y, w = value.Value.Width, h = value.Value.Height};
-                    result = SDL_RenderSetViewport(_renderer, &rect);
+                        { x = value.Value.X, y = value.Value.Y, w = value.Value.Width, h = value.Value.Height };
+                    result = SDL_RenderSetViewport(Renderer, &rect);
                 }
 
                 if (result != 0)
@@ -54,25 +53,34 @@ internal static class Graphics
 
     public static void Initialize()
     {
-        if (SDL.SDL_CreateWindowAndRenderer(640, 480, 0, out _window, out _renderer) != 0)
+        Window = SDL.SDL_CreateWindow("Duck Duck Jump!", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, 640,
+            480, 0);
+
+        if (Window == IntPtr.Zero)
+            Error.Panic("Could not create window.");
+
+        Renderer = SDL.SDL_CreateRenderer(Window, -1,
+            SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL.SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE);
+
+        if (Renderer == IntPtr.Zero)
             Error.Panic($"Could not create window and renderer. SDL Error: {SDL.SDL_GetError()}");
 
-        if (SDL.SDL_SetRenderDrawBlendMode(_renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND) != 0)
+        if (SDL.SDL_SetRenderDrawBlendMode(Renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND) != 0)
             Error.Panic($"Could not set correct blending mode. SDL Error: {SDL.SDL_GetError()}");
     }
 
     public static void Quit()
     {
-        SDL.SDL_DestroyRenderer(_renderer);
-        SDL.SDL_DestroyWindow(_window);
-        _renderer = IntPtr.Zero;
-        _window = IntPtr.Zero;
+        SDL.SDL_DestroyRenderer(Renderer);
+        SDL.SDL_DestroyWindow(Window);
+        Renderer = IntPtr.Zero;
+        Window = IntPtr.Zero;
     }
 
     public static void Begin()
     {
-        SDL.SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-        SDL.SDL_RenderClear(_renderer);
+        SDL.SDL_SetRenderDrawColor(Renderer, 0, 0, 0, 255);
+        SDL.SDL_RenderClear(Renderer);
     }
 
     public static void Draw(Texture texture, RectangleF? source, Matrix3x2 transformation, Color color)
@@ -125,12 +133,12 @@ internal static class Graphics
         Vertices[3].tex_coord.x = textureRectangle.Right;
         Vertices[3].tex_coord.y = textureRectangle.Bottom;
 
-        var sdlColor = new SDL.SDL_Color {r = color.R, g = color.G, b = color.B, a = color.A};
+        var sdlColor = new SDL.SDL_Color { r = color.R, g = color.G, b = color.B, a = color.A };
 
         for (var i = 0; i < Vertices.Length; i++)
             Vertices[i].color = sdlColor;
 
-        if (SDL.SDL_RenderGeometry(_renderer, texture.Handle, Vertices, Vertices.Length, Indices, Indices.Length) != 0)
+        if (SDL.SDL_RenderGeometry(Renderer, texture.Handle, Vertices, Vertices.Length, Indices, Indices.Length) != 0)
         {
 #if DEBUG
             Console.WriteLine($"Cannot draw object. SDL Error: {SDL.SDL_GetError()}");
@@ -140,7 +148,7 @@ internal static class Graphics
 
     public static void End()
     {
-        SDL.SDL_RenderPresent(_renderer);
+        SDL.SDL_RenderPresent(Renderer);
     }
 
     [DllImport("SDL2")]

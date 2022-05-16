@@ -6,7 +6,6 @@ using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
-using DuckDuckJump.Engine.Utilities;
 
 #endregion
 
@@ -32,7 +31,8 @@ internal static partial class Match
 
         public static void Update()
         {
-            _progress = Mathematics.SmoothDamp(_progress, _progressTarget, ref _progressSpeed, 0.25f, GameFlow.TimeStep);
+            _progress = Mathematics.SmoothDamp(_progress, _progressTarget, ref _progressSpeed, 0.25f,
+                GameFlow.TimeStep);
         }
 
         public static void SetTarget(short newTarget)
@@ -41,7 +41,7 @@ internal static partial class Match
                 return;
 
             _target = newTarget;
-            _progressTarget = Math.Clamp((float) _target / _info.PlatformCount, 0.0f, 1.0f);
+            _progressTarget = Math.Clamp((float)_target / _info.PlatformCount, 0.0f, 1.0f);
         }
 
         public static void DrawMe()

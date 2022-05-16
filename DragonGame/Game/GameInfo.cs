@@ -21,7 +21,7 @@ internal unsafe struct GameInfo : INetSerializable
         NoItems = 2,
         All = byte.MaxValue
     }
-    
+
     public ComLevels ComLevels;
     public readonly ushort PlatformCount;
     public readonly sbyte ScoreCount;
@@ -76,7 +76,7 @@ internal unsafe struct GameInfo : INetSerializable
             var dest = reader.GetBytesWithLength();
             fixed (void* dataPtr = dest)
             {
-                Unsafe.CopyBlock(ptr, dataPtr, (uint) dest.Length);
+                Unsafe.CopyBlock(ptr, dataPtr, (uint)dest.Length);
             }
         }
     }

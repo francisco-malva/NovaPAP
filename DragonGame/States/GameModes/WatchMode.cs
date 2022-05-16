@@ -72,6 +72,6 @@ public class WatchMode : IGameState
         _captionFont.Draw("PRESS ANY KEY TO EXIT",
             Matrix3x2.CreateTranslation(Graphics.Midpoint.X - _size.Width / 2.0f,
                 Graphics.LogicalSize.Height - _size.Height - 10.0f),
-            Color.FromArgb((int) (alpha * byte.MaxValue), Color.LightGray.R, Color.LightGray.G, Color.LightGray.B));
+            Color.FromArgb((int)(alpha * byte.MaxValue), Color.LightGray.R, Color.LightGray.G, Color.LightGray.B));
     }
 }

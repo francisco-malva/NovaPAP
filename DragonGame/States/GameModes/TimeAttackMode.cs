@@ -45,7 +45,7 @@ public class TimeAttackMode : IGameState
     public void Initialize()
     {
         _timer = 0;
-        _stageFont = new Font("terminator-two", 20);
+        _stageFont = new Font("terminator-two-20", 20);
         _pauseMenu = new PauseMenu();
 
         AdvanceStage();

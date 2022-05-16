@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
-using DuckDuckJump.Engine.Utilities;
 
 #endregion
 
@@ -33,7 +32,7 @@ internal static partial class Match
             public Vector2 Position;
             public BehaviorType Type;
 
-            public RectangleF Body => new((PointF) Position, Extents);
+            public RectangleF Body => new((PointF)Position, Extents);
             private float _time;
             private float _randomAngle;
 
@@ -85,7 +84,7 @@ internal static partial class Match
                 if (!OnScreen)
                     return;
                 Graphics.Draw(Assets.Texture(Assets.TextureIndex.Platform), null, Matrix3x2.CreateTranslation(Position),
-                    PlatformColors[(int) Type]);
+                    PlatformColors[(int)Type]);
             }
 
             public void Save(Stream stream)

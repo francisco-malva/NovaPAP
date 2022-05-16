@@ -13,6 +13,6 @@ public static class Error
     public static void Panic(string message)
     {
         SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "Error", message, Graphics.Window);
-        Environment.Exit(-1);
+        throw new Exception();
     }
 }

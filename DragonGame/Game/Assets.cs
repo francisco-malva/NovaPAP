@@ -34,8 +34,8 @@ internal static partial class Match
 
         private static readonly FontData[] FontDatas =
         {
-            new("terminator-two", 70),
-            new("terminator-two", 40)
+            new("terminator-two-70", 70),
+            new("terminator-two-40", 40)
         };
 
         private static readonly string[] TexturePaths =
@@ -72,17 +72,17 @@ internal static partial class Match
 
         public static Texture Texture(TextureIndex textureIndex)
         {
-            return Textures[(int) textureIndex];
+            return Textures[(int)textureIndex];
         }
 
         public static Font Font(FontIndex fontIndex)
         {
-            return Fonts[(int) fontIndex];
+            return Fonts[(int)fontIndex];
         }
 
         public static AudioClip SoundEffect(SfxIndex sfxIndex)
         {
-            return SoundEffects[(int) sfxIndex];
+            return SoundEffects[(int)sfxIndex];
         }
 
         public static void Unload()

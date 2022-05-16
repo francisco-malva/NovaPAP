@@ -3,7 +3,6 @@
 using System;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
-using DuckDuckJump.Engine.Utilities;
 
 #endregion
 
@@ -72,7 +71,7 @@ internal static partial class Match
                     {
                         ++currentProgress;
                         var nextPlatform =
-                            (short) (currentProgress + RandomWork.Next((byte) 1, MyComData.PlatformRange));
+                            (short)(currentProgress + RandomWork.Next((byte)1, MyComData.PlatformRange));
                         InsertIntoPath(currentProgress);
                         InsertIntoPath(nextPlatform);
                         currentProgress = nextPlatform;

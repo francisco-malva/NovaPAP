@@ -24,12 +24,12 @@ internal static class Settings
                 SfxVolume = 0.5f
             };
 
-            MyData.InputProfiles[0] = (int) SDL.SDL_Scancode.SDL_SCANCODE_A;
-            MyData.InputProfiles[1] = (int) SDL.SDL_Scancode.SDL_SCANCODE_D;
-            MyData.InputProfiles[2] = (int) SDL.SDL_Scancode.SDL_SCANCODE_S;
-            MyData.InputProfiles[3] = (int) SDL.SDL_Scancode.SDL_SCANCODE_J;
-            MyData.InputProfiles[4] = (int) SDL.SDL_Scancode.SDL_SCANCODE_L;
-            MyData.InputProfiles[5] = (int) SDL.SDL_Scancode.SDL_SCANCODE_K;
+            MyData.InputProfiles[0] = (int)SDL.SDL_Scancode.SDL_SCANCODE_A;
+            MyData.InputProfiles[1] = (int)SDL.SDL_Scancode.SDL_SCANCODE_D;
+            MyData.InputProfiles[2] = (int)SDL.SDL_Scancode.SDL_SCANCODE_S;
+            MyData.InputProfiles[3] = (int)SDL.SDL_Scancode.SDL_SCANCODE_J;
+            MyData.InputProfiles[4] = (int)SDL.SDL_Scancode.SDL_SCANCODE_L;
+            MyData.InputProfiles[5] = (int)SDL.SDL_Scancode.SDL_SCANCODE_K;
             Save();
         }
         else
@@ -87,7 +87,7 @@ internal static class Settings
             {
                 var idx = i - offset;
 
-                if (Keyboard.KeyHeld((SDL.SDL_Scancode) InputProfiles[i])) input |= (GameInput) (1 << idx);
+                if (Keyboard.KeyHeld((SDL.SDL_Scancode)InputProfiles[i])) input |= (GameInput)(1 << idx);
             }
 
             return input;

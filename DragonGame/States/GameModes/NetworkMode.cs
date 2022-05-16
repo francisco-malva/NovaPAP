@@ -96,7 +96,7 @@ public class NetworkMode : IGameState
             Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None);
 
         _writer.Put(info);
-        _writer.Put((byte) GameInput.None);
+        _writer.Put((byte)GameInput.None);
         peer.Send(_writer, DeliveryMethod.ReliableOrdered);
 
         Match.Initialize(info);
@@ -119,12 +119,12 @@ public class NetworkMode : IGameState
 
     private void EnqueuePendingInputs(NetPeer peer, NetDataReader reader)
     {
-        var foreign = (GameInput) reader.GetByte();
+        var foreign = (GameInput)reader.GetByte();
         _writer.Reset();
         var mine = Settings.MyData.GetInput(0);
 
         _writer.Reset();
-        _writer.Put((byte) mine);
+        _writer.Put((byte)mine);
         peer.Send(_writer, DeliveryMethod.ReliableOrdered);
 
         if (_initialized)

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ppy.SDL2-CS" Version="1.0.518-alpha"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.1"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Common\Common.csproj"/>
+    </ItemGroup>
+
+</Project>

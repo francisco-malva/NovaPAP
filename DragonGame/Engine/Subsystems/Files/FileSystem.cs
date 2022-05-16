@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.IO;
-using System.IO.Compression;
 
 #endregion
 
@@ -9,21 +8,27 @@ namespace DuckDuckJump.Engine.Subsystems.Files;
 
 public static class FileSystem
 {
-    private static ZipArchive _archive;
-    
     public static void Initialize()
     {
-        _archive = ZipFile.Open("Assets.zip", ZipArchiveMode.Read);
     }
 
     public static void Quit()
     {
-        _archive.Dispose();
     }
 
     public static Stream Open(string path)
     {
-        path = Path.Combine("Assets", path);
-        return _archive.GetEntry(path)?.Open() ?? File.OpenRead(path);
+        return File.OpenRead($"Assets\\{path}");
+    }
+
+    public static byte[] GetAllBytes(string path)
+    {
+        using var stream = Open(path);
+
+        var data = new byte[stream.Length];
+
+        stream.Read(data, 0, data.Length);
+
+        return data;
     }
 }

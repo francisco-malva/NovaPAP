@@ -30,7 +30,7 @@ public class MainMenuSelector : TextSelector
     };
 
     private readonly TextInputData _nicknameInput = new()
-        {Text = string.Empty, MaxLength = Settings.Nickname.MaxLength};
+        { Text = string.Empty, MaxLength = Settings.Nickname.MaxLength };
 
     private int _currentBoundInput;
     private float _musicVolume;
@@ -91,7 +91,7 @@ public class MainMenuSelector : TextSelector
                 unsafe
                 {
                     Label(
-                        $"{ActionNames[j - offset]}: {SDL.SDL_GetScancodeName((SDL.SDL_Scancode) Settings.MyData.InputProfiles[j])}");
+                        $"{ActionNames[j - offset]}: {SDL.SDL_GetScancodeName((SDL.SDL_Scancode)Settings.MyData.InputProfiles[j])}");
                 }
         }
 
@@ -100,7 +100,7 @@ public class MainMenuSelector : TextSelector
         if (Keyboard.AnyDown(out var newBinding))
             unsafe
             {
-                Settings.MyData.InputProfiles[_currentBoundInput] = (int) newBinding;
+                Settings.MyData.InputProfiles[_currentBoundInput] = (int)newBinding;
                 ++_currentBoundInput;
 
                 if (_currentBoundInput >= Settings.Data.InputProfileSize * Match.PlayerCount)
@@ -211,7 +211,7 @@ public class MainMenuSelector : TextSelector
         Break(80.0f);
 
         if (Button("TIME ATTACK")) GameFlow.Set(new TimeAttackMode());
-        
+
 
         if (Button("VS CPU")) GameFlow.Set(new VersusMode());
 
@@ -250,7 +250,7 @@ public class MainMenuSelector : TextSelector
                 {
                     var character = i > _nicknameInput.Text.Length - 1 ? char.MinValue : _nicknameInput.Text[i];
                     Settings.MyData.Nickname.Characters[i] = character;
-                    Settings.MyData.Nickname.Length = (byte) _nicknameInput.Text.Length;
+                    Settings.MyData.Nickname.Length = (byte)_nicknameInput.Text.Length;
                 }
 
             _nicknameInput.Text = string.Empty;
@@ -297,7 +297,7 @@ public class MainMenuState : IGameState
 
     public void Initialize()
     {
-        _font = new Font("public-pixel", 30);
+        _font = new Font("public-pixel-30", 30);
         _selector = new MainMenuSelector(_font);
         _music = new AudioClip("menu", true);
 

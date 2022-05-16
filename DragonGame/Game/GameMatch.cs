@@ -7,7 +7,6 @@ using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Graphical;
-using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Game.Input;
 
@@ -17,6 +16,14 @@ namespace DuckDuckJump.Game;
 
 internal static partial class Match
 {
+    public enum Winner : sbyte
+    {
+        None = -1,
+        P1,
+        P2,
+        Draw
+    }
+
     public const int PlayerCount = 2;
 
     private static GameInfo _info;
@@ -120,7 +127,7 @@ internal static partial class Match
             case MatchState.Winner:
                 if (_winner != Winner.Draw && _winner != Winner.None)
                 {
-                    var winner = (int) _winner;
+                    var winner = (int)_winner;
                     ScoreWork.IncreaseScore(winner);
 
                     ref var player = ref PlayerWork.Get(winner);
@@ -299,7 +306,7 @@ internal static partial class Match
     {
         Graphics.Draw(Texture.White, null,
             Matrix3x2.CreateScale(Graphics.LogicalSize.Width, Graphics.LogicalSize.Height),
-            Color.FromArgb((int) (Math.Min(1.0f, _fade) * byte.MaxValue), 0, 0, 0));
+            Color.FromArgb((int)(Math.Min(1.0f, _fade) * byte.MaxValue), 0, 0, 0));
     }
 
     private static void DrawGui()
@@ -317,13 +324,5 @@ internal static partial class Match
         Winner,
         Over,
         BeginningMessage
-    }
-
-    public enum Winner : sbyte
-    {
-        None = -1,
-        P1,
-        P2,
-        Draw
     }
 }

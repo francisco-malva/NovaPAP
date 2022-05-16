@@ -16,7 +16,7 @@ public static class Mathematics
 
     // Gradually changes a value towards a desired goal over time.
     public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime,
-        float deltaTime,float maxSpeed = float.PositiveInfinity)
+        float deltaTime, float maxSpeed = float.PositiveInfinity)
     {
         // Based on Game Programming Gems 4 Chapter 1.10
         smoothTime = Math.Max(0.0001F, smoothTime);
@@ -113,10 +113,10 @@ public static class Mathematics
     /// <returns>The interpolated color.</returns>
     public static Color Lerp(Color from, Color to, float t)
     {
-        var r = (byte) Lerp(from.R, to.R, t);
-        var g = (byte) Lerp(from.G, to.G, t);
-        var b = (byte) Lerp(from.B, to.B, t);
-        var a = (byte) Lerp(from.A, to.A, t);
+        var r = (byte)Lerp(from.R, to.R, t);
+        var g = (byte)Lerp(from.G, to.G, t);
+        var b = (byte)Lerp(from.B, to.B, t);
+        var a = (byte)Lerp(from.A, to.A, t);
         return Color.FromArgb(a, r, g, b);
     }
 
