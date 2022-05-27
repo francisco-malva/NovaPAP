@@ -12,6 +12,7 @@ using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.Configuration;
+using DuckDuckJump.Game.GameWork;
 using DuckDuckJump.Game.Input;
 using DuckDuckJump.States.GameModes;
 using SDL2;
@@ -73,9 +74,22 @@ public class MainMenuSelector : TextSelector
             case State.InputSettings:
                 UpdateInput();
                 break;
+            case State.Scoreboard:
+                UpdateScoreboard();
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+
+    private void UpdateScoreboard()
+    {
+        Begin();
+
+        if (Button("BACK"))
+            _state = State.MainScreen;
+
+        End();
     }
 
     private void UpdateInput()
@@ -266,6 +280,7 @@ public class MainMenuSelector : TextSelector
         Begin();
         Break(120.0f * 1.5f);
         if (Button("BEGIN")) _state = State.ModeSelect;
+        if (Button("SCOREBOARD")) _state = State.Scoreboard;
         if (Button("SETTINGS")) _state = State.Settings;
         var quitEv = new SDL.SDL_Event
         {
@@ -284,7 +299,8 @@ public class MainMenuSelector : TextSelector
         ModeSelect,
         NicknameSetting,
         AudioSettings,
-        InputSettings
+        InputSettings,
+        Scoreboard
     }
 }
 
@@ -303,9 +319,9 @@ public class MainMenuState : IGameState
 
         Audio.PlayMusic(_music);
 
-        Match.Assets.Load();
+        Assets.Load();
         Match.Initialize(new GameInfo(new ComLevels(8, 8), 100, Environment.TickCount, 0, ushort.MaxValue,
-            Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.Exhibition | GameInfo.Flags.NoItems));
+            BannerWork.MessageIndex.NoBanner, GameInfo.Flags.Exhibition | GameInfo.Flags.NoItems));
     }
 
     public void Exit()

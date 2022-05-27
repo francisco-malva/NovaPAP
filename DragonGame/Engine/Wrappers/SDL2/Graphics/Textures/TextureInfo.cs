@@ -1,6 +1,6 @@
 ﻿namespace DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 
-internal readonly struct TextureInfo
+public readonly struct TextureInfo
 {
     public readonly int Width;
     public readonly int Height;

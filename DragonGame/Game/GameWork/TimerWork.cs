@@ -9,82 +9,79 @@ using DuckDuckJump.Engine.Subsystems.Graphical;
 
 #endregion
 
-namespace DuckDuckJump.Game;
+namespace DuckDuckJump.Game.GameWork;
 
-internal partial class Match
+internal static class TimerWork
 {
-    private static class TimerWork
+    private const float DropShadowOffset = 3.0f;
+    private static ushort _timeLeft;
+
+    private static float _alpha;
+    private static float _alphaVelocity;
+
+    private static Size _stringSize;
+    private static string _string;
+    private static float TargetAlpha => Match.State == Match.MatchState.InGame ? 1.0f : 0.0f;
+
+    public static bool Over => _timeLeft == 0;
+
+    public static void Reset()
     {
-        private const float DropShadowOffset = 3.0f;
-        private static ushort _timeLeft;
+        _timeLeft = Match.Info.TimeLeft;
+        UpdateDisplay();
+    }
 
-        private static float _alpha;
-        private static float _alphaVelocity;
+    public static void SaveMe(Stream stream)
+    {
+        stream.Write(_timeLeft);
+        stream.Write(_alpha);
+        stream.Write(_alphaVelocity);
+    }
 
-        private static Size _stringSize;
-        private static string _string;
-        private static float TargetAlpha => State == MatchState.InGame ? 1.0f : 0.0f;
+    public static void LoadMe(Stream stream)
+    {
+        _timeLeft = stream.Read<ushort>();
+        _alpha = stream.Read<float>();
+        _alphaVelocity = stream.Read<float>();
+        UpdateDisplay();
+    }
 
-        public static bool Over => _timeLeft == 0;
+    public static void UpdateMe()
+    {
+        _alpha = Mathematics.SmoothDamp(_alpha, TargetAlpha, ref _alphaVelocity, 0.15f, GameFlow.TimeStep);
+        if (Match.State != Match.MatchState.InGame)
+            return;
 
-        public static void Reset()
-        {
-            _timeLeft = _info.TimeLeft;
-            UpdateDisplay();
-        }
+        if (_timeLeft > 0) TickDown();
+    }
 
-        public static void SaveMe(Stream stream)
-        {
-            stream.Write(_timeLeft);
-            stream.Write(_alpha);
-            stream.Write(_alphaVelocity);
-        }
+    private static void TickDown()
+    {
+        --_timeLeft;
 
-        public static void LoadMe(Stream stream)
-        {
-            _timeLeft = stream.Read<ushort>();
-            _alpha = stream.Read<float>();
-            _alphaVelocity = stream.Read<float>();
-            UpdateDisplay();
-        }
+        if (_timeLeft % 60 == 0) UpdateDisplay();
+    }
 
-        public static void UpdateMe()
-        {
-            _alpha = Mathematics.SmoothDamp(_alpha, TargetAlpha, ref _alphaVelocity, 0.15f, GameFlow.TimeStep);
-            if (State != MatchState.InGame)
-                return;
+    private static void UpdateDisplay()
+    {
+        _string = (_timeLeft / 60).ToString();
+        _stringSize = Assets.Font(Assets.FontIndex.TimerFont).MeasureString(_string);
+    }
 
-            if (_timeLeft > 0) TickDown();
-        }
+    public static void DrawMe()
+    {
+        var intAlpha = (int)(_alpha * byte.MaxValue);
 
-        private static void TickDown()
-        {
-            --_timeLeft;
+        var fgColor = Color.FromArgb(intAlpha, Color.Azure.R, Color.Azure.G, Color.Azure.B);
+        var bgColor = Color.FromArgb(intAlpha, 0, 0, 0);
 
-            if (_timeLeft % 60 == 0) UpdateDisplay();
-        }
-
-        private static void UpdateDisplay()
-        {
-            _string = (_timeLeft / 60).ToString();
-            _stringSize = Assets.Font(Assets.FontIndex.TimerFont).MeasureString(_string);
-        }
-
-        public static void DrawMe()
-        {
-            var intAlpha = (int)(_alpha * byte.MaxValue);
-
-            var fgColor = Color.FromArgb(intAlpha, Color.Azure.R, Color.Azure.G, Color.Azure.B);
-            var bgColor = Color.FromArgb(intAlpha, 0, 0, 0);
-
-            var x = Graphics.Midpoint.X - _stringSize.Width / 2.0f;
-            var y = 10.0f;
+        var x = Graphics.Midpoint.X - _stringSize.Width / 2.0f;
+        var y = 10.0f;
 
 
-            Assets.Font(Assets.FontIndex.TimerFont).Draw(_string,
-                Matrix3x2.CreateTranslation(x + DropShadowOffset, y + DropShadowOffset), bgColor);
-            Assets.Font(Assets.FontIndex.TimerFont).Draw(_string,
-                Matrix3x2.CreateTranslation(x, y), fgColor);
-        }
+        Assets.Font(Assets.FontIndex.TimerFont).Draw(_string,
+            Matrix3x2.CreateTranslation(x + DropShadowOffset, y + DropShadowOffset), bgColor);
+        Assets.Font(Assets.FontIndex.TimerFont).Draw(_string,
+            Matrix3x2.CreateTranslation(x, y), fgColor);
     }
 }

@@ -9,6 +9,7 @@ using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Game;
+using DuckDuckJump.Game.GameWork;
 using DuckDuckJump.Game.Input;
 using SDL2;
 
@@ -34,7 +35,7 @@ public class WatchMode : IGameState
 
         _size = _captionFont.MeasureString("PRESS ANY KEY TO EXIT");
         Match.Initialize(new GameInfo(new ComLevels(8, 8), 1024, Environment.TickCount, -1, ushort.MaxValue,
-            Match.BannerWork.MessageIndex.WatchModeStart, GameInfo.Flags.Exhibition));
+            BannerWork.MessageIndex.WatchModeStart, GameInfo.Flags.Exhibition));
     }
 
     public void Exit()
@@ -69,6 +70,7 @@ public class WatchMode : IGameState
 
         if (Match.State == Match.MatchState.BeginningMessage)
             return;
+
         _captionFont.Draw("PRESS ANY KEY TO EXIT",
             Matrix3x2.CreateTranslation(Graphics.Midpoint.X - _size.Width / 2.0f,
                 Graphics.LogicalSize.Height - _size.Height - 10.0f),

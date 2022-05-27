@@ -1,106 +1,89 @@
 ﻿#region
 
 using System;
-using System.IO;
 using System.Numerics;
-using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Graphical;
+using DuckDuckJump.Game.GameWork.Players;
 
 #endregion
 
-namespace DuckDuckJump.Game;
+namespace DuckDuckJump.Game.GameWork.Platforming;
 
-internal static partial class Match
+internal static class PlatformWork
 {
-    public static partial class PlatformWork
+    private const short MaxPlatformCount = 1024;
+
+    private const float StepRange = 85.0f;
+
+    private static readonly Platform[] Platforms = new Platform[MaxPlatformCount];
+    private static readonly float MinimumStep = Platform.Extents.Height * 7.5f;
+
+    public static float MaxPlatformY { get; private set; }
+
+    public static void Reset()
     {
-        private const short MaxPlatformCount = 1024;
+        var lastType = Platform.BehaviorType.Static;
 
-        private const float StepRange = 85.0f;
-
-        private static readonly Platform[] Platforms = new Platform[MaxPlatformCount];
-        private static readonly float MinimumStep = Platform.Extents.Height * 7.5f;
-
-        public static float MaxPlatformY { get; private set; }
-
-
-        public static void SaveMe(Stream stream)
+        var spawnY = Graphics.LogicalSize.Height - Platform.Extents.Height - 60.0f;
+        for (var i = 0; i < Match.Info.PlatformCount; i++)
         {
-            stream.Write(MaxPlatformY);
-            for (var i = 0; i < _info.PlatformCount; i++) Platforms[i].Save(stream);
-        }
+            var progression = (float)i / Match.Info.PlatformCount;
 
-        public static void LoadMe(Stream stream)
-        {
-            MaxPlatformY = stream.Read<float>();
-            for (var i = 0; i < _info.PlatformCount; i++) Platforms[i].Load(stream);
-        }
+            var yStep = RandomWork.Next(MinimumStep, MinimumStep + StepRange * progression);
 
-        public static void Reset()
-        {
-            var lastType = Platform.BehaviorType.Static;
+            spawnY -= yStep;
 
-            var spawnY = Graphics.LogicalSize.Height - Platform.Extents.Height - 60.0f;
-            for (var i = 0; i < _info.PlatformCount; i++)
+            Platforms[i].Position =
+                new Vector2(
+                    Math.Max(0.0f,
+                        RandomWork.Next(0.0f, 1.0f) * Graphics.LogicalSize.Width - Platform.Extents.Width),
+                    spawnY);
+
+            Platform.BehaviorType newType;
+            do
             {
-                var progression = (float)i / _info.PlatformCount;
+                newType = (Platform.BehaviorType)RandomWork.Next(0, (int)Platform.BehaviorType.Max);
+            } while (i > 0 && newType == lastType);
 
-                var yStep = RandomWork.Next(MinimumStep, MinimumStep + StepRange * progression);
+            lastType = newType;
+            Platforms[i].Type = newType;
 
-                spawnY -= yStep;
+            Platforms[i].ResetMe();
 
-                Platforms[i].Position =
-                    new Vector2(
-                        Math.Max(0.0f,
-                            RandomWork.Next(0.0f, 1.0f) * Graphics.LogicalSize.Width - Platform.Extents.Width),
-                        spawnY);
-
-                Platform.BehaviorType newType;
-                do
-                {
-                    newType = (Platform.BehaviorType)RandomWork.Next(0, (int)Platform.BehaviorType.Max);
-                } while (i > 0 && newType == lastType);
-
-                lastType = newType;
-                Platforms[i].Type = newType;
-
-                Platforms[i].ResetMe();
-
-                MaxPlatformY = Platforms[i].Position.Y;
-            }
+            MaxPlatformY = Platforms[i].Position.Y;
         }
+    }
 
-        public static void Update()
+    public static void Update()
+    {
+        if (Match.State != Match.MatchState.InGame)
+            return;
+        for (var i = 0; i < Match.Info.PlatformCount; i++) Platforms[i].UpdateMe();
+    }
+
+    public static void DrawUs()
+    {
+        for (var i = 0; i < Match.Info.PlatformCount; i++) Platforms[i].DrawMe();
+    }
+
+
+    public static ref Platform GetPlatform(short index)
+    {
+        return ref Platforms[index];
+    }
+
+    public static bool GetIntersectingPlatform(ref Player player, out short platformIndex)
+    {
+        for (short i = 0; i < Match.Info.PlatformCount; i++)
         {
-            if (State != MatchState.InGame)
-                return;
-            for (var i = 0; i < _info.PlatformCount; i++) Platforms[i].UpdateMe();
+            ref var platform = ref GetPlatform(i);
+
+            if (!platform.OnScreen || !platform.Body.IntersectsWith(player.PlatformBox)) continue;
+            platformIndex = i;
+            return true;
         }
 
-        public static void DrawUs()
-        {
-            for (var i = 0; i < _info.PlatformCount; i++) Platforms[i].DrawMe();
-        }
-
-
-        public static ref Platform GetPlatform(short index)
-        {
-            return ref Platforms[index];
-        }
-
-        public static bool GetIntersectingPlatform(ref PlayerWork.Player player, out short platformIndex)
-        {
-            for (short i = 0; i < _info.PlatformCount; i++)
-            {
-                ref var platform = ref GetPlatform(i);
-
-                if (!platform.OnScreen || !platform.Body.IntersectsWith(player.PlatformBox)) continue;
-                platformIndex = i;
-                return true;
-            }
-
-            platformIndex = -1;
-            return false;
-        }
+        platformIndex = -1;
+        return false;
     }
 }

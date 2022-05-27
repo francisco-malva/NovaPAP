@@ -1,4 +1,4 @@
-namespace DuckDuckJump.Engine.Utilities;
+namespace Common.Utilities;
 
 /// <summary>
 ///     A simple structure that houses 2 distinct structures within itself.

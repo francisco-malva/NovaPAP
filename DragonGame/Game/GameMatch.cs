@@ -2,102 +2,47 @@
 
 using System;
 using System.Drawing;
-using System.IO;
 using System.Numerics;
-using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
+using DuckDuckJump.Game.GameWork;
+using DuckDuckJump.Game.GameWork.Items;
+using DuckDuckJump.Game.GameWork.Platforming;
+using DuckDuckJump.Game.GameWork.Players;
 using DuckDuckJump.Game.Input;
 
 #endregion
 
 namespace DuckDuckJump.Game;
 
-internal static partial class Match
+internal static class Match
 {
-    public enum Winner : sbyte
-    {
-        None = -1,
-        P1,
-        P2,
-        Draw
-    }
-
     public const int PlayerCount = 2;
 
-    private static GameInfo _info;
-    private static float _fade;
-    private static Winner _winner;
-    private static byte _currentRound;
+    public static GameInfo Info;
+    public static float Fade;
+    public static MatchWinner RoundWinner, SetWinner;
+    public static byte CurrentRound;
 
-    private static Winner _matchWinner;
 
     public static MatchState State { get; private set; }
-    public static Winner MatchWinner => _matchWinner;
 
     public static bool IsOver { get; private set; }
-
-    public static void Save(Stream stream)
-    {
-        _info.Save(stream);
-
-        stream.Write(State);
-        stream.Write(_fade);
-        stream.Write(_winner);
-        stream.Write(_currentRound);
-        stream.Write(_matchWinner);
-        stream.Write(IsOver);
-
-        CameraWork.SaveMe(stream);
-        BannerWork.SaveMe(stream);
-        PlatformWork.SaveMe(stream);
-        RandomWork.SaveMe(stream);
-        FinishLineWork.SaveMe(stream);
-        PlayerWork.SaveMe(stream);
-        ScoreWork.Save(stream);
-        TimerWork.SaveMe(stream);
-        SoundEffectWork.SaveMe(stream);
-    }
-
-    public static void Load(Stream stream)
-    {
-        _info.Load(stream);
-
-        State = stream.Read<MatchState>();
-        _fade = stream.Read<float>();
-        _winner = stream.Read<Winner>();
-        _currentRound = stream.Read<byte>();
-        _matchWinner = stream.Read<Winner>();
-        IsOver = stream.Read<bool>();
-
-        CameraWork.LoadMe(stream);
-        BannerWork.LoadMe(stream);
-        PlatformWork.LoadMe(stream);
-        RandomWork.LoadMe(stream);
-        FinishLineWork.LoadMe(stream);
-        PlayerWork.LoadMe(stream);
-        ScoreWork.Load(stream);
-        TimerWork.LoadMe(stream);
-
-        SoundEffectWork.LoadMe(stream);
-        SoundEffectWork.UpdateMe();
-    }
 
 
     public static void Initialize(GameInfo info)
     {
         IsOver = false;
-        _info = info;
-        _currentRound = 0;
-        _matchWinner = 0;
+        Info = info;
+        CurrentRound = 0;
 
-        _fade = 1.0f;
+        Fade = 1.0f;
 
         ScoreWork.Reset();
         RandomWork.Reset();
 
-        SetState(_info.BeginMessageIndex != BannerWork.MessageIndex.NoBanner
+        SetState(Info.BeginMessageIndex != BannerWork.MessageIndex.NoBanner
             ? MatchState.BeginningMessage
             : MatchState.GetReady);
     }
@@ -109,38 +54,12 @@ internal static partial class Match
         switch (State)
         {
             case MatchState.GetReady:
-                _winner = Winner.None;
-                _currentRound++;
-                BackgroundWork.Reset();
-                BannerWork.Reset();
-                CameraWork.Reset();
-                PlayerWork.Reset();
-                PlatformWork.Reset();
-                TimerWork.Reset();
-                FinishLineWork.Reset();
-
-                if (_info.ScoreCount > 1)
-                    BannerWork.SetMessage(BannerWork.MessageIndex.Round);
+                OnGetReady();
                 break;
             case MatchState.InGame:
                 break;
             case MatchState.Winner:
-                if (_winner != Winner.Draw && _winner != Winner.None)
-                {
-                    var winner = (int)_winner;
-                    ScoreWork.IncreaseScore(winner);
-
-                    ref var player = ref PlayerWork.Get(winner);
-
-                    CenterCameraOnPlayer(ref player);
-                }
-
-                if (ScoreWork.GetWinner(out _matchWinner))
-                    SetState(MatchState.Over);
-                else
-                    BannerWork.SetMessage(_winner != Winner.Draw
-                        ? BannerWork.MessageIndex.Wins
-                        : BannerWork.MessageIndex.Draw);
+                OnWinner();
                 break;
             case MatchState.NotInitialized:
                 break;
@@ -151,14 +70,50 @@ internal static partial class Match
                 BannerWork.SetMessage(BannerWork.MessageIndex.TimeUp);
                 break;
             case MatchState.BeginningMessage:
-                BannerWork.SetMessage(_info.BeginMessageIndex);
+                BannerWork.SetMessage(Info.BeginMessageIndex);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
     }
 
-    private static void CenterCameraOnPlayer(ref PlayerWork.Player player)
+    private static void OnWinner()
+    {
+        if (RoundWinner != MatchWinner.Draw && RoundWinner != MatchWinner.None)
+        {
+            var winner = (int)RoundWinner;
+            ScoreWork.IncreaseScore(winner);
+
+            ref var player = ref PlayerWork.Get(winner);
+
+            CenterCameraOnPlayer(ref player);
+        }
+
+        if (ScoreWork.GetWinner(out SetWinner))
+            SetState(MatchState.Over);
+        else
+            BannerWork.SetMessage(RoundWinner != MatchWinner.Draw
+                ? BannerWork.MessageIndex.Wins
+                : BannerWork.MessageIndex.Draw);
+    }
+
+    private static void OnGetReady()
+    {
+        RoundWinner = MatchWinner.None;
+        CurrentRound++;
+        BackgroundWork.Reset();
+        BannerWork.Reset();
+        CameraWork.Reset();
+        PlayerWork.Reset();
+        PlatformWork.Reset();
+        TimerWork.Reset();
+        FinishLineWork.Reset();
+
+        if (Info.ScoreCount > 1)
+            BannerWork.SetMessage(BannerWork.MessageIndex.Round);
+    }
+
+    private static void CenterCameraOnPlayer(ref Player player)
     {
         CameraWork.Target =
             new Vector2(player.Position.X + player.PushBox.Width / 2.0f - Graphics.Midpoint.X,
@@ -175,80 +130,24 @@ internal static partial class Match
         switch (State)
         {
             case MatchState.GetReady:
-                if (BannerWork.IsDone())
-                {
-                    _fade -= 0.05f;
-                    if (_fade <= 0.0f)
-                    {
-                        _fade = 0.0f;
-                        SetState(MatchState.InGame);
-                    }
-                }
-
+                UpdateGetReady();
                 break;
             case MatchState.InGame:
-                if (TimerWork.Over)
-                {
-                    SetState(MatchState.TimeUp);
-                }
-                else
-                {
-                    DecideWinner();
-                    if (_winner >= 0) SetState(MatchState.Winner);
-                }
-
+                UpdateInGame();
                 break;
             case MatchState.TimeUp:
-                if (BannerWork.IsDone())
-                {
-                    if (PlayerWork.First.LastJumpedPlatform == PlayerWork.Last.LastJumpedPlatform)
-                    {
-                        PlayerWork.First.Lost = true;
-                        PlayerWork.Last.Lost = true;
-                    }
-                    else if (PlayerWork.First.LastJumpedPlatform > PlayerWork.Last.LastJumpedPlatform)
-                    {
-                        PlayerWork.Last.Lost = true;
-                    }
-                    else
-                    {
-                        PlayerWork.First.Lost = true;
-                    }
-
-                    DecideWinner();
-                    SetState(MatchState.Winner);
-                }
-
+                UpdateTimeUp();
                 break;
             case MatchState.Winner:
-                if (BannerWork.IsDone())
-                {
-                    _fade += 0.05f;
-                    if (_fade >= 1.0f) SetState(MatchState.GetReady);
-                }
-
+                UpdateWinner();
                 break;
             case MatchState.NotInitialized:
                 break;
             case MatchState.Over:
-
-                if (BannerWork.IsDone())
-                {
-                    _fade += 0.005f;
-                    if (_fade >= 1.0f)
-                    {
-                        _fade = 1.0f;
-                        IsOver = true;
-                        SetState(MatchState.NotInitialized);
-                    }
-
-                    Audio.MusicFade = 1.0f - _fade;
-                }
-
-
+                UpdateOver();
                 break;
             case MatchState.BeginningMessage:
-                if (BannerWork.IsDone()) SetState(MatchState.GetReady);
+                UpdateBeginningMessage();
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -264,19 +163,92 @@ internal static partial class Match
         SoundEffectWork.UpdateMe();
     }
 
+    private static void UpdateBeginningMessage()
+    {
+        if (BannerWork.IsDone()) SetState(MatchState.GetReady);
+    }
+
+    private static void UpdateOver()
+    {
+        if (!BannerWork.IsDone()) return;
+
+        Fade += 0.005f;
+        if (Fade >= 1.0f)
+        {
+            Fade = 1.0f;
+            IsOver = true;
+            SetState(MatchState.NotInitialized);
+        }
+
+        Audio.MusicFade = 1.0f - Fade;
+    }
+
+    private static void UpdateWinner()
+    {
+        if (!BannerWork.IsDone()) return;
+
+        Fade += 0.05f;
+        if (Fade >= 1.0f) SetState(MatchState.GetReady);
+    }
+
+    private static void UpdateTimeUp()
+    {
+        if (!BannerWork.IsDone()) return;
+
+        if (PlayerWork.First.LastJumpedPlatform == PlayerWork.Last.LastJumpedPlatform)
+        {
+            PlayerWork.First.Lost = true;
+            PlayerWork.Last.Lost = true;
+        }
+        else if (PlayerWork.First.LastJumpedPlatform > PlayerWork.Last.LastJumpedPlatform)
+        {
+            PlayerWork.Last.Lost = true;
+        }
+        else
+        {
+            PlayerWork.First.Lost = true;
+        }
+
+        DecideWinner();
+        SetState(MatchState.Winner);
+    }
+
+    private static void UpdateInGame()
+    {
+        if (TimerWork.Over)
+        {
+            SetState(MatchState.TimeUp);
+        }
+        else
+        {
+            DecideWinner();
+            if (RoundWinner >= 0) SetState(MatchState.Winner);
+        }
+    }
+
+    private static void UpdateGetReady()
+    {
+        if (!BannerWork.IsDone()) return;
+        Fade -= 0.05f;
+        if (!(Fade <= 0.0f)) return;
+
+        Fade = 0.0f;
+        SetState(MatchState.InGame);
+    }
+
     private static void DecideWinner()
     {
         switch (PlayerWork.First.Lost)
         {
             case true when PlayerWork.Last.Lost:
-                _winner = Winner.Draw;
+                RoundWinner = MatchWinner.Draw;
                 break;
             case true:
-                _winner = Winner.P2;
+                RoundWinner = MatchWinner.P2;
                 break;
             default:
             {
-                if (PlayerWork.Last.Lost) _winner = Winner.P1;
+                if (PlayerWork.Last.Lost) RoundWinner = MatchWinner.P1;
                 break;
             }
         }
@@ -296,7 +268,7 @@ internal static partial class Match
         FinishLineWork.DrawMe();
 
         Graphics.Camera = null;
-        if ((_info.GameFlags & GameInfo.Flags.Exhibition) == 0) DrawGui();
+        if ((Info.GameFlags & GameInfo.Flags.Exhibition) == 0) DrawGui();
         DrawFade();
 
         BannerWork.DrawMe();
@@ -306,13 +278,14 @@ internal static partial class Match
     {
         Graphics.Draw(Texture.White, null,
             Matrix3x2.CreateScale(Graphics.LogicalSize.Width, Graphics.LogicalSize.Height),
-            Color.FromArgb((int)(Math.Min(1.0f, _fade) * byte.MaxValue), 0, 0, 0));
+            Color.FromArgb((int)(Math.Min(1.0f, Fade) * byte.MaxValue), 0, 0, 0));
     }
 
     private static void DrawGui()
     {
         TimerWork.DrawMe();
         ScoreWork.DrawMe();
+        ItemWork.DrawMe();
     }
 
     internal enum MatchState : byte

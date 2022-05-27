@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using DuckDuckJump.Game.GameWork;
 using LiteNetLib.Utils;
 
 #endregion
@@ -27,11 +28,11 @@ internal unsafe struct GameInfo : INetSerializable
     public readonly sbyte ScoreCount;
     public int RandomSeed;
     public readonly ushort TimeLeft;
-    public readonly Match.BannerWork.MessageIndex BeginMessageIndex;
+    public readonly BannerWork.MessageIndex BeginMessageIndex;
     public readonly Flags GameFlags;
 
     public GameInfo(ComLevels levels, ushort platformCount, int randomSeed, sbyte scoreCount,
-        ushort timeLeft, Match.BannerWork.MessageIndex beginMessageIndex, Flags flags)
+        ushort timeLeft, BannerWork.MessageIndex beginMessageIndex, Flags flags)
     {
         ComLevels = levels;
         PlatformCount = platformCount;

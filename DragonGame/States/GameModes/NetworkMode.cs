@@ -5,10 +5,11 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using CircularBuffer;
+using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
-using DuckDuckJump.Engine.Utilities;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.Configuration;
+using DuckDuckJump.Game.GameWork;
 using DuckDuckJump.Game.Input;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -93,7 +94,7 @@ public class NetworkMode : IGameState
         _writer.Reset();
 
         var info = new GameInfo(new ComLevels(0, 0), 100, Environment.TickCount, 4, 99 * 60,
-            Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None);
+            BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None);
 
         _writer.Put(info);
         _writer.Put((byte)GameInput.None);
@@ -127,13 +128,12 @@ public class NetworkMode : IGameState
         _writer.Put((byte)mine);
         peer.Send(_writer, DeliveryMethod.ReliableOrdered);
 
-        if (_initialized)
-        {
-            Span<GameInput> inputs = stackalloc GameInput[Match.PlayerCount];
-            inputs[0] = _isHost ? mine : foreign;
-            inputs[1] = _isHost ? foreign : mine;
-            Match.Update(inputs);
-        }
+        if (!_initialized) return;
+
+        Span<GameInput> inputs = stackalloc GameInput[Match.PlayerCount];
+        inputs[0] = _isHost ? mine : foreign;
+        inputs[1] = _isHost ? foreign : mine;
+        Match.Update(inputs);
     }
 
     private void OnConnectionRequest(ConnectionRequest request)

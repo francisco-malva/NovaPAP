@@ -8,6 +8,7 @@ using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.Configuration;
+using DuckDuckJump.Game.GameWork;
 using DuckDuckJump.Game.Input;
 using DuckDuckJump.Game.Pausing;
 using SDL2;
@@ -22,14 +23,14 @@ public class TimeAttackMode : IGameState
 
     private static readonly GameInfo[] StageSettingTable =
     {
-        new(new ComLevels(0, 1), 50, 0, 2, 60 * 60, Match.BannerWork.MessageIndex.TimeAttackStart, GameInfo.Flags.None),
-        new(new ComLevels(0, 2), 50, 0, 2, 60 * 60, Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 3), 50, 0, 2, 60 * 60, Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 4), 50, 0, 2, 60 * 60, Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 5), 50, 0, 2, 60 * 60, Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 6), 50, 0, 2, 60 * 60, Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 7), 50, 0, 2, 60 * 60, Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 8), 50, 0, 2, 60 * 60, Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None)
+        new(new ComLevels(0, 1), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.TimeAttackStart, GameInfo.Flags.None),
+        new(new ComLevels(0, 2), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
+        new(new ComLevels(0, 3), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
+        new(new ComLevels(0, 4), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
+        new(new ComLevels(0, 5), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
+        new(new ComLevels(0, 6), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
+        new(new ComLevels(0, 7), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
+        new(new ComLevels(0, 8), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None)
     };
 
     private PauseMenu _pauseMenu;
@@ -65,7 +66,7 @@ public class TimeAttackMode : IGameState
     {
         if (Match.IsOver)
         {
-            if (Match.MatchWinner == 0)
+            if (Match.SetWinner == MatchWinner.P1)
             {
                 if (_stage == StageCount)
                     GameFlow.Set(new MainMenuState());

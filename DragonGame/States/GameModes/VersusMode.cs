@@ -6,6 +6,7 @@ using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.Configuration;
+using DuckDuckJump.Game.GameWork;
 using DuckDuckJump.Game.Input;
 using SDL2;
 
@@ -22,13 +23,13 @@ public class VersusMode : IGameState
         _gameMusic = new AudioClip("gameplay", true);
         Audio.PlayMusic(_gameMusic);
         Match.Initialize(new GameInfo(new ComLevels(0, 5), 50, Environment.TickCount, 3, 99 * 60,
-            Match.BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None));
+            BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None));
     }
 
     public void Exit()
     {
         _gameMusic.Dispose();
-        Match.Assets.Unload();
+        Assets.Unload();
     }
 
     public void OnEvent(ref SDL.SDL_Event sdlEvent)

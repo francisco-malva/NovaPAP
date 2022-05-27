@@ -10,7 +10,7 @@ using StbImageSharp;
 
 namespace DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 
-internal class Texture : IDisposable
+public class Texture : IDisposable
 {
     static Texture()
     {
