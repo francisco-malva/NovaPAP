@@ -3,10 +3,11 @@
 using System.IO;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Auditory;
+using DuckDuckJump.Game.Assets;
 
 #endregion
 
-namespace DuckDuckJump.Game.GameWork;
+namespace DuckDuckJump.Game.GameWork.Sound;
 
 internal static class SoundEffectWork
 {
@@ -30,7 +31,7 @@ internal static class SoundEffectWork
         for (var i = 0; i < _queuedSfxCount; i++) QueuedEffects[i].LoadSfx(stream);
     }
 
-    public static void Queue(Assets.SfxIndex index, float volume = 1.0f)
+    public static void Queue(MatchAssets.SfxIndex index, float volume = 1.0f)
     {
         if (_queuedSfxCount == QueuedEffects.Length)
             return;
@@ -49,12 +50,12 @@ internal static class SoundEffectWork
             return;
 
         for (var i = 0; i < _queuedSfxCount; i++)
-            Audio.PlaySound(Assets.SoundEffect(QueuedEffects[i].Index), QueuedEffects[i].Volume);
+            Audio.PlaySound(MatchAssets.SoundEffect(QueuedEffects[i].Index), QueuedEffects[i].Volume);
     }
 
     private struct Queued
     {
-        public Assets.SfxIndex Index;
+        public MatchAssets.SfxIndex Index;
         public float Volume;
 
         public void SaveSfx(Stream stream)
@@ -65,7 +66,7 @@ internal static class SoundEffectWork
 
         public void LoadSfx(Stream stream)
         {
-            Index = stream.Read<Assets.SfxIndex>();
+            Index = stream.Read<MatchAssets.SfxIndex>();
             Volume = stream.Read<float>();
         }
     }

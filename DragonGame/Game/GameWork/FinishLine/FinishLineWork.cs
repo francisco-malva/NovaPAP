@@ -6,12 +6,13 @@ using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
+using DuckDuckJump.Game.Assets;
 using DuckDuckJump.Game.GameWork.Platforming;
 using DuckDuckJump.Game.GameWork.Players;
 
 #endregion
 
-namespace DuckDuckJump.Game;
+namespace DuckDuckJump.Game.GameWork.FinishLine;
 
 internal static class FinishLineWork
 {
@@ -61,12 +62,13 @@ internal static class FinishLineWork
 
     public static void DrawMe()
     {
-        Graphics.Draw(Assets.Texture(Assets.TextureIndex.FinishLine), null,
+        Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.FinishLine), null,
             Matrix3x2.CreateTranslation(-Graphics.LogicalSize.Width, _y),
             Color.FromArgb((int)(_alpha * byte.MaxValue), 255, 255, 255));
-        Graphics.Draw(Assets.Texture(Assets.TextureIndex.FinishLine), null, Matrix3x2.CreateTranslation(0.0f, _y),
+        Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.FinishLine), null,
+            Matrix3x2.CreateTranslation(0.0f, _y),
             Color.FromArgb((int)(_alpha * byte.MaxValue), 255, 255, 255));
-        Graphics.Draw(Assets.Texture(Assets.TextureIndex.FinishLine), null,
+        Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.FinishLine), null,
             Matrix3x2.CreateTranslation(Graphics.LogicalSize.Width, _y),
             Color.FromArgb((int)(_alpha * byte.MaxValue), 255, 255, 255));
     }

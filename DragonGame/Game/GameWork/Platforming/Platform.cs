@@ -7,6 +7,9 @@ using System.Runtime.InteropServices;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
+using DuckDuckJump.Game.Assets;
+using DuckDuckJump.Game.GameWork.Camera;
+using DuckDuckJump.Game.GameWork.Rng;
 
 #endregion
 
@@ -78,7 +81,8 @@ internal struct Platform
     {
         if (!OnScreen)
             return;
-        Graphics.Draw(Assets.Texture(Assets.TextureIndex.Platform), null, Matrix3x2.CreateTranslation(Position),
+        Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.Platform), null,
+            Matrix3x2.CreateTranslation(Position),
             PlatformColors[(int)Type]);
     }
 }

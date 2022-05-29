@@ -5,8 +5,9 @@ using DuckDuckJump.Engine.Assets;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Game;
+using DuckDuckJump.Game.Assets;
 using DuckDuckJump.Game.Configuration;
-using DuckDuckJump.Game.GameWork;
+using DuckDuckJump.Game.GameWork.Banner;
 using DuckDuckJump.Game.Input;
 using SDL2;
 
@@ -29,7 +30,7 @@ public class VersusMode : IGameState
     public void Exit()
     {
         _gameMusic.Dispose();
-        Assets.Unload();
+        MatchAssets.Unload();
     }
 
     public void OnEvent(ref SDL.SDL_Event sdlEvent)

@@ -1,18 +1,16 @@
 ﻿#region
 
-using System.IO;
 using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
-using DuckDuckJump.Engine.Subsystems.Graphical;
 
 #endregion
 
-namespace DuckDuckJump.Game.GameWork;
+namespace DuckDuckJump.Game.GameWork.Camera;
 
 public static class CameraWork
 {
-    public static readonly Camera Camera;
+    public static readonly Engine.Subsystems.Graphical.Camera Camera;
     public static Vector2 Target;
     private static float _cameraX;
     private static float _cameraY;
@@ -21,27 +19,7 @@ public static class CameraWork
 
     static CameraWork()
     {
-        Camera = new Camera();
-    }
-
-    public static void SaveMe(Stream stream)
-    {
-        Camera.Save(stream);
-        stream.Write(Target);
-        stream.Write(_cameraX);
-        stream.Write(_cameraY);
-        stream.Write(_cameraXVelocity);
-        stream.Write(_cameraYVelocity);
-    }
-
-    public static void LoadMe(Stream stream)
-    {
-        Camera.Load(stream);
-        Target = stream.Read<Vector2>();
-        _cameraX = stream.Read<float>();
-        _cameraY = stream.Read<float>();
-        _cameraXVelocity = stream.Read<float>();
-        _cameraYVelocity = stream.Read<float>();
+        Camera = new Engine.Subsystems.Graphical.Camera();
     }
 
     public static void Reset()

@@ -2,19 +2,23 @@
 
 using System;
 using System.Drawing;
-using System.IO;
 using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
+using DuckDuckJump.Game.Assets;
+using DuckDuckJump.Game.GameWork.Background;
+using DuckDuckJump.Game.GameWork.Camera;
 using DuckDuckJump.Game.GameWork.Platforming;
+using DuckDuckJump.Game.GameWork.Rng;
+using DuckDuckJump.Game.GameWork.Sound;
 using DuckDuckJump.Game.Input;
 
 #endregion
 
 namespace DuckDuckJump.Game.GameWork.Players;
 
-internal partial struct Player
+internal unsafe struct Player
 {
     private static readonly SizeF BodyExtents = new(45, 50);
     public Vector2 Position;
@@ -179,7 +183,7 @@ internal partial struct Player
 
     private static void JumpSfx()
     {
-        SoundEffectWork.Queue(Assets.SfxIndex.Jump, 0.25f);
+        SoundEffectWork.Queue(MatchAssets.SfxIndex.Jump, 0.25f);
     }
 
     private static readonly Color ComColor = Color.FromArgb(128, 128, 128, 128);
@@ -187,25 +191,147 @@ internal partial struct Player
     public void DrawMe()
     {
         var color = IsCom ? ComColor : Color.White;
-        Graphics.Draw(Assets.Texture(Assets.TextureIndex.Player), null,
+        Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.Player), null,
             Matrix3x2.CreateTranslation(Position), color);
     }
 
-    public unsafe void SaveMe(Stream stream)
+    private readonly struct ComActionData
     {
-        fixed (Player* ptr = &this)
+        public readonly byte PlatformRange;
+        public readonly float StoppedChance;
+
+        public ComActionData(byte platformRange, float stoppedChance)
         {
-            var store = new Span<byte>(ptr, sizeof(Player));
-            stream.Write(store);
+            PlatformRange = platformRange;
+            StoppedChance = stoppedChance;
         }
     }
 
-    public unsafe void LoadMe(Stream stream)
+    private static readonly ComActionData[] ComActionTable =
     {
-        fixed (Player* ptr = &this)
+        new(1, 0.5f),
+        new(1, 0.25f),
+        new(2, 0.015f),
+        new(2, 0.005f),
+        new(3, 0.005f),
+        new(3, 0.0025f),
+        new(4, 0.0015f),
+        new(4, 0.0f)
+    };
+
+    public bool IsCom => Match.Info.ComLevels[_myPlayerIndex] > 0;
+    private byte MyComLevel => Match.Info.ComLevels[_myPlayerIndex];
+    private ref ComActionData MyComData => ref ComActionTable[MyComLevel - 1];
+    private short _comPathIndex;
+    private float _comProgress;
+
+
+    private const short MaxPathSize = 2048;
+#pragma warning disable CS0649
+    private fixed short _comPath[MaxPathSize];
+#pragma warning restore CS0649
+#pragma warning disable CS0649
+    private fixed float _randomOffsets[MaxPathSize];
+#pragma warning restore CS0649
+    private short _comPathLength;
+
+    private void GenerateComPath()
+    {
+        _comPathLength = 0;
+
+        InsertIntoPath(-1);
+        InsertIntoPath(0);
+        short currentProgress = 0;
+
+        while (currentProgress < Match.Info.PlatformCount)
         {
-            var store = new Span<byte>(ptr, sizeof(Player));
-            stream.Read(store);
+            var shouldStop = MyComData.StoppedChance != 0.0f &&
+                             RandomWork.Next(0.0f, 1.0f) <= MyComData.StoppedChance;
+
+            if (shouldStop)
+            {
+                GenerateComStopped(currentProgress);
+            }
+            else
+            {
+                ++currentProgress;
+                var nextPlatform =
+                    (short)(currentProgress + RandomWork.Next((byte)1, MyComData.PlatformRange));
+                InsertIntoPath(currentProgress);
+                InsertIntoPath(nextPlatform);
+                currentProgress = nextPlatform;
+            }
         }
+
+        for (var i = 0; i < _comPathLength; i++) _randomOffsets[i] = RandomWork.Next(-20.0f, 20.0f);
+    }
+
+    private void GenerateComStopped(short position)
+    {
+        InsertIntoPath(position);
+        InsertIntoPath(position);
+    }
+
+    private void InsertIntoPath(short position)
+    {
+        _comPath[_comPathLength++] = position;
+    }
+
+    private void ResetComFields()
+    {
+        _comPathIndex = 0;
+        _comProgress = 0.0f;
+
+        GenerateComPath();
+    }
+
+    private void ComGameUpdate()
+    {
+        _comProgress += GameFlow.TimeStep;
+
+        if (!(_comProgress >= 1.0f)) return;
+
+        JumpSfx();
+        _comProgress %= 1.0f;
+        ++_comPathIndex;
+        _lastJumpedPlatform = _comPath[_comPathIndex];
+
+        if (_lastJumpedPlatform >= 0)
+            CorrectCameraHeight(_lastJumpedPlatform);
+    }
+
+    private void ApplyComSpeed()
+    {
+        var progress = Math.Clamp(_comProgress, 0.0f, 1.0f);
+
+        var begin = GetTargetPosition(_comPath[_comPathIndex]);
+        begin.X += _randomOffsets[_comPathIndex];
+
+        var endIndex = Math.Clamp(_comPathIndex + 1, 0, _comPathLength - 1);
+
+        var end = GetTargetPosition(_comPath[endIndex]);
+        end.X += _randomOffsets[endIndex];
+
+        var p2 = begin - JumpMaxPoint;
+        var p3 = end - JumpMaxPoint;
+
+        Position = Mathematics.CubicBezier(begin, p2, p3, end, progress);
+    }
+
+    private Vector2 _velocity;
+    private float _xVelocity;
+    private float _targetXVelocity;
+    private float _xVelocityDelta;
+    private float _yVelocity;
+    private const float YDamping = 0.45f;
+    private const float MaxXVelocity = 15.0f;
+    private const float JumpVelocity = -16.25f;
+
+    private void HumanGameUpdate(GameInput input)
+    {
+        _targetXVelocity = 0.0f;
+
+        if (input.HasFlag(GameInput.Left)) _targetXVelocity -= MaxXVelocity;
+        if (input.HasFlag(GameInput.Right)) _targetXVelocity += MaxXVelocity;
     }
 }

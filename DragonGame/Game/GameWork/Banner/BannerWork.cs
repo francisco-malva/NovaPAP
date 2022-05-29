@@ -7,11 +7,12 @@ using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
+using DuckDuckJump.Game.Assets;
 using DuckDuckJump.Game.Configuration;
 
 #endregion
 
-namespace DuckDuckJump.Game.GameWork;
+namespace DuckDuckJump.Game.GameWork.Banner;
 
 internal static class BannerWork
 {
@@ -69,7 +70,7 @@ internal static class BannerWork
             .Replace("%w", Match.RoundWinner.ToString()).Replace("%n", Settings.MyData.Nickname.ToString());
         _color = Messages[(int)index].Color;
         _time = Messages[(int)index].Time;
-        _size = Assets.Font(Assets.FontIndex.BannerFont).MeasureString(_message);
+        _size = MatchAssets.Font(MatchAssets.FontIndex.BannerFont).MeasureString(_message);
     }
 
     public static void Reset()
@@ -92,7 +93,7 @@ internal static class BannerWork
             ((Match.Info.GameFlags & GameInfo.Flags.Exhibition) != 0 || IsDone() || _message == null))
             return;
 
-        Assets.Font(Assets.FontIndex.BannerFont).Draw(_message,
+        MatchAssets.Font(MatchAssets.FontIndex.BannerFont).Draw(_message,
             Matrix3x2.CreateScale(1.0f, _scale) * Matrix3x2.CreateTranslation(
                 Graphics.Midpoint.X - _size.Width / 2.0f,
                 Graphics.Midpoint.Y - _size.Height / 2.0f), _color);

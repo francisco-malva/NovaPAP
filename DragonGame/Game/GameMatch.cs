@@ -6,10 +6,17 @@ using System.Numerics;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
-using DuckDuckJump.Game.GameWork;
+using DuckDuckJump.Game.GameWork.Background;
+using DuckDuckJump.Game.GameWork.Banner;
+using DuckDuckJump.Game.GameWork.Camera;
+using DuckDuckJump.Game.GameWork.FinishLine;
 using DuckDuckJump.Game.GameWork.Items;
 using DuckDuckJump.Game.GameWork.Platforming;
 using DuckDuckJump.Game.GameWork.Players;
+using DuckDuckJump.Game.GameWork.Rng;
+using DuckDuckJump.Game.GameWork.Scoring;
+using DuckDuckJump.Game.GameWork.Sound;
+using DuckDuckJump.Game.GameWork.Time;
 using DuckDuckJump.Game.Input;
 
 #endregion
@@ -29,7 +36,6 @@ internal static class Match
     public static MatchState State { get; private set; }
 
     public static bool IsOver { get; private set; }
-
 
     public static void Initialize(GameInfo info)
     {
@@ -101,11 +107,13 @@ internal static class Match
     {
         RoundWinner = MatchWinner.None;
         CurrentRound++;
+        
         BackgroundWork.Reset();
         BannerWork.Reset();
         CameraWork.Reset();
         PlayerWork.Reset();
         PlatformWork.Reset();
+        ItemWork.Reset();
         TimerWork.Reset();
         FinishLineWork.Reset();
 
@@ -155,6 +163,7 @@ internal static class Match
 
         BackgroundWork.Update();
         PlatformWork.Update();
+        ItemWork.UpdateMe();
         PlayerWork.UpdateUs(inputs);
         CameraWork.UpdateMe();
         BannerWork.Update();
@@ -265,6 +274,7 @@ internal static class Match
 
         PlayerWork.DrawUs();
         PlatformWork.DrawUs();
+        ItemWork.DrawMe();
         FinishLineWork.DrawMe();
 
         Graphics.Camera = null;
@@ -285,7 +295,7 @@ internal static class Match
     {
         TimerWork.DrawMe();
         ScoreWork.DrawMe();
-        ItemWork.DrawMe();
+        ItemWork.DrawGui();
     }
 
     internal enum MatchState : byte

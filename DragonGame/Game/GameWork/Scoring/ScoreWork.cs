@@ -4,10 +4,11 @@ using System.Drawing;
 using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Graphical;
+using DuckDuckJump.Game.Assets;
 
 #endregion
 
-namespace DuckDuckJump.Game.GameWork;
+namespace DuckDuckJump.Game.GameWork.Scoring;
 
 internal static class ScoreWork
 {
@@ -32,7 +33,7 @@ internal static class ScoreWork
         {
             var isFirstPlayer = (i + 1) % 2 != 0;
 
-            var texture = Assets.Texture(Assets.TextureIndex.ScoreIcon);
+            var texture = MatchAssets.Texture(MatchAssets.TextureIndex.ScoreIcon);
 
             var query = texture.QueryTexture();
 

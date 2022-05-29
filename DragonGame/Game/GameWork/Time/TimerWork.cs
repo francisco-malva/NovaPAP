@@ -1,15 +1,15 @@
 ﻿#region
 
 using System.Drawing;
-using System.IO;
 using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
+using DuckDuckJump.Game.Assets;
 
 #endregion
 
-namespace DuckDuckJump.Game.GameWork;
+namespace DuckDuckJump.Game.GameWork.Time;
 
 internal static class TimerWork
 {
@@ -28,21 +28,6 @@ internal static class TimerWork
     public static void Reset()
     {
         _timeLeft = Match.Info.TimeLeft;
-        UpdateDisplay();
-    }
-
-    public static void SaveMe(Stream stream)
-    {
-        stream.Write(_timeLeft);
-        stream.Write(_alpha);
-        stream.Write(_alphaVelocity);
-    }
-
-    public static void LoadMe(Stream stream)
-    {
-        _timeLeft = stream.Read<ushort>();
-        _alpha = stream.Read<float>();
-        _alphaVelocity = stream.Read<float>();
         UpdateDisplay();
     }
 
@@ -65,7 +50,7 @@ internal static class TimerWork
     private static void UpdateDisplay()
     {
         _string = (_timeLeft / 60).ToString();
-        _stringSize = Assets.Font(Assets.FontIndex.TimerFont).MeasureString(_string);
+        _stringSize = MatchAssets.Font(MatchAssets.FontIndex.TimerFont).MeasureString(_string);
     }
 
     public static void DrawMe()
@@ -79,9 +64,9 @@ internal static class TimerWork
         var y = 10.0f;
 
 
-        Assets.Font(Assets.FontIndex.TimerFont).Draw(_string,
+        MatchAssets.Font(MatchAssets.FontIndex.TimerFont).Draw(_string,
             Matrix3x2.CreateTranslation(x + DropShadowOffset, y + DropShadowOffset), bgColor);
-        Assets.Font(Assets.FontIndex.TimerFont).Draw(_string,
+        MatchAssets.Font(MatchAssets.FontIndex.TimerFont).Draw(_string,
             Matrix3x2.CreateTranslation(x, y), fgColor);
     }
 }

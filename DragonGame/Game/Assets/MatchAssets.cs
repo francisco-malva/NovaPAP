@@ -5,9 +5,9 @@ using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 
 #endregion
 
-namespace DuckDuckJump.Game;
+namespace DuckDuckJump.Game.Assets;
 
-public static class Assets
+public static class MatchAssets
 {
     public enum FontIndex : byte
     {
@@ -18,7 +18,8 @@ public static class Assets
     public enum SfxIndex : byte
     {
         None,
-        Jump
+        Jump,
+        ItemPop
     }
 
     public enum TextureIndex : byte
@@ -28,10 +29,16 @@ public static class Assets
         Platform,
         ScoreIcon,
         FinishLine,
-        ItemBox
+        ItemBox,
+        ItemFrame,
+        DoubleJumpItem,
+        FreezeItem,
+        SlowdownItem,
+        ReviveItem,
+        UmbrellaItem
     }
 
-    private static readonly FontData[] FontDatas =
+    private static readonly FontData[] FontDatum =
     {
         new("terminator-two-70", 70),
         new("terminator-two-40", 40)
@@ -44,17 +51,24 @@ public static class Assets
         "Game/Field/platform",
         "Game/Scoreboard/checkmark",
         "Game/Field/finish-line",
-        "Game/Items/item-box"
+        "Game/Items/item-box",
+        "Game/Items/item-ui",
+        "Game/Items/double-jump",
+        "Game/Items/freeze",
+        "Game/Items/slowdown",
+        "Game/Items/revive",
+        "Game/Items/umbrella"
     };
 
     private static readonly string[] SfxPaths =
     {
         null,
-        "Game/Player/jump"
+        "Game/Player/jump",
+        "Game/Player/item-pop"
     };
 
     private static readonly Texture[] Textures = new Texture[TexturePaths.Length];
-    private static readonly Font[] Fonts = new Font[FontDatas.Length];
+    private static readonly Font[] Fonts = new Font[FontDatum.Length];
     private static readonly AudioClip[] SoundEffects = new AudioClip[SfxPaths.Length];
 
     private static bool _loaded;
@@ -63,8 +77,9 @@ public static class Assets
     {
         if (_loaded)
             return;
+        
         for (var i = 0; i < Textures.Length; i++) Textures[i] = new Texture(TexturePaths[i]);
-        for (var i = 0; i < Fonts.Length; i++) Fonts[i] = new Font(FontDatas[i].Path, FontDatas[i].Size);
+        for (var i = 0; i < Fonts.Length; i++) Fonts[i] = new Font(FontDatum[i].Path, FontDatum[i].Size);
         for (var i = 1; i < SoundEffects.Length; i++) SoundEffects[i] = new AudioClip(SfxPaths[i]);
 
         _loaded = true;

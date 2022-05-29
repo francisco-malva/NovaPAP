@@ -1,18 +1,13 @@
 ﻿#region
 
 using System;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using DuckDuckJump.Game.GameWork;
-using LiteNetLib.Utils;
+using DuckDuckJump.Game.GameWork.Banner;
 
 #endregion
 
 namespace DuckDuckJump.Game;
 
-[StructLayout(LayoutKind.Sequential)]
-internal unsafe struct GameInfo : INetSerializable
+internal struct GameInfo
 {
     [Flags]
     public enum Flags : byte
@@ -41,44 +36,5 @@ internal unsafe struct GameInfo : INetSerializable
         GameFlags = flags;
         TimeLeft = timeLeft;
         BeginMessageIndex = beginMessageIndex;
-    }
-
-    public void Save(Stream stream)
-    {
-        fixed (GameInfo* ptr = &this)
-        {
-            var store = new Span<byte>(ptr, sizeof(GameInfo));
-            stream.Write(store);
-        }
-    }
-
-    public void Load(Stream stream)
-    {
-        fixed (GameInfo* ptr = &this)
-        {
-            var store = new Span<byte>(ptr, sizeof(GameInfo));
-            stream.Read(store);
-        }
-    }
-
-    public void Serialize(NetDataWriter writer)
-    {
-        fixed (GameInfo* ptr = &this)
-        {
-            var store = new Span<byte>(ptr, sizeof(GameInfo));
-            writer.PutBytesWithLength(store.ToArray());
-        }
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        fixed (GameInfo* ptr = &this)
-        {
-            var dest = reader.GetBytesWithLength();
-            fixed (void* dataPtr = dest)
-            {
-                Unsafe.CopyBlock(ptr, dataPtr, (uint)dest.Length);
-            }
-        }
     }
 }

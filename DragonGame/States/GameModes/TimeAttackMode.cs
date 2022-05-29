@@ -4,11 +4,12 @@ using System;
 using System.Drawing;
 using System.Numerics;
 using DuckDuckJump.Engine.Assets;
+using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.Configuration;
-using DuckDuckJump.Game.GameWork;
+using DuckDuckJump.Game.GameWork.Banner;
 using DuckDuckJump.Game.Input;
 using DuckDuckJump.Game.Pausing;
 using SDL2;
@@ -33,6 +34,8 @@ public class TimeAttackMode : IGameState
         new(new ComLevels(0, 8), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None)
     };
 
+    private AudioClip _gameMusic;
+
     private PauseMenu _pauseMenu;
     private byte _stage;
     private Font _stageFont;
@@ -40,20 +43,22 @@ public class TimeAttackMode : IGameState
     private string _stageString;
     private SizeF _stageStringSize;
 
-    private State _state = State.InMatch;
     private uint _timer;
 
     public void Initialize()
     {
+        _gameMusic = new AudioClip("gameplay", true);
         _timer = 0;
         _stageFont = new Font("terminator-two-20", 20);
         _pauseMenu = new PauseMenu();
+        Audio.PlayMusic(_gameMusic);
 
         AdvanceStage();
     }
 
     public void Exit()
     {
+        _gameMusic.Dispose();
         _pauseMenu.Dispose();
         _stageFont.Dispose();
     }
@@ -126,6 +131,7 @@ public class TimeAttackMode : IGameState
         var info = StageSettingTable[_stage - 1];
         info.RandomSeed = Environment.TickCount;
         Match.Initialize(info);
+        Audio.MusicFade = 1.0f;
         SetStageLabel();
     }
 
@@ -150,11 +156,5 @@ public class TimeAttackMode : IGameState
     {
         _stageString = $"STAGE {_stage}";
         _stageStringSize = _stageFont.MeasureString(_stageString);
-    }
-
-    private enum State : byte
-    {
-        InMatch,
-        Continue
     }
 }

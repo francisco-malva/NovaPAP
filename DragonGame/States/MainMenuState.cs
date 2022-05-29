@@ -11,8 +11,9 @@ using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Game;
+using DuckDuckJump.Game.Assets;
 using DuckDuckJump.Game.Configuration;
-using DuckDuckJump.Game.GameWork;
+using DuckDuckJump.Game.GameWork.Banner;
 using DuckDuckJump.Game.Input;
 using DuckDuckJump.States.GameModes;
 using SDL2;
@@ -30,11 +31,22 @@ public class MainMenuSelector : TextSelector
         "Special"
     };
 
+    private static readonly TimerType[] TimerTypes =
+    {
+        new(10, 10),
+        new(30, 50),
+        new(60, 65),
+        new(99, 100)
+    };
+
     private readonly TextInputData _nicknameInput = new()
         { Text = string.Empty, MaxLength = Settings.Nickname.MaxLength };
 
     private int _currentBoundInput;
+    private bool _items = false;
     private float _musicVolume;
+
+    private byte _setCount = 1;
 
     private float _sfxVolume;
     private State _state = State.Title;
@@ -77,8 +89,24 @@ public class MainMenuSelector : TextSelector
             case State.Scoreboard:
                 UpdateScoreboard();
                 break;
+            case State.MatchSettings:
+                UpdateMatchSettings();
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private void UpdateMatchSettings()
+    {
+        Begin();
+
+        Break(30.0f);
+        Label("MATCH SETTINGS");
+        Break(30.0f);
+
+        if (Button("BACK"))
+        {
         }
     }
 
@@ -95,9 +123,15 @@ public class MainMenuSelector : TextSelector
     private void UpdateInput()
     {
         Begin();
+
+        Break(30.0f);
+        Label("INPUT BINDING", Color.Gold);
+        Break(30.0f);
+
         for (byte i = 0; i < Match.PlayerCount; i++)
         {
-            Label($"P{i + 1}");
+            Label($"P{i + 1}", Color.Gold);
+            Break(30.0f);
 
             var offset = Settings.MyData.GetInputStartingOffset(i);
 
@@ -105,12 +139,12 @@ public class MainMenuSelector : TextSelector
                 unsafe
                 {
                     Label(
-                        $"{ActionNames[j - offset]}: {SDL.SDL_GetScancodeName((SDL.SDL_Scancode)Settings.MyData.InputProfiles[j])}");
+                        $"{ActionNames[j - offset]}: {SDL.SDL_GetScancodeName((SDL.SDL_Scancode)Settings.MyData.InputProfiles[j])}",
+                        _currentBoundInput == j ? Color.White : Color.Gray);
                 }
         }
 
-        Label(
-            $"BINDING P{_currentBoundInput / Settings.Data.InputProfileSize + 1} {ActionNames[_currentBoundInput % Settings.Data.InputProfileSize]}");
+
         if (Keyboard.AnyDown(out var newBinding))
             unsafe
             {
@@ -233,10 +267,6 @@ public class MainMenuSelector : TextSelector
         {
         }
 
-        if (Button("HOST NETWORK")) GameFlow.Set(new NetworkMode(true, "localhost"));
-
-        if (Button("JOIN NETWORK")) GameFlow.Set(new NetworkMode(false, "localhost"));
-
         if (Button("WATCH")) GameFlow.Set(new WatchMode());
 
         Break(20.0f);
@@ -248,7 +278,6 @@ public class MainMenuSelector : TextSelector
     private void UpdateNickname()
     {
         Begin();
-
         Break(30.0f);
         Label("NICKNAME SETUP", Color.Gold);
         Break(30.0f);
@@ -291,6 +320,18 @@ public class MainMenuSelector : TextSelector
         End();
     }
 
+    private struct TimerType
+    {
+        public sbyte Seconds;
+        public short PlatformCount;
+
+        public TimerType(sbyte seconds, short platformCount)
+        {
+            Seconds = seconds;
+            PlatformCount = platformCount;
+        }
+    }
+
     private enum State
     {
         Title,
@@ -300,7 +341,8 @@ public class MainMenuSelector : TextSelector
         NicknameSetting,
         AudioSettings,
         InputSettings,
-        Scoreboard
+        Scoreboard,
+        MatchSettings
     }
 }
 
@@ -319,7 +361,7 @@ public class MainMenuState : IGameState
 
         Audio.PlayMusic(_music);
 
-        Assets.Load();
+        MatchAssets.Load();
         Match.Initialize(new GameInfo(new ComLevels(8, 8), 100, Environment.TickCount, 0, ushort.MaxValue,
             BannerWork.MessageIndex.NoBanner, GameInfo.Flags.Exhibition | GameInfo.Flags.NoItems));
     }

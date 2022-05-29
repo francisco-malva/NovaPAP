@@ -6,10 +6,11 @@ using System.Numerics;
 using Common.Utilities;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
+using DuckDuckJump.Game.Assets;
 
 #endregion
 
-namespace DuckDuckJump.Game.GameWork;
+namespace DuckDuckJump.Game.GameWork.Background;
 
 public static class BackgroundWork
 {
@@ -44,7 +45,7 @@ public static class BackgroundWork
 
     public static void DrawMe()
     {
-        Graphics.Draw(Assets.Texture(Assets.TextureIndex.Sky),
+        Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.Sky),
             null,
             Matrix3x2.CreateTranslation(0.0f, Mathematics.Lerp(-480.0f, 0.0f, _progress)), Color.White);
     }

@@ -9,7 +9,7 @@ using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Game;
-using DuckDuckJump.Game.GameWork;
+using DuckDuckJump.Game.GameWork.Banner;
 using DuckDuckJump.Game.Input;
 using SDL2;
 
@@ -27,7 +27,7 @@ public class WatchMode : IGameState
 
     public void Initialize()
     {
-        _captionFont = new Font("terminator-two", 20);
+        _captionFont = new Font("terminator-two-20", 20);
         _watchModeOst = new AudioClip("watch-mode", true);
 
         Audio.PlayMusic(_watchModeOst);

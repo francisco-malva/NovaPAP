@@ -21,10 +21,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CircularBuffer" Version="1.2.1"/>
-        <PackageReference Include="LiteNetLib" Version="1.0.0-rc.1"/>
-        <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha"/>
-        <PackageReference Include="StbImageSharp" Version="2.27.8"/>
+        <PackageReference Include="CircularBuffer" Version="1.2.1" />
+        <PackageReference Include="LiteNetLib" Version="1.0.0-rc.1" />
+        <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha" />
+        <PackageReference Include="StbImageSharp" Version="2.27.8" />
     </ItemGroup>
 
     <ItemGroup>
@@ -116,16 +116,16 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\Game\Items\item-ui.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\Game\Items\item-box.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\Game\Items\umbrella.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\Game\Items\double-jump.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\Game\Scoreboard\checkmark.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -202,8 +202,8 @@
         <None Update="Assets\Audio\Game\Player\jump.snd">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Remove="Engine\Wrappers\SDL2\Mixer\**"/>
-        <None Remove="Engine\Settings\**"/>
+        <None Remove="Engine\Wrappers\SDL2\Mixer\**" />
+        <None Remove="Engine\Settings\**" />
         <None Update="Assets\Audio\watch-mode.snd">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
@@ -231,20 +231,32 @@
         <None Update="Assets\Fonts\terminator-two-40.fnt">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="Assets\Audio\Game\Player\item-pop.snd">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Items\freeze.png">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Items\revive.png">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Items\slowdown.png">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Common\Common.csproj"/>
+        <ProjectReference Include="..\Common\Common.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="Engine\Wrappers\SDL2\Mixer\**"/>
-        <Compile Remove="Engine\Settings\**"/>
+        <Compile Remove="Engine\Wrappers\SDL2\Mixer\**" />
+        <Compile Remove="Engine\Settings\**" />
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Remove="Engine\Wrappers\SDL2\Mixer\**"/>
-        <EmbeddedResource Remove="Engine\Settings\**"/>
+        <EmbeddedResource Remove="Engine\Wrappers\SDL2\Mixer\**" />
+        <EmbeddedResource Remove="Engine\Settings\**" />
     </ItemGroup>
 
 </Project>

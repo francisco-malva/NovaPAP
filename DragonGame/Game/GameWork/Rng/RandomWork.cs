@@ -5,7 +5,7 @@ using Common.Utilities;
 
 #endregion
 
-namespace DuckDuckJump.Game.GameWork;
+namespace DuckDuckJump.Game.GameWork.Rng;
 
 internal static class RandomWork
 {
