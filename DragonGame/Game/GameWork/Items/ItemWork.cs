@@ -1,10 +1,12 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Numerics;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Game.Assets;
 using DuckDuckJump.Game.GameWork.Players;
 using DuckDuckJump.Game.GameWork.Rng;
 using DuckDuckJump.Game.GameWork.Sound;
+using DuckDuckJump.Game.Input;
 
 namespace DuckDuckJump.Game.GameWork.Items;
 
@@ -31,18 +33,15 @@ internal static class ItemWork
         MatchAssets.TextureIndex.ReviveItem,
         MatchAssets.TextureIndex.UmbrellaItem
     };
-    
+
     public static void Reset()
     {
         _itemCount = 0;
+
+        for (var i = 0; i < PlayerItems.Length; i++) PlayerItems[i] = ItemType.None;
         for (short i = 0; i < Match.Info.PlatformCount; i++)
-        {
             if (RandomWork.Next(0.0f, 1.0f) < 0.25f)
-            {
                 AddBox(i);
-            }
-        }
-            
     }
 
     private static void AddBox(short platformId)
@@ -53,13 +52,72 @@ internal static class ItemWork
         itemBox.InvisibleTimer = 0;
     }
 
-    public static void UpdateMe()
+    public static void Update(Span<GameInput> inputs)
     {
-        if ((Match.Info.GameFlags & GameInfo.Flags.NoItems) != 0)
+        if (Match.State != Match.MatchState.InGame || (Match.Info.GameFlags & GameInfo.Flags.NoItems) != 0)
             return;
 
         UpdateItemBoxes();
         UpdateBoxIntersection();
+        UpdateItemUsage(inputs);
+    }
+
+    private static void UpdateItemUsage(Span<GameInput> inputs)
+    {
+        for (var i = 0; i < Match.PlayerCount; i++)
+        {
+            ref var player = ref PlayerWork.Get(i);
+
+            if (player.IsCom)
+                continue;
+
+            if ((inputs[i] & GameInput.Special) == 0 || PlayerItems[i] == ItemType.None) continue;
+            UseItem(i, ref player, PlayerItems[i]);
+            PlayerItems[i] = ItemType.None;
+        }
+    }
+
+    private static void UseItem(int index, ref Player player, ItemType playerItem)
+    {
+        switch (playerItem)
+        {
+            case ItemType.None:
+                break;
+            case ItemType.DoubleJump:
+                player.Jump();
+                break;
+            case ItemType.Freeze:
+                for (var i = 0; i < Match.PlayerCount; i++)
+                {
+                    ref var otherPlayer = ref PlayerWork.Get(i);
+
+                    if (i == index) continue;
+
+                    otherPlayer.ApplyFreeze();
+                }
+
+                break;
+            case ItemType.Slowdown:
+                for (var i = 0; i < Match.PlayerCount; i++)
+                {
+                    ref var otherPlayer = ref PlayerWork.Get(i);
+
+                    if (i == index) continue;
+
+                    otherPlayer.ApplySlowdown();
+                }
+
+                break;
+            case ItemType.Revive:
+                player.ApplyRevive();
+                break;
+            case ItemType.Umbrella:
+                break;
+            case ItemType.All:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(playerItem), playerItem, null);
+        }
     }
 
     private static void UpdateBoxIntersection()
@@ -75,8 +133,8 @@ internal static class ItemWork
             {
                 ref var itemBox = ref ItemBoxes[j];
 
-                if (!itemBox.IntersectsPlayer(ref player)) continue;
-                
+                if (!itemBox.IntersectsPlayer(ref player) || PlayerItems[i] != ItemType.None) continue;
+
                 itemBox.InvisibleTimer = 60 * 3;
                 SoundEffectWork.Queue(MatchAssets.SfxIndex.ItemPop, 0.5f);
                 PlayerItems[i] = (ItemType)RandomWork.Next((byte)ItemType.DoubleJump, (byte)ItemType.All);
@@ -97,23 +155,22 @@ internal static class ItemWork
         for (var i = 0; i < Match.PlayerCount; i++)
         {
             ref var player = ref PlayerWork.Get(i);
-            
-            if(player.IsCom)
+
+            if (player.IsCom)
                 continue;
 
             var uiTransform = Matrix3x2.CreateScale(1.0f - Match.Fade) *
                               Matrix3x2.CreateTranslation(BoxDrawPositions[i]);
-            
+
             Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.ItemFrame), null,
                 Matrix3x2.CreateScale(1.0f - Match.Fade) * Matrix3x2.CreateTranslation(BoxDrawPositions[i]),
                 Color.White);
 
             if (Match.State != Match.MatchState.InGame || PlayerItems[i] == ItemType.None) continue;
-            
+
             var playerItem = PlayerItems[i];
             Graphics.Draw(MatchAssets.Texture(UiItemTextures[(int)playerItem]), null, uiTransform, Color.White);
         }
-        
     }
 
     public static void DrawMe()

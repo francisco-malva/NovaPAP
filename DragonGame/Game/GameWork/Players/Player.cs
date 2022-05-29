@@ -39,6 +39,10 @@ internal unsafe struct Player
     public bool Lost;
     private byte _myPlayerIndex;
 
+    private byte _slowdownFrames;
+    private byte _freezeFrames;
+    private byte _reviveFrames;
+
     public void Reset(byte playerIndex)
     {
         _myPlayerIndex = playerIndex;
@@ -46,6 +50,10 @@ internal unsafe struct Player
 
         if (IsCom) ResetComFields();
 
+
+        _slowdownFrames = 0;
+        _freezeFrames = 0;
+        _reviveFrames = 0;
 
         _lastJumpedPlatform = -1;
 
@@ -67,24 +75,13 @@ internal unsafe struct Player
         Jump();
     }
 
-    public void UpdateMe(GameInput input)
+    public void Update(GameInput input)
     {
         switch (Match.State)
         {
             case Match.MatchState.InGame:
-                if (IsCom)
-                {
-                    ComGameUpdate();
-                }
-                else
-                {
-                    HumanGameUpdate(input);
-                    PlatformDetectionUpdate();
-                }
-
-                FallDetectionUpdate();
+                UpdateInGame(input);
                 break;
-
             case Match.MatchState.Winner:
                 break;
             case Match.MatchState.GetReady:
@@ -102,10 +99,64 @@ internal unsafe struct Player
         }
     }
 
+    private void UpdateInGame(GameInput input)
+    {
+        TickItemTimers();
+
+        if (NoTick)
+            return;
+
+        if (IsCom)
+            ComGameUpdate();
+        else
+            UpdateHumanPlayer(input);
+
+        FallDetectionUpdate();
+    }
+
+    private void UpdateHumanPlayer(GameInput input)
+    {
+        UpdateHumanVelocity(input);
+        PlatformDetectionUpdate();
+    }
+
+
+    private void TickItemTimers()
+    {
+        if (HasRevive()) --_reviveFrames;
+        if (HasSlowdown()) --_slowdownFrames;
+
+        if (HasFreeze()) --_freezeFrames;
+    }
+
+    private bool HasRevive()
+    {
+        return _reviveFrames > 0;
+    }
+
+    private bool HasFreeze()
+    {
+        return _freezeFrames > 0;
+    }
+
+    private bool HasSlowdown()
+    {
+        return _slowdownFrames > 0;
+    }
+
     private void FallDetectionUpdate()
     {
-        if (!CameraWork.Camera.Bounds.IntersectsWith(PushBox) && Position.Y > CameraWork.Camera.Bounds.Bottom)
+        if (CameraWork.Camera.Bounds.IntersectsWith(PushBox) || !(Position.Y > CameraWork.Camera.Bounds.Bottom)) return;
+
+        if (HasRevive())
+        {
+            _reviveFrames = 0;
+            Jump(1.5f);
+        }
+        else
+        {
             Lost = true;
+        }
     }
 
     private void PlatformDetectionUpdate()
@@ -127,7 +178,7 @@ internal unsafe struct Player
 
     public short LastJumpedPlatform => _lastJumpedPlatform;
 
-    private void CorrectCameraHeight(short targetId)
+    private static void CorrectCameraHeight(short targetId)
     {
         BackgroundWork.SetTarget(targetId);
 
@@ -162,8 +213,13 @@ internal unsafe struct Player
         Position += _velocity;
     }
 
+    private bool NoTick => HasFreeze() || (HasSlowdown() && Match.UpdateFrameCount % 2 == 0);
+
     public void ApplySpeed()
     {
+        if (NoTick)
+            return;
+
         var prev = Position;
 
         if (IsCom)
@@ -174,7 +230,7 @@ internal unsafe struct Player
         _yPosDelta = Position.Y - prev.Y;
     }
 
-    private void Jump(float multiplier = 1.0f)
+    public void Jump(float multiplier = 1.0f)
     {
         JumpSfx();
         var velocity = JumpVelocity * multiplier;
@@ -186,11 +242,17 @@ internal unsafe struct Player
         SoundEffectWork.Queue(MatchAssets.SfxIndex.Jump, 0.25f);
     }
 
-    private static readonly Color ComColor = Color.FromArgb(128, 128, 128, 128);
-
     public void DrawMe()
     {
-        var color = IsCom ? ComColor : Color.White;
+        Color color;
+        if (HasFreeze())
+            color = Color.Aqua;
+        else if (HasSlowdown())
+            color = Color.DarkGray;
+        else
+            color = Color.White;
+        if (IsCom) color = Color.FromArgb(128, color);
+
         Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.Player), null,
             Matrix3x2.CreateTranslation(Position), color);
     }
@@ -300,6 +362,21 @@ internal unsafe struct Player
             CorrectCameraHeight(_lastJumpedPlatform);
     }
 
+    public void ApplyFreeze()
+    {
+        _freezeFrames = 40;
+    }
+
+    public void ApplySlowdown()
+    {
+        _slowdownFrames = 60;
+    }
+
+    public void ApplyRevive()
+    {
+        _reviveFrames = 30;
+    }
+
     private void ApplyComSpeed()
     {
         var progress = Math.Clamp(_comProgress, 0.0f, 1.0f);
@@ -327,7 +404,7 @@ internal unsafe struct Player
     private const float MaxXVelocity = 15.0f;
     private const float JumpVelocity = -16.25f;
 
-    private void HumanGameUpdate(GameInput input)
+    private void UpdateHumanVelocity(GameInput input)
     {
         _targetXVelocity = 0.0f;
 

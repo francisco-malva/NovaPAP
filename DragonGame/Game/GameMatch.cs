@@ -32,6 +32,8 @@ internal static class Match
     public static MatchWinner RoundWinner, SetWinner;
     public static byte CurrentRound;
 
+    public static ulong UpdateFrameCount;
+
 
     public static MatchState State { get; private set; }
 
@@ -42,7 +44,7 @@ internal static class Match
         IsOver = false;
         Info = info;
         CurrentRound = 0;
-
+        UpdateFrameCount = 0;
         Fade = 1.0f;
 
         ScoreWork.Reset();
@@ -107,7 +109,7 @@ internal static class Match
     {
         RoundWinner = MatchWinner.None;
         CurrentRound++;
-        
+
         BackgroundWork.Reset();
         BannerWork.Reset();
         CameraWork.Reset();
@@ -163,13 +165,15 @@ internal static class Match
 
         BackgroundWork.Update();
         PlatformWork.Update();
-        ItemWork.UpdateMe();
+        ItemWork.Update(inputs);
         PlayerWork.UpdateUs(inputs);
         CameraWork.UpdateMe();
         BannerWork.Update();
         TimerWork.UpdateMe();
         FinishLineWork.UpdateMe();
         SoundEffectWork.UpdateMe();
+
+        ++UpdateFrameCount;
     }
 
     private static void UpdateBeginningMessage()

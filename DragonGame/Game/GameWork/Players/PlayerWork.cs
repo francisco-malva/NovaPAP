@@ -26,7 +26,7 @@ internal static class PlayerWork
 
     public static void UpdateUs(Span<GameInput> inputs)
     {
-        for (var i = 0; i < Match.PlayerCount; i++) Get(i).UpdateMe(inputs[i]);
+        for (var i = 0; i < Match.PlayerCount; i++) Get(i).Update(inputs[i]);
 
         if (Match.State != Match.MatchState.InGame) return;
         for (var i = 0; i < Match.PlayerCount; i++) Get(i).ApplySpeed();

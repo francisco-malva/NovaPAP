@@ -77,7 +77,7 @@ public static class MatchAssets
     {
         if (_loaded)
             return;
-        
+
         for (var i = 0; i < Textures.Length; i++) Textures[i] = new Texture(TexturePaths[i]);
         for (var i = 0; i < Fonts.Length; i++) Fonts[i] = new Font(FontDatum[i].Path, FontDatum[i].Size);
         for (var i = 1; i < SoundEffects.Length; i++) SoundEffects[i] = new AudioClip(SfxPaths[i]);
