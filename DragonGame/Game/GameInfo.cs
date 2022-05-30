@@ -18,7 +18,7 @@ internal struct GameInfo
         All = byte.MaxValue
     }
 
-    public ComLevels ComLevels;
+    public ComInfo ComInfo;
     public readonly ushort PlatformCount;
     public readonly sbyte ScoreCount;
     public int RandomSeed;
@@ -26,10 +26,10 @@ internal struct GameInfo
     public readonly BannerWork.MessageIndex BeginMessageIndex;
     public readonly Flags GameFlags;
 
-    public GameInfo(ComLevels levels, ushort platformCount, int randomSeed, sbyte scoreCount,
+    public GameInfo(ComInfo info, ushort platformCount, int randomSeed, sbyte scoreCount,
         ushort timeLeft, BannerWork.MessageIndex beginMessageIndex, Flags flags)
     {
-        ComLevels = levels;
+        ComInfo = info;
         PlatformCount = platformCount;
         RandomSeed = randomSeed;
         ScoreCount = scoreCount;

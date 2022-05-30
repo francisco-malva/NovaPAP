@@ -63,7 +63,7 @@ internal static class ScoreWork
         {
             if (Scores[i] < Match.Info.ScoreCount) continue;
 
-            winner = (MatchWinner)i;
+            winner = (MatchWinner) i;
             return true;
         }
 

@@ -2,12 +2,12 @@
 
 using System;
 using DuckDuckJump.Engine.Assets;
+using DuckDuckJump.Engine.Selector;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.Assets;
 using DuckDuckJump.Game.Configuration;
-using DuckDuckJump.Game.GameWork.Banner;
 using DuckDuckJump.Game.Input;
 using SDL2;
 
@@ -15,20 +15,73 @@ using SDL2;
 
 namespace DuckDuckJump.States.GameModes;
 
-public class VersusMode : IGameState
+internal class VersusSettingsSelector : TextSelector
+{
+    public enum VersusAction
+    {
+        None,
+        PlayAgain,
+        Quit
+    }
+
+    private readonly byte[] _scores = new byte[Match.PlayerCount];
+
+    public VersusAction Action;
+
+    public VersusSettingsSelector(Font font) : base(font)
+    {
+    }
+
+
+    public void IncreaseScore(byte playerId)
+    {
+        _scores[playerId] = (byte) Math.Clamp(_scores[playerId] + 1, 0, 99);
+    }
+
+    public override void Update()
+    {
+        Begin();
+
+        Break(30.0f);
+        Label($"{_scores[0]} - {_scores[1]}");
+        Break(30.0f);
+
+        if (Button("PLAY AGAIN")) Action = VersusAction.PlayAgain;
+
+        if (Button("QUIT")) Action = VersusAction.Quit;
+        End();
+        base.Update();
+    }
+}
+
+internal class VersusMode : IGameState
 {
     private AudioClip _gameMusic;
+    private readonly GameInfo _info;
+
+    private bool _inSelection;
+
+    private Font _selectionFont;
+    private VersusSettingsSelector _selector;
+
+    public VersusMode(GameInfo info)
+    {
+        _info = info;
+    }
 
     public void Initialize()
     {
+        _selectionFont = new Font("public-pixel-30", 30);
+        _selector = new VersusSettingsSelector(_selectionFont);
         _gameMusic = new AudioClip("gameplay", true);
+
         Audio.PlayMusic(_gameMusic);
-        Match.Initialize(new GameInfo(new ComLevels(0, 5), 50, Environment.TickCount, 3, 99 * 60,
-            BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None));
+        Match.Initialize(_info);
     }
 
     public void Exit()
     {
+        _selectionFont.Dispose();
         _gameMusic.Dispose();
         MatchAssets.Unload();
     }
@@ -39,21 +92,46 @@ public class VersusMode : IGameState
 
     public void Update()
     {
-        if (Match.IsOver)
+        if (!_inSelection)
         {
-            GameFlow.Set(new MainMenuState());
-            return;
+            if (Match.IsOver)
+            {
+                _selector.IncreaseScore((byte) Match.SetWinner);
+                _inSelection = true;
+                return;
+            }
+
+            Span<GameInput> inputs = stackalloc GameInput[Match.PlayerCount];
+
+            for (var i = 0; i < Match.PlayerCount; i++) inputs[i] = Settings.MyData.GetInput(i);
+
+            Match.Update(inputs);
         }
+        else
+        {
+            _selector.Update();
 
-        Span<GameInput> inputs = stackalloc GameInput[Match.PlayerCount];
-
-        for (var i = 0; i < Match.PlayerCount; i++) inputs[i] = Settings.MyData.GetInput(i);
-
-        Match.Update(inputs);
+            switch (_selector.Action)
+            {
+                case VersusSettingsSelector.VersusAction.None:
+                    break;
+                case VersusSettingsSelector.VersusAction.PlayAgain:
+                    Match.Initialize(_info);
+                    _selector.Action = VersusSettingsSelector.VersusAction.None;
+                    _inSelection = false;
+                    break;
+                case VersusSettingsSelector.VersusAction.Quit:
+                    GameFlow.Set(new MainMenuState());
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 
     public void Draw()
     {
         Match.Draw();
+        if (_inSelection) _selector.Draw();
     }
 }

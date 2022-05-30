@@ -28,7 +28,7 @@ public class Texture : IDisposable
         {
             fixed (void* locked = result.Data)
             {
-                var surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr)locked, result.Width, result.Height, 32,
+                var surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) locked, result.Width, result.Height, 32,
                     4 * result.Width, flipped ? SDL.SDL_PIXELFORMAT_ABGR8888 : SDL.SDL_PIXELFORMAT_RGBA8888);
 
                 Handle = SDL.SDL_CreateTextureFromSurface(Subsystems.Graphical.Graphics.Renderer, surface);

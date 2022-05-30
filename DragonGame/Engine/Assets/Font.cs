@@ -50,7 +50,7 @@ public class Font : IDisposable
             var data = new byte[entry.Length];
 
             entryStream.Read(data, 0, data.Length);
-            _glyphs.Add((char)idx, new FontGlyph(data));
+            _glyphs.Add((char) idx, new FontGlyph(data));
         }
     }
 

@@ -11,12 +11,18 @@ namespace DuckDuckJump.Game.GameWork.Players;
 internal static class PlayerWork
 {
     private static readonly Player[] MyPlayers = new Player[Match.PlayerCount];
-    public static ref Player First => ref Get(0);
-    public static ref Player Last => ref Get(Match.PlayerCount - 1);
 
-    public static ref Player Get(int index)
+    static PlayerWork()
     {
-        return ref MyPlayers[index];
+        for (var i = 0; i < MyPlayers.Length; i++) MyPlayers[i] = new Player();
+    }
+
+    public static Player First => Get(0);
+    public static Player Last => Get(Match.PlayerCount - 1);
+
+    public static Player Get(int index)
+    {
+        return MyPlayers[index];
     }
 
     public static void Reset()
@@ -31,7 +37,7 @@ internal static class PlayerWork
         if (Match.State != Match.MatchState.InGame) return;
         for (var i = 0; i < Match.PlayerCount; i++) Get(i).ApplySpeed();
 
-        if (!Match.Info.ComLevels.HasAi) ApplyPushback();
+        if (!Match.Info.ComInfo.HasAi) ApplyPushback();
         ClampPositions();
     }
 
@@ -64,7 +70,7 @@ internal static class PlayerWork
         for (var i = 0; i < Match.PlayerCount; i++)
             if (Match.State == Match.MatchState.Winner)
             {
-                if (Match.RoundWinner == (MatchWinner)i)
+                if (Match.RoundWinner == (MatchWinner) i)
                     Get(i).DrawMe();
             }
             else

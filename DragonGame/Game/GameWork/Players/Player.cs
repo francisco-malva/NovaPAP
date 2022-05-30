@@ -18,10 +18,82 @@ using DuckDuckJump.Game.Input;
 
 namespace DuckDuckJump.Game.GameWork.Players;
 
-internal unsafe struct Player
+internal class Player
 {
+    private const short MaxPathSize = 2048;
+    private const float YDamping = 0.45f;
+    private const float MaxXVelocity = 15.0f;
+    private const float JumpVelocity = -16.25f;
     private static readonly SizeF BodyExtents = new(45, 50);
+
+    private static readonly Vector2[] InitialPositions =
+    {
+        new(Graphics.Midpoint.X / 2.0f, Graphics.LogicalSize.Height - BodyExtents.Height),
+        new(Graphics.Midpoint.X * 1.5f, Graphics.LogicalSize.Height - BodyExtents.Height)
+    };
+
+    private static readonly Vector2 JumpMaxPoint = new(0.0f, 480.0f / 1.35f);
+
+    private static readonly ComActionData[] ComActionTable =
+    {
+        new(1, 1, 1, 1, -1),
+        new(1, 1, 2, 2, -1),
+        new(1, 2, 2, 2, -1),
+        new(2, 2, 2, 2, -1),
+        new(2, 2, 3, 3, -1),
+        new(2, 2, 3, 3, 2, 1),
+        new(2, 3, 3, 4, 2, 1),
+        new(2, 4, 4, 3, 2, 1, 1)
+    };
+
+    private readonly short[] _comPath;
+    private short _comPathIndex;
+    private short _comPathLength;
+    private float _comProgress;
+    private byte _freezeFrames;
+
+    private short _lastJumpedPlatform;
+    private byte _myPlayerIndex;
+    private readonly float[] _randomOffsets;
+    private byte _reviveFrames;
+
+    private byte _slowdownFrames;
+    private float _targetXVelocity;
+    private byte _umbrellaFrames;
+
+    private Vector2 _velocity;
+    private float _xVelocity;
+    private float _xVelocityDelta;
+
+    private float _yPosDelta;
+    private float _yVelocity;
+
+    public bool Lost;
     public Vector2 Position;
+
+    public Player()
+    {
+        _comPath = new short[MaxPathSize];
+        _randomOffsets = new float[MaxPathSize];
+        Position = default;
+        Lost = false;
+        _myPlayerIndex = 0;
+        _slowdownFrames = 0;
+        _freezeFrames = 0;
+        _reviveFrames = 0;
+        _lastJumpedPlatform = 0;
+        _yPosDelta = 0;
+        _comPathIndex = 0;
+        _comProgress = 0;
+        _comPathLength = 0;
+        _velocity = default;
+        _xVelocity = 0;
+        _targetXVelocity = 0;
+        _xVelocityDelta = 0;
+        _yVelocity = 0;
+        _umbrellaFrames = 0;
+    }
+
     public RectangleF PushBox => new(Position.X, Position.Y, BodyExtents.Width, BodyExtents.Height);
 
     public RectangleF PlatformBox =>
@@ -30,18 +102,13 @@ internal unsafe struct Player
 
     private bool Descending => _yPosDelta > 5f;
 
-    private static readonly Vector2[] InitialPositions =
-    {
-        new(Graphics.Midpoint.X / 2.0f, Graphics.LogicalSize.Height - BodyExtents.Height),
-        new(Graphics.Midpoint.X * 1.5f, Graphics.LogicalSize.Height - BodyExtents.Height)
-    };
+    public short LastJumpedPlatform => _lastJumpedPlatform;
 
-    public bool Lost;
-    private byte _myPlayerIndex;
+    private bool NoTick => HasFreeze() || HasSlowdown() && Match.UpdateFrameCount % 2 == 0;
 
-    private byte _slowdownFrames;
-    private byte _freezeFrames;
-    private byte _reviveFrames;
+    public bool IsCom => MyComLevel > 0;
+    private byte MyComLevel => Match.Info.ComInfo.Levels[_myPlayerIndex];
+    private ref ComActionData MyComData => ref ComActionTable[MyComLevel - 1];
 
     public void Reset(byte playerIndex)
     {
@@ -54,6 +121,7 @@ internal unsafe struct Player
         _slowdownFrames = 0;
         _freezeFrames = 0;
         _reviveFrames = 0;
+        _umbrellaFrames = 0;
 
         _lastJumpedPlatform = -1;
 
@@ -125,8 +193,13 @@ internal unsafe struct Player
     {
         if (HasRevive()) --_reviveFrames;
         if (HasSlowdown()) --_slowdownFrames;
-
+        if (HasUmbrella()) --_umbrellaFrames;
         if (HasFreeze()) --_freezeFrames;
+    }
+
+    private bool HasUmbrella()
+    {
+        return _umbrellaFrames > 0;
     }
 
     private bool HasRevive()
@@ -164,7 +237,7 @@ internal unsafe struct Player
         if (!Descending)
             return;
 
-        if (!PlatformWork.GetIntersectingPlatform(ref this, out _lastJumpedPlatform)) return;
+        if (!PlatformWork.GetIntersectingPlatform(this, out _lastJumpedPlatform)) return;
 
         ref var platform = ref PlatformWork.GetPlatform(_lastJumpedPlatform);
 
@@ -174,10 +247,6 @@ internal unsafe struct Player
         Jump();
     }
 
-    private short _lastJumpedPlatform;
-
-    public short LastJumpedPlatform => _lastJumpedPlatform;
-
     private static void CorrectCameraHeight(short targetId)
     {
         BackgroundWork.SetTarget(targetId);
@@ -186,12 +255,8 @@ internal unsafe struct Player
 
         var transformedY = newTarget.Position.Y - Graphics.Midpoint.Y * 1.5f;
         if (transformedY < CameraWork.Target.Y)
-            CameraWork.Target = CameraWork.Target with { Y = transformedY };
+            CameraWork.Target = CameraWork.Target with {Y = transformedY};
     }
-
-    private float _yPosDelta;
-
-    private static readonly Vector2 JumpMaxPoint = new(0.0f, 480.0f / 1.35f);
 
     private Vector2 GetTargetPosition(short targetIndex)
     {
@@ -207,13 +272,11 @@ internal unsafe struct Player
     {
         _xVelocity = Mathematics.SmoothDamp(_xVelocity, _targetXVelocity, ref _xVelocityDelta, 0.1f,
             GameFlow.TimeStep);
-        _yVelocity += YDamping;
+        _yVelocity += HasUmbrella() ? YDamping * 0.85F : YDamping;
 
         _velocity = new Vector2(_xVelocity, _yVelocity);
         Position += _velocity;
     }
-
-    private bool NoTick => HasFreeze() || (HasSlowdown() && Match.UpdateFrameCount % 2 == 0);
 
     public void ApplySpeed()
     {
@@ -255,47 +318,11 @@ internal unsafe struct Player
 
         Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.Player), null,
             Matrix3x2.CreateTranslation(Position), color);
+
+        if (HasUmbrella())
+            Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.UmbrellaItem), null,
+                Matrix3x2.CreateTranslation(Position.X + 32.0f, Position.Y - 32.0f), Color.White);
     }
-
-    private readonly struct ComActionData
-    {
-        public readonly byte PlatformRange;
-        public readonly float StoppedChance;
-
-        public ComActionData(byte platformRange, float stoppedChance)
-        {
-            PlatformRange = platformRange;
-            StoppedChance = stoppedChance;
-        }
-    }
-
-    private static readonly ComActionData[] ComActionTable =
-    {
-        new(1, 0.5f),
-        new(1, 0.25f),
-        new(2, 0.015f),
-        new(2, 0.005f),
-        new(3, 0.005f),
-        new(3, 0.0025f),
-        new(4, 0.0015f),
-        new(4, 0.0f)
-    };
-
-    public bool IsCom => Match.Info.ComLevels[_myPlayerIndex] > 0;
-    private byte MyComLevel => Match.Info.ComLevels[_myPlayerIndex];
-    private ref ComActionData MyComData => ref ComActionTable[MyComLevel - 1];
-    private short _comPathIndex;
-    private float _comProgress;
-
-
-    private const short MaxPathSize = 2048;
-#pragma warning disable CS0649
-    private fixed short _comPath[MaxPathSize];
-#pragma warning restore CS0649
-#pragma warning disable CS0649
-    private fixed float _randomOffsets[MaxPathSize];
-#pragma warning restore CS0649
-    private short _comPathLength;
 
     private void GenerateComPath()
     {
@@ -305,33 +332,21 @@ internal unsafe struct Player
         InsertIntoPath(0);
         short currentProgress = 0;
 
+        var offset = RandomWork.Next(0, MyComData.BehaviorTable.Length);
         while (currentProgress < Match.Info.PlatformCount)
         {
-            var shouldStop = MyComData.StoppedChance != 0.0f &&
-                             RandomWork.Next(0.0f, 1.0f) <= MyComData.StoppedChance;
+            var next = MyComData.BehaviorTable[offset];
+            offset = (offset + 1) % MyComData.BehaviorTable[offset];
 
-            if (shouldStop)
-            {
-                GenerateComStopped(currentProgress);
-            }
-            else
-            {
-                ++currentProgress;
-                var nextPlatform =
-                    (short)(currentProgress + RandomWork.Next((byte)1, MyComData.PlatformRange));
-                InsertIntoPath(currentProgress);
-                InsertIntoPath(nextPlatform);
-                currentProgress = nextPlatform;
-            }
+            var nextPlatform =
+                (short) (currentProgress +
+                         next);
+            InsertIntoPath(currentProgress);
+            InsertIntoPath(nextPlatform);
+            currentProgress = nextPlatform;
         }
 
         for (var i = 0; i < _comPathLength; i++) _randomOffsets[i] = RandomWork.Next(-20.0f, 20.0f);
-    }
-
-    private void GenerateComStopped(short position)
-    {
-        InsertIntoPath(position);
-        InsertIntoPath(position);
     }
 
     private void InsertIntoPath(short position)
@@ -372,6 +387,11 @@ internal unsafe struct Player
         _slowdownFrames = 60;
     }
 
+    public void ApplyUmbrella()
+    {
+        _umbrellaFrames = 60 * 3;
+    }
+
     public void ApplyRevive()
     {
         _reviveFrames = 30;
@@ -395,20 +415,21 @@ internal unsafe struct Player
         Position = Mathematics.CubicBezier(begin, p2, p3, end, progress);
     }
 
-    private Vector2 _velocity;
-    private float _xVelocity;
-    private float _targetXVelocity;
-    private float _xVelocityDelta;
-    private float _yVelocity;
-    private const float YDamping = 0.45f;
-    private const float MaxXVelocity = 15.0f;
-    private const float JumpVelocity = -16.25f;
-
     private void UpdateHumanVelocity(GameInput input)
     {
         _targetXVelocity = 0.0f;
 
         if (input.HasFlag(GameInput.Left)) _targetXVelocity -= MaxXVelocity;
         if (input.HasFlag(GameInput.Right)) _targetXVelocity += MaxXVelocity;
+    }
+
+    private readonly struct ComActionData
+    {
+        public readonly sbyte[] BehaviorTable;
+
+        public ComActionData(params sbyte[] behaviorTable)
+        {
+            BehaviorTable = behaviorTable;
+        }
     }
 }

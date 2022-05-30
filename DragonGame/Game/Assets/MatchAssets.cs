@@ -87,17 +87,17 @@ public static class MatchAssets
 
     public static Texture Texture(TextureIndex textureIndex)
     {
-        return Textures[(int)textureIndex];
+        return Textures[(int) textureIndex];
     }
 
     public static Font Font(FontIndex fontIndex)
     {
-        return Fonts[(int)fontIndex];
+        return Fonts[(int) fontIndex];
     }
 
     public static AudioClip SoundEffect(SfxIndex sfxIndex)
     {
-        return SoundEffects[(int)sfxIndex];
+        return SoundEffects[(int) sfxIndex];
     }
 
     public static void Unload()

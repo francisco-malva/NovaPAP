@@ -66,10 +66,10 @@ internal static class BannerWork
     public static void SetMessage(MessageIndex index)
     {
         _currentMessage = index;
-        _message = Messages[(int)index].Message.Replace("%r", Match.CurrentRound.ToString())
+        _message = Messages[(int) index].Message.Replace("%r", Match.CurrentRound.ToString())
             .Replace("%w", Match.RoundWinner.ToString()).Replace("%n", Settings.MyData.Nickname.ToString());
-        _color = Messages[(int)index].Color;
-        _time = Messages[(int)index].Time;
+        _color = Messages[(int) index].Color;
+        _time = Messages[(int) index].Time;
         _size = MatchAssets.Font(MatchAssets.FontIndex.BannerFont).MeasureString(_message);
     }
 

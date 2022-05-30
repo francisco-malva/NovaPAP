@@ -39,14 +39,28 @@ public class MainMenuSelector : TextSelector
         new(99, 100)
     };
 
+    private static readonly string[] DifficultyCaptions =
+    {
+        "Human",
+        "COM 1",
+        "COM 2",
+        "COM 3",
+        "COM 4",
+        "COM 5",
+        "COM 6",
+        "COM 7",
+        "COM 8"
+    };
+
     private readonly TextInputData _nicknameInput = new()
-        { Text = string.Empty, MaxLength = Settings.Nickname.MaxLength };
+        {Text = string.Empty, MaxLength = Settings.Nickname.MaxLength};
 
     private int _currentBoundInput;
-    private bool _items = false;
-    private float _musicVolume;
 
-    private byte _setCount = 1;
+    private byte _difficulty;
+    private bool _items;
+    private float _musicVolume;
+    private sbyte _rounds = 1;
 
     private float _sfxVolume;
     private State _state = State.Title;
@@ -105,9 +119,21 @@ public class MainMenuSelector : TextSelector
         Label("MATCH SETTINGS");
         Break(30.0f);
 
-        if (Button("BACK"))
+        if (Button(DifficultyCaptions[_difficulty])) _difficulty = (byte) ((_difficulty + 1) % 9);
+
+        if (Button(_items ? "ITEMS" : "NO ITEMS")) _items = !_items;
+
+        if (Button($"BEST OF {_rounds}"))
         {
+            _rounds = (sbyte) (_rounds + 1 % 5);
+
+            if (_rounds == 0) _rounds = 1;
         }
+
+        if (Button("BEGIN"))
+            GameFlow.Set(new VersusMode(new GameInfo(new ComInfo(0, _difficulty), 50, Environment.TickCount, _rounds,
+                60 * 60, BannerWork.MessageIndex.NoBanner, _items ? GameInfo.Flags.None : GameInfo.Flags.NoItems)));
+        if (Button("BACK")) _state = State.ModeSelect;
     }
 
     private void UpdateScoreboard()
@@ -139,7 +165,7 @@ public class MainMenuSelector : TextSelector
                 unsafe
                 {
                     Label(
-                        $"{ActionNames[j - offset]}: {SDL.SDL_GetScancodeName((SDL.SDL_Scancode)Settings.MyData.InputProfiles[j])}",
+                        $"{ActionNames[j - offset]}: {SDL.SDL_GetScancodeName((SDL.SDL_Scancode) Settings.MyData.InputProfiles[j])}",
                         _currentBoundInput == j ? Color.White : Color.Gray);
                 }
         }
@@ -148,7 +174,7 @@ public class MainMenuSelector : TextSelector
         if (Keyboard.AnyDown(out var newBinding))
             unsafe
             {
-                Settings.MyData.InputProfiles[_currentBoundInput] = (int)newBinding;
+                Settings.MyData.InputProfiles[_currentBoundInput] = (int) newBinding;
                 ++_currentBoundInput;
 
                 if (_currentBoundInput >= Settings.Data.InputProfileSize * Match.PlayerCount)
@@ -258,16 +284,11 @@ public class MainMenuSelector : TextSelector
         Label("MODE SELECTION", Color.Gold);
         Break(80.0f);
 
-        if (Button("TIME ATTACK")) GameFlow.Set(new TimeAttackMode());
+        if (Button("TIME ATTACK MODE")) GameFlow.Set(new TimeAttackMode());
 
+        if (Button("VERSUS MODE")) _state = State.MatchSettings;
 
-        if (Button("VS CPU")) GameFlow.Set(new VersusMode());
-
-        if (Button("VS PLAYER"))
-        {
-        }
-
-        if (Button("WATCH")) GameFlow.Set(new WatchMode());
+        if (Button("WATCH MODE")) GameFlow.Set(new WatchMode());
 
         Break(20.0f);
 
@@ -293,7 +314,7 @@ public class MainMenuSelector : TextSelector
                 {
                     var character = i > _nicknameInput.Text.Length - 1 ? char.MinValue : _nicknameInput.Text[i];
                     Settings.MyData.Nickname.Characters[i] = character;
-                    Settings.MyData.Nickname.Length = (byte)_nicknameInput.Text.Length;
+                    Settings.MyData.Nickname.Length = (byte) _nicknameInput.Text.Length;
                 }
 
             _nicknameInput.Text = string.Empty;
@@ -362,7 +383,7 @@ public class MainMenuState : IGameState
         Audio.PlayMusic(_music);
 
         MatchAssets.Load();
-        Match.Initialize(new GameInfo(new ComLevels(8, 8), 100, Environment.TickCount, 0, ushort.MaxValue,
+        Match.Initialize(new GameInfo(new ComInfo(8, 8), 100, Environment.TickCount, 0, ushort.MaxValue,
             BannerWork.MessageIndex.NoBanner, GameInfo.Flags.Exhibition | GameInfo.Flags.NoItems));
     }
 

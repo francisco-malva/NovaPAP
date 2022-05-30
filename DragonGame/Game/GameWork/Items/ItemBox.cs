@@ -1,10 +1,14 @@
-﻿using System.Drawing;
+﻿#region
+
+using System.Drawing;
 using System.Numerics;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Game.Assets;
 using DuckDuckJump.Game.GameWork.Camera;
 using DuckDuckJump.Game.GameWork.Platforming;
 using DuckDuckJump.Game.GameWork.Players;
+
+#endregion
 
 namespace DuckDuckJump.Game.GameWork.Items;
 
@@ -28,7 +32,7 @@ internal struct ItemBox
         }
     }
 
-    private RectangleF CollisionBody => new((PointF)Position, (SizeF)CollisionExtents);
+    private RectangleF CollisionBody => new((PointF) Position, (SizeF) CollisionExtents);
 
 
     public void Update()

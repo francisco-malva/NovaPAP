@@ -20,7 +20,7 @@ internal static class Graphics
     public static readonly Vector2 Midpoint = new(LogicalSize.Width / 2.0f, LogicalSize.Height / 2.0f);
 
     private static readonly SDL.SDL_Vertex[] Vertices = new SDL.SDL_Vertex[4];
-    private static readonly int[] Indices = { 0, 1, 2, 1, 3, 2 };
+    private static readonly int[] Indices = {0, 1, 2, 1, 3, 2};
 
     public static IntPtr Window { get; private set; }
 
@@ -40,7 +40,7 @@ internal static class Graphics
                 else
                 {
                     var rect = new SDL.SDL_Rect
-                        { x = value.Value.X, y = value.Value.Y, w = value.Value.Width, h = value.Value.Height };
+                        {x = value.Value.X, y = value.Value.Y, w = value.Value.Width, h = value.Value.Height};
                     result = SDL_RenderSetViewport(Renderer, &rect);
                 }
 
@@ -57,16 +57,16 @@ internal static class Graphics
             480, 0);
 
         if (Window == IntPtr.Zero)
-            Error.Panic("Could not create window.");
+            Error.RaiseMessage("Could not create window.");
 
         Renderer = SDL.SDL_CreateRenderer(Window, -1,
             SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL.SDL_RendererFlags.SDL_RENDERER_TARGETTEXTURE);
 
         if (Renderer == IntPtr.Zero)
-            Error.Panic($"Could not create window and renderer. SDL Error: {SDL.SDL_GetError()}");
+            Error.RaiseMessage($"Could not create window and renderer. SDL Error: {SDL.SDL_GetError()}");
 
         if (SDL.SDL_SetRenderDrawBlendMode(Renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND) != 0)
-            Error.Panic($"Could not set correct blending mode. SDL Error: {SDL.SDL_GetError()}");
+            Error.RaiseMessage($"Could not set correct blending mode. SDL Error: {SDL.SDL_GetError()}");
     }
 
     public static void Quit()
@@ -133,7 +133,7 @@ internal static class Graphics
         Vertices[3].tex_coord.x = textureRectangle.Right;
         Vertices[3].tex_coord.y = textureRectangle.Bottom;
 
-        var sdlColor = new SDL.SDL_Color { r = color.R, g = color.G, b = color.B, a = color.A };
+        var sdlColor = new SDL.SDL_Color {r = color.R, g = color.G, b = color.B, a = color.A};
 
         for (var i = 0; i < Vertices.Length; i++)
             Vertices[i].color = sdlColor;

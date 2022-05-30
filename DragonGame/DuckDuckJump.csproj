@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>WinExe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <Nullable>disable</Nullable>
@@ -23,7 +23,6 @@
 
     <ItemGroup>
         <PackageReference Include="CircularBuffer" Version="1.2.1" />
-        <PackageReference Include="LiteNetLib" Version="1.0.0-rc.1" />
         <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha" />
         <PackageReference Include="StbImageSharp" Version="2.27.8" />
     </ItemGroup>

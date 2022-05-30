@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Drawing;
 using System.Numerics;
 using DuckDuckJump.Engine.Subsystems.Graphical;
@@ -7,6 +9,8 @@ using DuckDuckJump.Game.GameWork.Players;
 using DuckDuckJump.Game.GameWork.Rng;
 using DuckDuckJump.Game.GameWork.Sound;
 using DuckDuckJump.Game.Input;
+
+#endregion
 
 namespace DuckDuckJump.Game.GameWork.Items;
 
@@ -66,7 +70,7 @@ internal static class ItemWork
     {
         for (var i = 0; i < Match.PlayerCount; i++)
         {
-            ref var player = ref PlayerWork.Get(i);
+            var player = PlayerWork.Get(i);
 
             if (player.IsCom)
                 continue;
@@ -89,7 +93,7 @@ internal static class ItemWork
             case ItemType.Freeze:
                 for (var i = 0; i < Match.PlayerCount; i++)
                 {
-                    ref var otherPlayer = ref PlayerWork.Get(i);
+                    var otherPlayer = PlayerWork.Get(i);
 
                     if (i == index) continue;
 
@@ -100,7 +104,7 @@ internal static class ItemWork
             case ItemType.Slowdown:
                 for (var i = 0; i < Match.PlayerCount; i++)
                 {
-                    ref var otherPlayer = ref PlayerWork.Get(i);
+                    var otherPlayer = PlayerWork.Get(i);
 
                     if (i == index) continue;
 
@@ -112,6 +116,7 @@ internal static class ItemWork
                 player.ApplyRevive();
                 break;
             case ItemType.Umbrella:
+                player.ApplyUmbrella();
                 break;
             case ItemType.All:
                 break;
@@ -124,7 +129,7 @@ internal static class ItemWork
     {
         for (var i = 0; i < Match.PlayerCount; i++)
         {
-            ref var player = ref PlayerWork.Get(i);
+            var player = PlayerWork.Get(i);
 
             if (player.IsCom)
                 continue;
@@ -137,7 +142,7 @@ internal static class ItemWork
 
                 itemBox.InvisibleTimer = 60 * 3;
                 SoundEffectWork.Queue(MatchAssets.SfxIndex.ItemPop, 0.5f);
-                PlayerItems[i] = (ItemType)RandomWork.Next((byte)ItemType.DoubleJump, (byte)ItemType.All);
+                PlayerItems[i] = (ItemType) RandomWork.Next((byte) ItemType.DoubleJump, (byte) ItemType.All);
             }
         }
     }
@@ -154,7 +159,7 @@ internal static class ItemWork
 
         for (var i = 0; i < Match.PlayerCount; i++)
         {
-            ref var player = ref PlayerWork.Get(i);
+            var player = PlayerWork.Get(i);
 
             if (player.IsCom)
                 continue;
@@ -169,7 +174,7 @@ internal static class ItemWork
             if (Match.State != Match.MatchState.InGame || PlayerItems[i] == ItemType.None) continue;
 
             var playerItem = PlayerItems[i];
-            Graphics.Draw(MatchAssets.Texture(UiItemTextures[(int)playerItem]), null, uiTransform, Color.White);
+            Graphics.Draw(MatchAssets.Texture(UiItemTextures[(int) playerItem]), null, uiTransform, Color.White);
         }
     }
 

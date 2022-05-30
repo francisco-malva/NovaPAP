@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using SDL2;
 
@@ -10,9 +9,8 @@ namespace DuckDuckJump.Engine.Subsystems.Output;
 
 public static class Error
 {
-    public static void Panic(string message)
+    public static void RaiseMessage(string message)
     {
         SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "Error", message, Graphics.Window);
-        throw new Exception();
     }
 }

@@ -85,7 +85,7 @@ internal static class Audio
     {
         unsafe
         {
-            var span = new Span<short>((void*)stream, len / SampleSize);
+            var span = new Span<short>((void*) stream, len / SampleSize);
 
             for (var i = 0; i < span.Length; i++) span[i] = 0;
             for (var i = 0; i < Channels.Length; i++)
@@ -162,7 +162,7 @@ internal static class Audio
                     else
                     {
                         for (var i = 0; i < buffer.Length; i++)
-                            outputBuffer[i] += (short)(buffer[i] * Volume * mixingVolume);
+                            outputBuffer[i] += (short) (buffer[i] * Volume * mixingVolume);
                     }
 
                     _offset += bytesRead;

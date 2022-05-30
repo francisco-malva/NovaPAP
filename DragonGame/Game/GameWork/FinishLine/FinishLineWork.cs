@@ -49,7 +49,7 @@ internal static class FinishLineWork
 
         for (var i = 0; i < Match.PlayerCount; i++)
         {
-            if (!IntersectsPlayer(ref PlayerWork.Get(i))) continue;
+            if (!IntersectsPlayer(PlayerWork.Get(i))) continue;
 
             for (var j = 0; j < Match.PlayerCount; j++)
             {
@@ -64,16 +64,16 @@ internal static class FinishLineWork
     {
         Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.FinishLine), null,
             Matrix3x2.CreateTranslation(-Graphics.LogicalSize.Width, _y),
-            Color.FromArgb((int)(_alpha * byte.MaxValue), 255, 255, 255));
+            Color.FromArgb((int) (_alpha * byte.MaxValue), 255, 255, 255));
         Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.FinishLine), null,
             Matrix3x2.CreateTranslation(0.0f, _y),
-            Color.FromArgb((int)(_alpha * byte.MaxValue), 255, 255, 255));
+            Color.FromArgb((int) (_alpha * byte.MaxValue), 255, 255, 255));
         Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.FinishLine), null,
             Matrix3x2.CreateTranslation(Graphics.LogicalSize.Width, _y),
-            Color.FromArgb((int)(_alpha * byte.MaxValue), 255, 255, 255));
+            Color.FromArgb((int) (_alpha * byte.MaxValue), 255, 255, 255));
     }
 
-    private static bool IntersectsPlayer(ref Player player)
+    private static bool IntersectsPlayer(Player player)
     {
         return player.Position.Y <= _y;
     }

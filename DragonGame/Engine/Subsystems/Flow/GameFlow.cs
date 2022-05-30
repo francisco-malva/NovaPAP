@@ -51,7 +51,7 @@ public static class GameFlow
             stopwatch.Stop();
 
             if (stopwatch.ElapsedMilliseconds < 16)
-                Thread.Sleep((int)(16 - stopwatch.ElapsedMilliseconds));
+                Thread.Sleep((int) (16 - stopwatch.ElapsedMilliseconds));
         }
 
         FileSystem.Quit();

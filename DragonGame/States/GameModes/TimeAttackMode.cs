@@ -24,15 +24,17 @@ public class TimeAttackMode : IGameState
 
     private static readonly GameInfo[] StageSettingTable =
     {
-        new(new ComLevels(0, 1), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.TimeAttackStart, GameInfo.Flags.None),
-        new(new ComLevels(0, 2), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 3), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 4), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 5), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 6), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 7), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None),
-        new(new ComLevels(0, 8), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None)
+        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.TimeAttackStart, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems)
     };
+
+    private byte _comLevel = 1;
 
     private AudioClip _gameMusic;
 
@@ -73,6 +75,8 @@ public class TimeAttackMode : IGameState
         {
             if (Match.SetWinner == MatchWinner.P1)
             {
+                _comLevel = (byte) Math.Clamp(_comLevel + 1, 1, 8);
+
                 if (_stage == StageCount)
                     GameFlow.Set(new MainMenuState());
                 else
@@ -81,6 +85,7 @@ public class TimeAttackMode : IGameState
             else
             {
                 --_stage;
+                _comLevel = (byte) Math.Clamp(_comLevel - 1, 1, 8);
                 AdvanceStage();
             }
         }
@@ -130,6 +135,8 @@ public class TimeAttackMode : IGameState
         ++_stage;
         var info = StageSettingTable[_stage - 1];
         info.RandomSeed = Environment.TickCount;
+        info.ComInfo.Levels[1] = _comLevel;
+
         Match.Initialize(info);
         Audio.MusicFade = 1.0f;
         SetStageLabel();
@@ -141,7 +148,7 @@ public class TimeAttackMode : IGameState
             Matrix3x2.CreateTranslation(Graphics.LogicalSize.Width - _stageStringSize.Width - 10.0f,
                 Graphics.LogicalSize.Height - _stageStringSize.Height - 10.0f), Color.Gray);
 
-        var seconds = _timer == 0 ? 0 : _timer / 60;
+        var seconds = _timer == 0 ? 0 : _timer / 60 % 60;
         var minutes = seconds == 0 ? 0 : seconds / 60;
 
         var timerString = $"{minutes:00}:{seconds:00}";

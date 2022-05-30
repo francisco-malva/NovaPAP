@@ -3,7 +3,6 @@
 using System;
 using System.Drawing;
 using System.Numerics;
-using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Game.GameWork.Background;
@@ -89,10 +88,10 @@ internal static class Match
     {
         if (RoundWinner != MatchWinner.Draw && RoundWinner != MatchWinner.None)
         {
-            var winner = (int)RoundWinner;
+            var winner = (int) RoundWinner;
             ScoreWork.IncreaseScore(winner);
 
-            ref var player = ref PlayerWork.Get(winner);
+            var player = PlayerWork.Get(winner);
 
             CenterCameraOnPlayer(ref player);
         }
@@ -185,15 +184,13 @@ internal static class Match
     {
         if (!BannerWork.IsDone()) return;
 
-        Fade += 0.005f;
-        if (Fade >= 1.0f)
-        {
-            Fade = 1.0f;
-            IsOver = true;
-            SetState(MatchState.NotInitialized);
-        }
+        Fade += 0.05f;
+        
+        if (!(Fade >= 1.0f)) return;
 
-        Audio.MusicFade = 1.0f - Fade;
+        Fade = 1.0f;
+        IsOver = true;
+        SetState(MatchState.NotInitialized);
     }
 
     private static void UpdateWinner()
@@ -292,7 +289,7 @@ internal static class Match
     {
         Graphics.Draw(Texture.White, null,
             Matrix3x2.CreateScale(Graphics.LogicalSize.Width, Graphics.LogicalSize.Height),
-            Color.FromArgb((int)(Math.Min(1.0f, Fade) * byte.MaxValue), 0, 0, 0));
+            Color.FromArgb((int) (Math.Min(1.0f, Fade) * byte.MaxValue), 0, 0, 0));
     }
 
     private static void DrawGui()
