@@ -30,7 +30,7 @@ public class PauseMenu : IDisposable
     public PauseMenu()
     {
         Paused = false;
-        _pauseFont = new Font("public-pixel-30", 30);
+        _pauseFont = new Font("public-pixel-30");
         _selector = new PauseSelector(_pauseFont);
     }
 

@@ -36,17 +36,18 @@ internal class Player
 
     private static readonly ComActionData[] ComActionTable =
     {
-        new(1, 1, 1, 1, -1),
-        new(1, 1, 2, 2, -1),
-        new(1, 2, 2, 2, -1),
-        new(2, 2, 2, 2, -1),
-        new(2, 2, 3, 3, -1),
-        new(2, 2, 3, 3, 2, 1),
-        new(2, 3, 3, 4, 2, 1),
-        new(2, 4, 4, 3, 2, 1, 1)
+        new(1, 1, 1, 1, 1),
+        new(1, 1, 1, 1, 2),
+        new(1, 1, 1, 2, 2),
+        new(1, 1, 2, 2, 2),
+        new(1, 2, 2, 2, 2),
+        new(2, 2, 2, 2, 2),
+        new(2, 2, 2, 2, 3),
+        new(2, 2, 2, 3, 3)
     };
 
     private readonly short[] _comPath;
+    private readonly float[] _randomOffsets;
     private short _comPathIndex;
     private short _comPathLength;
     private float _comProgress;
@@ -54,7 +55,6 @@ internal class Player
 
     private short _lastJumpedPlatform;
     private byte _myPlayerIndex;
-    private readonly float[] _randomOffsets;
     private byte _reviveFrames;
 
     private byte _slowdownFrames;
@@ -341,7 +341,7 @@ internal class Player
             var nextPlatform =
                 (short) (currentProgress +
                          next);
-            InsertIntoPath(currentProgress);
+            //InsertIntoPath(currentProgress);
             InsertIntoPath(nextPlatform);
             currentProgress = nextPlatform;
         }

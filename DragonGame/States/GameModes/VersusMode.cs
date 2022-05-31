@@ -56,8 +56,8 @@ internal class VersusSettingsSelector : TextSelector
 
 internal class VersusMode : IGameState
 {
-    private AudioClip _gameMusic;
     private readonly GameInfo _info;
+    private AudioClip _gameMusic;
 
     private bool _inSelection;
 
@@ -71,7 +71,7 @@ internal class VersusMode : IGameState
 
     public void Initialize()
     {
-        _selectionFont = new Font("public-pixel-30", 30);
+        _selectionFont = new Font("public-pixel-30");
         _selector = new VersusSettingsSelector(_selectionFont);
         _gameMusic = new AudioClip("gameplay", true);
 

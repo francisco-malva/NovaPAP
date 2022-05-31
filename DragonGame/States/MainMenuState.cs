@@ -1,8 +1,13 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Net.Sockets;
 using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
+using Common.Parsers;
 using DuckDuckJump.Engine.Assets;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Selector;
@@ -16,6 +21,7 @@ using DuckDuckJump.Game.Configuration;
 using DuckDuckJump.Game.GameWork.Banner;
 using DuckDuckJump.Game.Input;
 using DuckDuckJump.States.GameModes;
+using DuckDuckJump.States.GameModes.NetworkMode;
 using SDL2;
 
 #endregion
@@ -29,14 +35,6 @@ public class MainMenuSelector : TextSelector
         "Left",
         "Right",
         "Special"
-    };
-
-    private static readonly TimerType[] TimerTypes =
-    {
-        new(10, 10),
-        new(30, 50),
-        new(60, 65),
-        new(99, 100)
     };
 
     private static readonly string[] DifficultyCaptions =
@@ -62,6 +60,8 @@ public class MainMenuSelector : TextSelector
     private float _musicVolume;
     private sbyte _rounds = 1;
 
+    private List<Score> _scores;
+
     private float _sfxVolume;
     private State _state = State.Title;
 
@@ -70,13 +70,43 @@ public class MainMenuSelector : TextSelector
         _musicVolume = Settings.MyData.MusicVolume * 100.0f;
         _sfxVolume = Settings.MyData.SfxVolume * 100.0f;
 
-        if (!Settings.MyData.NicknameDefined) _state = State.NicknameSetting;
+        if (!Settings.MyData.NicknameDefined) _state = State.NicknameSetup;
+
+        Task.Run(GetScores);
+    }
+
+    private void GetScores()
+    {
+        Socket socket = null;
+        try
+        {
+            socket = ScoringServer.ConnectToScoringServer();
+
+            socket.Send(Encoding.UTF8.GetBytes("(\"GetScores\")"));
+
+            Span<byte> buffer = stackalloc byte[4096];
+            socket.Receive(buffer);
+
+            _scores = new List<Score>();
+
+            if (SExpressionParser.Parse(Encoding.UTF8.GetString(buffer)) is not List<object> list) return;
+            foreach (List<object> score in list) _scores.Add(new Score(score[0] as string, (int) score[1]));
+        }
+        catch (Exception e)
+        {
+            // ignored
+        }
+        finally
+        {
+            socket?.Close();
+        }
     }
 
     public override void Update()
     {
         base.Update();
 
+        Begin();
         switch (_state)
         {
             case State.Title:
@@ -94,7 +124,7 @@ public class MainMenuSelector : TextSelector
             case State.ModeSelect:
                 ModeSelection();
                 break;
-            case State.NicknameSetting:
+            case State.NicknameSetup:
                 UpdateNickname();
                 break;
             case State.InputSettings:
@@ -106,17 +136,20 @@ public class MainMenuSelector : TextSelector
             case State.MatchSettings:
                 UpdateMatchSettings();
                 break;
+            case State.NetworkModes:
+                UpdateNetworkModeMatches();
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
+
+        End();
     }
 
     private void UpdateMatchSettings()
     {
-        Begin();
-
         Break(30.0f);
-        Label("MATCH SETTINGS");
+        Label("MATCH SETTINGS", Color.Gold);
         Break(30.0f);
 
         if (Button(DifficultyCaptions[_difficulty])) _difficulty = (byte) ((_difficulty + 1) % 9);
@@ -130,6 +163,8 @@ public class MainMenuSelector : TextSelector
             if (_rounds == 0) _rounds = 1;
         }
 
+        Break(30.0f);
+
         if (Button("BEGIN"))
             GameFlow.Set(new VersusMode(new GameInfo(new ComInfo(0, _difficulty), 50, Environment.TickCount, _rounds,
                 60 * 60, BannerWork.MessageIndex.NoBanner, _items ? GameInfo.Flags.None : GameInfo.Flags.NoItems)));
@@ -138,18 +173,24 @@ public class MainMenuSelector : TextSelector
 
     private void UpdateScoreboard()
     {
-        Begin();
+        Break(30.0f);
+        Label("SCOREBOARD", Color.Gold);
+        Break(30.0f);
+
+        var place = 1;
+        if (_scores != null)
+            foreach (var score in _scores)
+            {
+                var span = TimeSpan.FromSeconds(score.Time / 60.0);
+                Label($"{place++}. {score.Name} {span.Minutes.ToString("00")}:{span.Seconds.ToString("00")}");
+            }
 
         if (Button("BACK"))
             _state = State.MainScreen;
-
-        End();
     }
 
     private void UpdateInput()
     {
-        Begin();
-
         Break(30.0f);
         Label("INPUT BINDING", Color.Gold);
         Break(30.0f);
@@ -183,29 +224,21 @@ public class MainMenuSelector : TextSelector
                     _state = State.Settings;
                 }
             }
-
-        End();
     }
 
 
     private void UpdateTitle()
     {
-        Begin();
-
         Break(30.0f);
         Label("DUCK DUCK JUMP", Color.Gold);
         Break(120.0f * 3.0f);
 
         if (Button("PRESS TO START"))
             _state = State.MainScreen;
-
-        End();
     }
 
     private void UpdateAudioSettings()
     {
-        Begin();
-
         Break(30.0f);
         Label("AUDIO SETTINGS", Color.Gold);
         Break(30.0f);
@@ -251,14 +284,10 @@ public class MainMenuSelector : TextSelector
             Settings.Save();
             _state = State.Settings;
         }
-
-        End();
     }
 
     private void UpdateSettings()
     {
-        Begin();
-
         Break(30.0f);
         Label("SETTINGS", Color.Gold);
         Break(30.0f);
@@ -273,18 +302,17 @@ public class MainMenuSelector : TextSelector
         Break(10.0f);
 
         if (Button("BACK")) _state = State.MainScreen;
-        End();
     }
 
     private void ModeSelection()
     {
-        Begin();
-
         Break(30.0f);
         Label("MODE SELECTION", Color.Gold);
         Break(80.0f);
 
         if (Button("TIME ATTACK MODE")) GameFlow.Set(new TimeAttackMode());
+
+        if (Button("NETWORK MODES")) _state = State.NetworkModes;
 
         if (Button("VERSUS MODE")) _state = State.MatchSettings;
 
@@ -293,12 +321,25 @@ public class MainMenuSelector : TextSelector
         Break(20.0f);
 
         if (Button("BACK")) _state = State.MainScreen;
-        End();
+    }
+
+    private void UpdateNetworkModeMatches()
+    {
+        Break(30.0f);
+        Label("NETWORK MODES", Color.Gold);
+        Break(80.0f);
+
+        if (Button("HOST MATCH")) GameFlow.Set(new HostNetworkMode());
+
+        if (Button("JOIN MATCH")) GameFlow.Set(new ClientNetworkMode());
+
+        Break(80.0f);
+
+        if (Button("BACK")) _state = State.ModeSelect;
     }
 
     private void UpdateNickname()
     {
-        Begin();
         Break(30.0f);
         Label("NICKNAME SETUP", Color.Gold);
         Break(30.0f);
@@ -321,13 +362,10 @@ public class MainMenuSelector : TextSelector
             Settings.Save();
             _state = State.Title;
         }
-
-        End();
     }
 
     private void UpdateMainScreen()
     {
-        Begin();
         Break(120.0f * 1.5f);
         if (Button("BEGIN")) _state = State.ModeSelect;
         if (Button("SCOREBOARD")) _state = State.Scoreboard;
@@ -338,19 +376,6 @@ public class MainMenuSelector : TextSelector
         };
 
         if (Button("QUIT")) SDL.SDL_PushEvent(ref quitEv);
-        End();
-    }
-
-    private struct TimerType
-    {
-        public sbyte Seconds;
-        public short PlatformCount;
-
-        public TimerType(sbyte seconds, short platformCount)
-        {
-            Seconds = seconds;
-            PlatformCount = platformCount;
-        }
     }
 
     private enum State
@@ -359,11 +384,12 @@ public class MainMenuSelector : TextSelector
         MainScreen,
         Settings,
         ModeSelect,
-        NicknameSetting,
+        NicknameSetup,
         AudioSettings,
         InputSettings,
         Scoreboard,
-        MatchSettings
+        MatchSettings,
+        NetworkModes
     }
 }
 
@@ -376,7 +402,7 @@ public class MainMenuState : IGameState
 
     public void Initialize()
     {
-        _font = new Font("public-pixel-30", 30);
+        _font = new Font("public-pixel-30");
         _selector = new MainMenuSelector(_font);
         _music = new AudioClip("menu", true);
 
@@ -402,7 +428,7 @@ public class MainMenuState : IGameState
     {
         Span<GameInput> inputs = stackalloc GameInput[Match.PlayerCount];
         Match.Update(inputs);
-        _selector.Update();
+        _selector?.Update();
     }
 
     public void Draw()

@@ -19,6 +19,8 @@ public static class GameFlow
     public const float TimeStep = 1.0f / FrameRate;
     private static IGameState _gameState;
 
+    private static readonly object GameStateLock = new();
+
     public static void Run()
     {
         FileSystem.Initialize();
@@ -38,15 +40,23 @@ public static class GameFlow
             while (SDL.SDL_PollEvent(out var sdlEvent) > 0)
             {
                 if (sdlEvent.type == SDL.SDL_EventType.SDL_QUIT) running = false;
-                _gameState?.OnEvent(ref sdlEvent);
+                if (_gameState == null) continue;
+                lock (GameStateLock)
+                {
+                    _gameState?.OnEvent(ref sdlEvent);
+                }
             }
 
             Keyboard.Update();
 
-            _gameState?.Update();
-            Graphics.Begin();
-            _gameState?.Draw();
-            Graphics.End();
+            if (_gameState != null)
+                lock (GameStateLock)
+                {
+                    _gameState?.Update();
+                    Graphics.Begin();
+                    _gameState?.Draw();
+                    Graphics.End();
+                }
 
             stopwatch.Stop();
 
@@ -61,10 +71,13 @@ public static class GameFlow
 
     public static void Set(IGameState state)
     {
-        _gameState?.Exit();
+        lock (GameStateLock)
+        {
+            _gameState?.Exit();
 
-        _gameState = state;
+            _gameState = state;
 
-        _gameState?.Initialize();
+            _gameState?.Initialize();
+        }
     }
 }

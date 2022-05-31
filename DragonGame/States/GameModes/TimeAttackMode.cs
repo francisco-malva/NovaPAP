@@ -2,7 +2,9 @@
 
 using System;
 using System.Drawing;
+using System.Net.Sockets;
 using System.Numerics;
+using System.Text;
 using DuckDuckJump.Engine.Assets;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Flow;
@@ -51,7 +53,7 @@ public class TimeAttackMode : IGameState
     {
         _gameMusic = new AudioClip("gameplay", true);
         _timer = 0;
-        _stageFont = new Font("terminator-two-20", 20);
+        _stageFont = new Font("terminator-two-20");
         _pauseMenu = new PauseMenu();
         Audio.PlayMusic(_gameMusic);
 
@@ -78,9 +80,30 @@ public class TimeAttackMode : IGameState
                 _comLevel = (byte) Math.Clamp(_comLevel + 1, 1, 8);
 
                 if (_stage == StageCount)
+                {
                     GameFlow.Set(new MainMenuState());
+
+                    Socket socket = null;
+                    try
+                    {
+                        socket = ScoringServer.ConnectToScoringServer();
+                        socket.Send(
+                            Encoding.UTF8.GetBytes(
+                                $"(\"UpdateScore\" \"{Settings.MyData.Nickname.ToString()}\" {_timer})"));
+                    }
+                    catch (Exception e)
+                    {
+                        // ignored
+                    }
+                    finally
+                    {
+                        socket?.Close();
+                    }
+                }
                 else
+                {
                     AdvanceStage();
+                }
             }
             else
             {
@@ -146,17 +169,17 @@ public class TimeAttackMode : IGameState
     {
         _stageFont.Draw(_stageString,
             Matrix3x2.CreateTranslation(Graphics.LogicalSize.Width - _stageStringSize.Width - 10.0f,
-                Graphics.LogicalSize.Height - _stageStringSize.Height - 10.0f), Color.Gray);
+                Graphics.LogicalSize.Height - _stageStringSize.Height - 10.0f), Color.DarkGoldenrod);
 
-        var seconds = _timer == 0 ? 0 : _timer / 60 % 60;
+        var seconds = _timer == 0 ? 0 : _timer / 60;
         var minutes = seconds == 0 ? 0 : seconds / 60;
 
-        var timerString = $"{minutes:00}:{seconds:00}";
+        var timerString = $"{minutes:00}:{seconds % 60:00}";
         var timerStringSize = _stageFont.MeasureString(timerString);
 
         _stageFont.Draw(timerString,
             Matrix3x2.CreateTranslation(timerStringSize.Width / 2.0f,
-                Graphics.LogicalSize.Height - timerStringSize.Height - 10.0f), Color.Gray);
+                Graphics.LogicalSize.Height - timerStringSize.Height - 10.0f), Color.DarkGoldenrod);
     }
 
     private void SetStageLabel()

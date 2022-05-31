@@ -31,8 +31,7 @@ public class Font : IDisposable
     ///     Creates a new font object.
     /// </summary>
     /// <param name="path">Path on the virtual filesystem.</param>
-    /// <param name="ptSize">Size the cached glyphs are rendered at.</param>
-    public Font(string path, int ptSize)
+    public Font(string path)
     {
         path = Path.Combine("Fonts", $"{path}.fnt");
 

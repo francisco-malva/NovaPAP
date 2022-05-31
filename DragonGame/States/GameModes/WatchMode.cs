@@ -29,7 +29,7 @@ public class WatchMode : IGameState
 
 
         Match.Initialize(new GameInfo(new ComInfo(8, 8), 1024, Environment.TickCount, -1, ushort.MaxValue,
-            BannerWork.MessageIndex.WatchModeStart, GameInfo.Flags.Exhibition));
+            BannerWork.MessageIndex.WatchModeStart, GameInfo.Flags.Exhibition | GameInfo.Flags.NoItems));
     }
 
     public void Exit()

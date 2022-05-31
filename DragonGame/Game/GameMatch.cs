@@ -185,7 +185,7 @@ internal static class Match
         if (!BannerWork.IsDone()) return;
 
         Fade += 0.05f;
-        
+
         if (!(Fade >= 1.0f)) return;
 
         Fade = 1.0f;

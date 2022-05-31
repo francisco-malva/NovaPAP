@@ -113,10 +113,10 @@ public static class Mathematics
     /// <returns>The interpolated color.</returns>
     public static Color Lerp(Color from, Color to, float t)
     {
-        var r = (byte)Lerp(from.R, to.R, t);
-        var g = (byte)Lerp(from.G, to.G, t);
-        var b = (byte)Lerp(from.B, to.B, t);
-        var a = (byte)Lerp(from.A, to.A, t);
+        var r = (byte) Lerp(from.R, to.R, t);
+        var g = (byte) Lerp(from.G, to.G, t);
+        var b = (byte) Lerp(from.B, to.B, t);
+        var a = (byte) Lerp(from.A, to.A, t);
         return Color.FromArgb(a, r, g, b);
     }
 
