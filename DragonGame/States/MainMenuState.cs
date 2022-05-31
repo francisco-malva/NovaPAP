@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
@@ -50,6 +51,11 @@ public class MainMenuSelector : TextSelector
         "COM 8"
     };
 
+    private readonly TextInputData _ipInput = new()
+    {
+        Text = string.Empty, MaxLength = 15
+    };
+
     private readonly TextInputData _nicknameInput = new()
         {Text = string.Empty, MaxLength = Settings.Nickname.MaxLength};
 
@@ -71,8 +77,6 @@ public class MainMenuSelector : TextSelector
         _sfxVolume = Settings.MyData.SfxVolume * 100.0f;
 
         if (!Settings.MyData.NicknameDefined) _state = State.NicknameSetup;
-
-        Task.Run(GetScores);
     }
 
     private void GetScores()
@@ -139,11 +143,27 @@ public class MainMenuSelector : TextSelector
             case State.NetworkModes:
                 UpdateNetworkModeMatches();
                 break;
+            case State.IpConfig:
+                UpdateIpConfiguration();
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
 
         End();
+    }
+
+    private void UpdateIpConfiguration()
+    {
+        Break(30.0f);
+        Label("IP CONFIGURATION", Color.Gold);
+        Break(30.0f);
+
+        Text(_ipInput);
+
+        if (Button("CONNECT") && IPAddress.TryParse(_ipInput.Text, out var ip)) GameFlow.Set(new ClientNetworkMode(ip));
+
+        if (Button("BACK")) _state = State.NetworkModes;
     }
 
     private void UpdateMatchSettings()
@@ -331,7 +351,7 @@ public class MainMenuSelector : TextSelector
 
         if (Button("HOST MATCH")) GameFlow.Set(new HostNetworkMode());
 
-        if (Button("JOIN MATCH")) GameFlow.Set(new ClientNetworkMode());
+        if (Button("JOIN MATCH")) _state = State.IpConfig;
 
         Break(80.0f);
 
@@ -346,29 +366,33 @@ public class MainMenuSelector : TextSelector
 
         Text(_nicknameInput);
 
-        if (Button("CONFIRM") && _nicknameInput.Text.Length > 3)
-        {
-            Settings.MyData.NicknameDefined = true;
+        if (!Button("CONFIRM") || _nicknameInput.Text.Length <= 3) return;
 
-            for (var i = 0; i < _nicknameInput.Text.Length; i++)
-                unsafe
-                {
-                    var character = i > _nicknameInput.Text.Length - 1 ? char.MinValue : _nicknameInput.Text[i];
-                    Settings.MyData.Nickname.Characters[i] = character;
-                    Settings.MyData.Nickname.Length = (byte) _nicknameInput.Text.Length;
-                }
+        Settings.MyData.NicknameDefined = true;
 
-            _nicknameInput.Text = string.Empty;
-            Settings.Save();
-            _state = State.Title;
-        }
+        for (var i = 0; i < _nicknameInput.Text.Length; i++)
+            unsafe
+            {
+                var character = i > _nicknameInput.Text.Length - 1 ? char.MinValue : _nicknameInput.Text[i];
+                Settings.MyData.Nickname.Characters[i] = character;
+                Settings.MyData.Nickname.Length = (byte) _nicknameInput.Text.Length;
+            }
+
+        _nicknameInput.Text = string.Empty;
+        Settings.Save();
+        _state = State.Title;
     }
 
     private void UpdateMainScreen()
     {
         Break(120.0f * 1.5f);
         if (Button("BEGIN")) _state = State.ModeSelect;
-        if (Button("SCOREBOARD")) _state = State.Scoreboard;
+        if (Button("SCOREBOARD"))
+        {
+            _state = State.Scoreboard;
+            Task.Run(GetScores);
+        }
+
         if (Button("SETTINGS")) _state = State.Settings;
         var quitEv = new SDL.SDL_Event
         {
@@ -389,7 +413,8 @@ public class MainMenuSelector : TextSelector
         InputSettings,
         Scoreboard,
         MatchSettings,
-        NetworkModes
+        NetworkModes,
+        IpConfig
     }
 }
 

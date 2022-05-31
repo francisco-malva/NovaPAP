@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>WinExe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <Nullable>disable</Nullable>
@@ -22,9 +22,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CircularBuffer" Version="1.2.1"/>
-        <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha"/>
-        <PackageReference Include="StbImageSharp" Version="2.27.8"/>
+        <PackageReference Include="CircularBuffer" Version="1.2.1" />
+        <PackageReference Include="ppy.SDL2-CS" Version="1.0.486-alpha" />
+        <PackageReference Include="StbImageSharp" Version="2.27.8" />
     </ItemGroup>
 
     <ItemGroup>
@@ -196,8 +196,8 @@
         <None Update="Assets\Audio\Game\Player\jump.snd">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Remove="Engine\Wrappers\SDL2\Mixer\**"/>
-        <None Remove="Engine\Settings\**"/>
+        <None Remove="Engine\Wrappers\SDL2\Mixer\**" />
+        <None Remove="Engine\Settings\**" />
         <None Update="Assets\Audio\watch-mode.snd">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
@@ -237,23 +237,21 @@
         <None Update="Assets\Textures\Game\Items\slowdown.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="ip.txt">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
+        <None Remove="ip.txt" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Common\Common.csproj"/>
+        <ProjectReference Include="..\Common\Common.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="Engine\Wrappers\SDL2\Mixer\**"/>
-        <Compile Remove="Engine\Settings\**"/>
+        <Compile Remove="Engine\Wrappers\SDL2\Mixer\**" />
+        <Compile Remove="Engine\Settings\**" />
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Remove="Engine\Wrappers\SDL2\Mixer\**"/>
-        <EmbeddedResource Remove="Engine\Settings\**"/>
+        <EmbeddedResource Remove="Engine\Wrappers\SDL2\Mixer\**" />
+        <EmbeddedResource Remove="Engine\Settings\**" />
     </ItemGroup>
 
 </Project>
