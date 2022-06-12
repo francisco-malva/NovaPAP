@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FontMaker", "FontMaker\FontMaker.csproj", "{E07AC4D7-E06C-4ED9-AE6F-237B8A16E49F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoringServer", "ScoringServer\ScoringServer.csproj", "{D4DB40A5-E480-4725-A580-D7055F8353D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoringServer", "ScoringServer\ScoringServer.csproj", "{4911C7A4-2E33-4190-A388-9802BFE0525E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{E07AC4D7-E06C-4ED9-AE6F-237B8A16E49F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E07AC4D7-E06C-4ED9-AE6F-237B8A16E49F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E07AC4D7-E06C-4ED9-AE6F-237B8A16E49F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D4DB40A5-E480-4725-A580-D7055F8353D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D4DB40A5-E480-4725-A580-D7055F8353D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D4DB40A5-E480-4725-A580-D7055F8353D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D4DB40A5-E480-4725-A580-D7055F8353D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4911C7A4-2E33-4190-A388-9802BFE0525E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4911C7A4-2E33-4190-A388-9802BFE0525E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4911C7A4-2E33-4190-A388-9802BFE0525E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4911C7A4-2E33-4190-A388-9802BFE0525E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
