@@ -1,6 +1,8 @@
 ﻿#region
 
+using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Subsystems.Auditory;
@@ -49,6 +51,8 @@ public static class GameFlow
 
             Keyboard.Update();
 
+            var screenshot = Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_P);
+            
             if (_gameState != null)
                 lock (GameStateLock)
                 {
@@ -56,6 +60,11 @@ public static class GameFlow
                     Graphics.Begin();
                     _gameState?.Draw();
                     Graphics.End();
+
+                    if (screenshot)
+                    {
+                        TakeScreenshot();
+                    }
                 }
 
             stopwatch.Stop();
@@ -67,6 +76,27 @@ public static class GameFlow
         FileSystem.Quit();
         Graphics.Quit();
         Audio.Quit();
+    }
+
+    private static unsafe void TakeScreenshot()
+    {
+        var surface =
+            (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurface(0, 640, 480, 32,
+                0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+
+        var rect = new SDL.SDL_Rect() {x = 0, y = 0, w = 640, h = 480};
+        if (SDL.SDL_RenderReadPixels(Graphics.Renderer, ref rect, SDL.SDL_PIXELFORMAT_ARGB8888, surface->pixels,
+                surface->pitch) == 0)
+        {
+            if (!Directory.Exists("screenshots"))
+            {
+                Directory.CreateDirectory("screenshots");
+            }
+
+            SDL.SDL_SaveBMP((IntPtr) surface, $"screenshots/{Directory.GetFiles("screenshots").Length + 1}.bmp");
+        }
+        
+        SDL.SDL_FreeSurface((IntPtr) surface);
     }
 
     public static void Set(IGameState state)
