@@ -3,6 +3,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.GameWork.Banner;
 
@@ -21,7 +22,7 @@ public class ClientNetworkMode : NetworkMode
         _address = address;
     }
 
-    protected override void EstablishConnection()
+    protected override async Task EstablishConnection()
     {
         var localEndPoint = new IPEndPoint(_address, 11000);
 
@@ -35,7 +36,7 @@ public class ClientNetworkMode : NetworkMode
         {
             OtherSocket.Connect(localEndPoint);
 
-            Span<byte> buffer = stackalloc byte[sizeof(int)];
+            var buffer = new byte[sizeof(int)];
 
             OtherSocket.Receive(buffer);
 

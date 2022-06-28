@@ -120,14 +120,14 @@ public abstract class NetworkMode : IGameState
         }
     }
 
-    protected abstract void EstablishConnection();
+    protected abstract Task EstablishConnection();
 
-    private void ListenThread()
+    private async void ListenThread()
     {
         try
         {
             _hasConnection = false;
-            EstablishConnection();
+            await EstablishConnection();
             KickoffLockstep(0);
             _hasConnection = true;
         }

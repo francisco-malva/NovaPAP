@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Threading;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Subsystems.Auditory;
-using DuckDuckJump.Engine.Subsystems.Files;
 using DuckDuckJump.Engine.Subsystems.Graphical;
 using DuckDuckJump.States;
 using SDL2;
@@ -23,7 +22,6 @@ public static class GameFlow
 
     public static void Run()
     {
-        FileSystem.Initialize();
         Graphics.Initialize();
         Audio.Initialize();
 
@@ -64,7 +62,6 @@ public static class GameFlow
                 Thread.Sleep((int) (16 - stopwatch.ElapsedMilliseconds));
         }
 
-        FileSystem.Quit();
         Graphics.Quit();
         Audio.Quit();
     }

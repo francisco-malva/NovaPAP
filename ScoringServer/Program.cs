@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Common.Parsers;
+using Common.Web;
 
 #endregion
 
@@ -21,9 +22,9 @@ command.CommandText =
     "CREATE TABLE IF NOT EXISTS Times (Id int PRIMARY KEY, Name varchar(16) NOT NULL , Time int NOT NULL)";
 command.ExecuteNonQuery();
 
-var addresses = Dns.GetHostAddresses(Dns.GetHostName());
-var endpoint = new IPEndPoint(addresses[0], 12168);
-var socket = new Socket(addresses[0].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+var endpoint = new IPEndPoint(IpUtilities.GetIpFromName(Dns.GetHostName()), 12168);
+Console.WriteLine($"Listening on endpoint: {endpoint}");
+var socket = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
 socket.Bind(endpoint);
 socket.Listen();
