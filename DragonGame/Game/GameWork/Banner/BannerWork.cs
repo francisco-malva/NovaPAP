@@ -32,6 +32,7 @@ internal static class BannerWork
         S7,
         S8,
         WatchModeStart,
+        Climb,
         NoBanner = byte.MaxValue
     }
 
@@ -52,7 +53,8 @@ internal static class BannerWork
         new("STAGE 6!", Color.DarkGoldenrod, 1.0f),
         new("STAGE 7!", Color.DarkGoldenrod, 1.0f),
         new("STAGE 8!", Color.DarkGoldenrod, 1.0f),
-        new("WATCH MODE!", Color.DarkGoldenrod, 1.0f)
+        new("WATCH MODE!", Color.DarkGoldenrod, 1.0f),
+        new("CLIMB!", Color.MediumAquamarine, 2.0f)
     };
 
     private static MessageIndex _currentMessage;

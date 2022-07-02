@@ -60,8 +60,6 @@ public class MainMenuSelector : TextSelector
     private readonly TextInputData _nicknameInput = new()
         { Text = string.Empty, MaxLength = Settings.Nickname.MaxLength };
 
-    private int _currentBoundInput;
-
     private byte _difficulty;
     private List<Height> _heights;
     private bool _items;
@@ -309,41 +307,49 @@ public class MainMenuSelector : TextSelector
             _state = State.ScoreboardSelection;
     }
 
+    private int _input;
+    
     private void UpdateInput()
     {
-        Break(30.0f);
-        Label("INPUT BINDING", Color.Gold);
-        Break(30.0f);
-
-        for (byte i = 0; i < Match.PlayerCount; i++)
+        unsafe
         {
-            Label($"P{i + 1}", Color.Gold);
+            Break(30.0f);
+            Label("INPUT BINDINGS", Color.Gold);
             Break(30.0f);
 
-            var offset = Settings.MyData.GetInputStartingOffset(i);
+            var player = _input < 3 ? "P1" : "P2";
+        
+            Label($"KEY FOR {player} {ActionNames[_input % 3]}", Color.White);
+            Label($"{SDL.SDL_GetScancodeName((SDL.SDL_Scancode)Settings.MyData.InputProfiles[_input])}",
+                Color.White);
 
-            for (var j = offset; j < offset + Settings.Data.InputProfileSize; j++)
-                unsafe
-                {
-                    Label(
-                        $"{ActionNames[j - offset]}: {SDL.SDL_GetScancodeName((SDL.SDL_Scancode)Settings.MyData.InputProfiles[j])}",
-                        _currentBoundInput == j ? Color.White : Color.Gray);
-                }
-        }
-
-
-        if (Keyboard.AnyDown(out var newBinding))
-            unsafe
+            Break(30.0f);
+            if (Button("CONTINUE"))
             {
-                Settings.MyData.InputProfiles[_currentBoundInput] = (int)newBinding;
-                ++_currentBoundInput;
+                ++_input;
 
-                if (_currentBoundInput >= Settings.Data.InputProfileSize * Match.PlayerCount)
+                if (_input == Settings.Data.InputProfileSize * 2)
                 {
                     Settings.Save();
+                    _input = 0;
                     _state = State.Settings;
                 }
             }
+
+            if (Button("BACK"))
+            {
+                Settings.Save();
+                _input = 0;
+                _state = State.Settings;
+            }
+
+
+            if (Keyboard.AnyDown(out var newBinding))
+                unsafe
+                {
+                    Settings.MyData.InputProfiles[_input] = (int)newBinding;
+                }
+        }
     }
 
 
@@ -415,7 +421,6 @@ public class MainMenuSelector : TextSelector
         if (Button("AUDIO")) _state = State.AudioSettings;
         if (Button("INPUT"))
         {
-            _currentBoundInput = 0;
             _state = State.InputSettings;
         }
 

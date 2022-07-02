@@ -41,12 +41,12 @@ public class EndlessClimberMode : IGameState
         _pauseMenu = new PauseMenu();
 
         _versusSelectionFont = new Font("public-pixel-30");
-        _versusSettingsSelector = new VersusSettingsSelector(_versusSelectionFont);
+        _versusSettingsSelector = new VersusSettingsSelector(_versusSelectionFont, false);
         _stageFont = new Font("terminator-two-20");
 
         Audio.PlayMusic(_gameMusic);
         Match.Initialize(new GameInfo(new ComInfo(0, 0), 1000, Environment.TickCount, 1, 60 * 60,
-            BannerWork.MessageIndex.WatchModeStart, GameInfo.Flags.NoItems | GameInfo.Flags.EndlessClimber));
+            BannerWork.MessageIndex.Climb, GameInfo.Flags.NoItems | GameInfo.Flags.EndlessClimber));
         _distanceClimbed = 0.0f;
     }
 
@@ -66,6 +66,7 @@ public class EndlessClimberMode : IGameState
     {
         if (Match.IsOver)
         {
+            _versusSettingsSelector.SetHeight(_distanceClimbed);
             _versusSettingsSelector.Update();
 
             switch (_versusSettingsSelector.Action)

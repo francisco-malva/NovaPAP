@@ -26,16 +26,21 @@ internal class VersusSettingsSelector : TextSelector
 
     private readonly byte[] _scores = new byte[Match.PlayerCount];
 
-    private readonly bool _showScore;
+    private readonly bool _isHeight;
 
     public VersusAction Action;
 
-    public VersusSettingsSelector(Font font, bool showScore = true) : base(font)
+    public VersusSettingsSelector(Font font, bool isHeight = true) : base(font)
     {
-        _showScore = showScore;
+        _isHeight = isHeight;
     }
 
-
+    private float _height;
+    public void SetHeight(float height)
+    {
+        _height = height;
+    }
+    
     public void IncreaseScore(byte playerId)
     {
         _scores[playerId] = (byte)Math.Clamp(_scores[playerId] + 1, 0, 99);
@@ -47,7 +52,7 @@ internal class VersusSettingsSelector : TextSelector
 
 
         Break(30.0f);
-        if (_showScore) Label($"{_scores[0]} - {_scores[1]}");
+        Label(_isHeight ? $"{_scores[0]} - {_scores[1]}" : $"{MathF.Truncate(_height)}M CLIMBED!");
         Break(30.0f);
 
         if (Button("PLAY AGAIN")) Action = VersusAction.PlayAgain;
