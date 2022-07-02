@@ -88,12 +88,13 @@ internal static class Match
     {
         if (RoundWinner != MatchWinner.Draw && RoundWinner != MatchWinner.None)
         {
-            var winner = (int) RoundWinner;
+            var winner = (int)RoundWinner;
             ScoreWork.IncreaseScore(winner);
 
             var player = PlayerWork.Get(winner);
 
-            CenterCameraOnPlayer(ref player);
+            if ((Info.GameFlags & GameInfo.Flags.EndlessClimber) == 0)
+                CenterCameraOnPlayer(ref player);
         }
 
         if (ScoreWork.GetWinner(out SetWinner))
@@ -289,7 +290,7 @@ internal static class Match
     {
         Graphics.Draw(Texture.White, null,
             Matrix3x2.CreateScale(Graphics.LogicalSize.Width, Graphics.LogicalSize.Height),
-            Color.FromArgb((int) (Math.Min(1.0f, Fade) * byte.MaxValue), 0, 0, 0));
+            Color.FromArgb((int)(Math.Min(1.0f, Fade) * byte.MaxValue), 0, 0, 0));
     }
 
     private static void DrawGui()

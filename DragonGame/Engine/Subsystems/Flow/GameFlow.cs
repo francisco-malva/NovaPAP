@@ -5,6 +5,7 @@ using System.Threading;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Graphical;
+using DuckDuckJump.Game.Configuration;
 using DuckDuckJump.States;
 using SDL2;
 
@@ -24,7 +25,7 @@ public static class GameFlow
     {
         Graphics.Initialize();
         Audio.Initialize();
-
+        
         Set(new MainMenuState());
 
         var running = true;
@@ -59,7 +60,7 @@ public static class GameFlow
             stopwatch.Stop();
 
             if (stopwatch.ElapsedMilliseconds < 16)
-                Thread.Sleep((int) (16 - stopwatch.ElapsedMilliseconds));
+                Thread.Sleep((int)(16 - stopwatch.ElapsedMilliseconds));
         }
 
         Graphics.Quit();

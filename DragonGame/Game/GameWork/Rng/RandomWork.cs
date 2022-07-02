@@ -1051,7 +1051,7 @@ internal static class RandomWork
 
     public static void Reset()
     {
-        _pointer = (ushort) (Match.Info.RandomSeed % Entropy.Length);
+        _pointer = (ushort)(Match.Info.RandomSeed % Entropy.Length);
     }
 
 
@@ -1068,35 +1068,35 @@ internal static class RandomWork
     {
         uint value = RandomByte();
 
-        for (var i = 0; i < 4; i++) value ^= (uint) (RandomByte() << (i * 8));
+        for (var i = 0; i < 4; i++) value ^= (uint)(RandomByte() << (i * 8));
 
         return value;
     }
 
     private static float RandomFloat()
     {
-        return (float) RandomUnsigned() / uint.MaxValue;
+        return (float)RandomUnsigned() / uint.MaxValue;
     }
 
     public static int Next(int min, int max)
     {
         if (min == max)
             return min;
-        return (int) (min + RandomUnsigned() % (max - min));
+        return (int)(min + RandomUnsigned() % (max - min));
     }
 
     public static short Next(short min, short max)
     {
         if (min == max)
             return min;
-        return (short) (min + RandomUnsigned() % (max - min));
+        return (short)(min + RandomUnsigned() % (max - min));
     }
 
     public static byte Next(byte min, byte max)
     {
         if (min == max)
             return min;
-        return (byte) (min + RandomByte() % (max - min));
+        return (byte)(min + RandomByte() % (max - min));
     }
 
     public static float Next(float min, float max)

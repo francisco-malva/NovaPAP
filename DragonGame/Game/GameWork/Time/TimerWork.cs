@@ -55,7 +55,7 @@ internal static class TimerWork
 
     public static void DrawMe()
     {
-        var intAlpha = (int) (_alpha * byte.MaxValue);
+        var intAlpha = (int)(_alpha * byte.MaxValue);
 
         var fgColor = Color.FromArgb(intAlpha, Color.Azure.R, Color.Azure.G, Color.Azure.B);
         var bgColor = Color.FromArgb(intAlpha, 0, 0, 0);

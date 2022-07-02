@@ -7,6 +7,8 @@ public static class IpUtilities
 {
     public static IPAddress GetIpFromName(string name)
     {
-        return IPAddress.TryParse(name, out var ipAddress) ? ipAddress : Dns.GetHostAddresses(name, AddressFamily.InterNetwork)[0];
+        return IPAddress.TryParse(name, out var ipAddress)
+            ? ipAddress
+            : Dns.GetHostAddresses(name, AddressFamily.InterNetwork)[0];
     }
 }

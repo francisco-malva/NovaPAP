@@ -30,7 +30,7 @@ internal struct Platform
     public Vector2 Position;
     public BehaviorType Type;
 
-    public RectangleF Body => new((PointF) Position, Extents);
+    public RectangleF Body => new((PointF)Position, Extents);
     private float _time;
     private float _randomAngle;
 
@@ -83,6 +83,6 @@ internal struct Platform
             return;
         Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.Platform), null,
             Matrix3x2.CreateTranslation(Position),
-            PlatformColors[(int) Type]);
+            PlatformColors[(int)Type]);
     }
 }

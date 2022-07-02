@@ -15,6 +15,7 @@ internal struct GameInfo
         None = 0,
         Exhibition = 1,
         NoItems = 2,
+        EndlessClimber = 4,
         All = byte.MaxValue
     }
 

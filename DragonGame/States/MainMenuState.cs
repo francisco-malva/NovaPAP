@@ -15,6 +15,7 @@ using DuckDuckJump.Engine.Selector;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
+using DuckDuckJump.Engine.Subsystems.Output;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.Assets;
@@ -57,11 +58,12 @@ public class MainMenuSelector : TextSelector
     };
 
     private readonly TextInputData _nicknameInput = new()
-        {Text = string.Empty, MaxLength = Settings.Nickname.MaxLength};
+        { Text = string.Empty, MaxLength = Settings.Nickname.MaxLength };
 
     private int _currentBoundInput;
 
     private byte _difficulty;
+    private List<Height> _heights;
     private bool _items;
     private float _musicVolume;
     private sbyte _rounds = 1;
@@ -79,31 +81,50 @@ public class MainMenuSelector : TextSelector
         if (!Settings.MyData.NicknameDefined) _state = State.NicknameSetup;
     }
 
-    private void GetScores()
+    private void GetServerData()
     {
         Socket socket = null;
         try
         {
             socket = ScoringServer.ConnectToScoringServer();
 
-            socket.Send(Encoding.UTF8.GetBytes("(\"GetScores\")"));
-
-            Span<byte> buffer = stackalloc byte[4096];
-            socket.Receive(buffer);
-
-            _scores = new List<Score>();
-
-            if (SExpressionParser.Parse(Encoding.UTF8.GetString(buffer)) is not List<object> list) return;
-            foreach (List<object> score in list) _scores.Add(new Score(score[0] as string, (int) score[1]));
+            GetScores(socket);
+            GetHeights(socket);
         }
         catch (Exception e)
         {
-            // ignored
+            Error.RaiseMessage(e.Message);
         }
         finally
         {
             socket?.Close();
         }
+    }
+
+    private void GetScores(Socket socket)
+    {
+        socket.Send(Encoding.UTF8.GetBytes("(\"GetScores\")"));
+
+        Span<byte> buffer = stackalloc byte[4096];
+        socket.Receive(buffer);
+
+        _scores = new List<Score>();
+
+        if (SExpressionParser.Parse(Encoding.UTF8.GetString(buffer)) is not List<object> list) return;
+        foreach (List<object> score in list) _scores.Add(new Score(score[0] as string, (int)score[1]));
+    }
+
+    private void GetHeights(Socket socket)
+    {
+        socket.Send(Encoding.UTF8.GetBytes("(\"GetHeights\")"));
+
+        Span<byte> buffer = stackalloc byte[4096];
+        var recv = socket.Receive(buffer);
+
+        _heights = new List<Height>();
+
+        if (SExpressionParser.Parse(Encoding.UTF8.GetString(buffer)) is not List<object> list) return;
+        foreach (List<object> height in list) _heights.Add(new Height(height[0] as string, (double)height[1]));
     }
 
     public override void Update()
@@ -134,8 +155,11 @@ public class MainMenuSelector : TextSelector
             case State.InputSettings:
                 UpdateInput();
                 break;
-            case State.Scoreboard:
-                UpdateScoreboard();
+            case State.ScreenSettings:
+                UpdateScreenSettings();
+                break;
+            case State.ScoreboardSelection:
+                UpdateScoreboardSelection();
                 break;
             case State.MatchSettings:
                 UpdateMatchSettings();
@@ -146,11 +170,72 @@ public class MainMenuSelector : TextSelector
             case State.IpConfig:
                 UpdateIpConfiguration();
                 break;
+            case State.Extras:
+                UpdateExtras();
+                break;
+            case State.TimeAttackScoreboard:
+                UpdateTimeAttackScoreboard();
+                break;
+            case State.EndlessClimberScoreboard:
+                UpdateEndlessClimberScoreboard();
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
 
         End();
+    }
+
+    private void UpdateScreenSettings()
+    {
+        Break(30.0f);
+        Label("SCREEN SETTINGS", Color.Gold);
+        Break(80.0f);
+
+        if (Button("FULLSCREEN: " + (Settings.MyData.Fullscreen ? "YES" : "NO")))
+        {
+            Settings.MyData.Fullscreen = !Settings.MyData.Fullscreen;
+            Graphics.SetFullscreen();
+        }
+
+
+        Break(20.0f);
+
+        if (Button("BACK"))
+        {
+            Settings.Save();
+            _state = State.Settings;
+        }
+    }
+
+    private void UpdateScoreboardSelection()
+    {
+        Break(30.0f);
+        Label("SCOREBOARDS", Color.Gold);
+        Break(80.0f);
+
+        if (Button("TIME ATTACK MODE")) _state = State.TimeAttackScoreboard;
+
+        if (Button("ENDLESS CLIMBER MODE")) _state = State.EndlessClimberScoreboard;
+
+        Break(20.0f);
+
+        if (Button("BACK")) _state = State.MainScreen;
+    }
+
+    private void UpdateExtras()
+    {
+        Break(30.0f);
+        Label("EXTRAS", Color.Gold);
+        Break(80.0f);
+
+        if (Button("WATCH MODE")) GameFlow.Set(new WatchMode());
+
+        if (Button("ENDLESS CLIMBER MODE")) GameFlow.Set(new EndlessClimberMode());
+
+        Break(20.0f);
+
+        if (Button("BACK")) _state = State.MainScreen;
     }
 
     private void UpdateIpConfiguration()
@@ -172,13 +257,13 @@ public class MainMenuSelector : TextSelector
         Label("MATCH SETTINGS", Color.Gold);
         Break(30.0f);
 
-        if (Button(DifficultyCaptions[_difficulty])) _difficulty = (byte) ((_difficulty + 1) % 9);
+        if (Button(DifficultyCaptions[_difficulty])) _difficulty = (byte)((_difficulty + 1) % 9);
 
         if (Button(_items ? "ITEMS" : "NO ITEMS")) _items = !_items;
 
         if (Button($"BEST OF {_rounds}"))
         {
-            _rounds = (sbyte) (_rounds + 1 % 5);
+            _rounds = (sbyte)(_rounds + 1 % 5);
 
             if (_rounds == 0) _rounds = 1;
         }
@@ -191,10 +276,25 @@ public class MainMenuSelector : TextSelector
         if (Button("BACK")) _state = State.ModeSelect;
     }
 
-    private void UpdateScoreboard()
+    private void UpdateEndlessClimberScoreboard()
     {
         Break(30.0f);
-        Label("SCOREBOARD", Color.Gold);
+        Label("ENDLESS CLIMBER", Color.Gold);
+        Break(30.0f);
+
+        var place = 1;
+        if (_heights != null)
+            foreach (var height in _heights)
+                Label($"{place++}. {height.Name} {Math.Truncate(height.Amount)}m");
+
+        if (Button("BACK"))
+            _state = State.ScoreboardSelection;
+    }
+
+    private void UpdateTimeAttackScoreboard()
+    {
+        Break(30.0f);
+        Label("TIME ATTACK", Color.Gold);
         Break(30.0f);
 
         var place = 1;
@@ -206,7 +306,7 @@ public class MainMenuSelector : TextSelector
             }
 
         if (Button("BACK"))
-            _state = State.MainScreen;
+            _state = State.ScoreboardSelection;
     }
 
     private void UpdateInput()
@@ -226,7 +326,7 @@ public class MainMenuSelector : TextSelector
                 unsafe
                 {
                     Label(
-                        $"{ActionNames[j - offset]}: {SDL.SDL_GetScancodeName((SDL.SDL_Scancode) Settings.MyData.InputProfiles[j])}",
+                        $"{ActionNames[j - offset]}: {SDL.SDL_GetScancodeName((SDL.SDL_Scancode)Settings.MyData.InputProfiles[j])}",
                         _currentBoundInput == j ? Color.White : Color.Gray);
                 }
         }
@@ -235,7 +335,7 @@ public class MainMenuSelector : TextSelector
         if (Keyboard.AnyDown(out var newBinding))
             unsafe
             {
-                Settings.MyData.InputProfiles[_currentBoundInput] = (int) newBinding;
+                Settings.MyData.InputProfiles[_currentBoundInput] = (int)newBinding;
                 ++_currentBoundInput;
 
                 if (_currentBoundInput >= Settings.Data.InputProfileSize * Match.PlayerCount)
@@ -319,6 +419,11 @@ public class MainMenuSelector : TextSelector
             _state = State.InputSettings;
         }
 
+        if (Button("SCREEN"))
+        {
+            _state = State.ScreenSettings;
+        }
+
         Break(10.0f);
 
         if (Button("BACK")) _state = State.MainScreen;
@@ -336,7 +441,7 @@ public class MainMenuSelector : TextSelector
 
         if (Button("VERSUS MODE")) _state = State.MatchSettings;
 
-        if (Button("WATCH MODE")) GameFlow.Set(new WatchMode());
+        if (Button("EXTRAS")) _state = State.Extras;
 
         Break(20.0f);
 
@@ -375,7 +480,7 @@ public class MainMenuSelector : TextSelector
             {
                 var character = i > _nicknameInput.Text.Length - 1 ? char.MinValue : _nicknameInput.Text[i];
                 Settings.MyData.Nickname.Characters[i] = character;
-                Settings.MyData.Nickname.Length = (byte) _nicknameInput.Text.Length;
+                Settings.MyData.Nickname.Length = (byte)_nicknameInput.Text.Length;
             }
 
         _nicknameInput.Text = string.Empty;
@@ -387,10 +492,10 @@ public class MainMenuSelector : TextSelector
     {
         Break(120.0f * 1.5f);
         if (Button("BEGIN")) _state = State.ModeSelect;
-        if (Button("SCOREBOARD"))
+        if (Button("SCOREBOARDS"))
         {
-            _state = State.Scoreboard;
-            Task.Run(GetScores);
+            _state = State.ScoreboardSelection;
+            Task.Run(GetServerData);
         }
 
         if (Button("SETTINGS")) _state = State.Settings;
@@ -411,10 +516,14 @@ public class MainMenuSelector : TextSelector
         NicknameSetup,
         AudioSettings,
         InputSettings,
-        Scoreboard,
+        ScoreboardSelection,
         MatchSettings,
         NetworkModes,
-        IpConfig
+        Extras,
+        IpConfig,
+        TimeAttackScoreboard,
+        EndlessClimberScoreboard,
+        ScreenSettings
     }
 }
 

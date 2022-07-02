@@ -32,7 +32,7 @@ internal struct ItemBox
         }
     }
 
-    private RectangleF CollisionBody => new((PointF) Position, (SizeF) CollisionExtents);
+    private RectangleF CollisionBody => new((PointF)Position, (SizeF)CollisionExtents);
 
 
     public void Update()

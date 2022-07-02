@@ -26,24 +26,28 @@ internal class VersusSettingsSelector : TextSelector
 
     private readonly byte[] _scores = new byte[Match.PlayerCount];
 
+    private readonly bool _showScore;
+
     public VersusAction Action;
 
-    public VersusSettingsSelector(Font font) : base(font)
+    public VersusSettingsSelector(Font font, bool showScore = true) : base(font)
     {
+        _showScore = showScore;
     }
 
 
     public void IncreaseScore(byte playerId)
     {
-        _scores[playerId] = (byte) Math.Clamp(_scores[playerId] + 1, 0, 99);
+        _scores[playerId] = (byte)Math.Clamp(_scores[playerId] + 1, 0, 99);
     }
 
     public override void Update()
     {
         Begin();
 
+
         Break(30.0f);
-        Label($"{_scores[0]} - {_scores[1]}");
+        if (_showScore) Label($"{_scores[0]} - {_scores[1]}");
         Break(30.0f);
 
         if (Button("PLAY AGAIN")) Action = VersusAction.PlayAgain;
@@ -96,7 +100,7 @@ internal class VersusMode : IGameState
         {
             if (Match.IsOver)
             {
-                _selector.IncreaseScore((byte) Match.SetWinner);
+                _selector.IncreaseScore((byte)Match.SetWinner);
                 _inSelection = true;
                 return;
             }

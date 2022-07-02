@@ -16,11 +16,22 @@ await using var connection = new SQLiteConnection("Data Source=db.sqlite;");
 
 await connection.OpenAsync();
 
-await using var command = connection.CreateCommand();
+{
+    await using var command = connection.CreateCommand();
 
-command.CommandText =
-    "CREATE TABLE IF NOT EXISTS Times (Id int PRIMARY KEY, Name varchar(16) NOT NULL , Time int NOT NULL)";
-command.ExecuteNonQuery();
+    command.CommandText =
+        "CREATE TABLE IF NOT EXISTS Times (Id int PRIMARY KEY, Name varchar(16) NOT NULL , Time int NOT NULL)";
+    await command.ExecuteNonQueryAsync();
+}
+
+{
+    await using var command = connection.CreateCommand();
+
+    command.CommandText =
+        "CREATE TABLE IF NOT EXISTS Heights (Id int PRIMARY KEY, Name varchar(16) NOT NULL , Height real NOT NULL)";
+    await command.ExecuteNonQueryAsync();
+}
+
 
 var endpoint = new IPEndPoint(IpUtilities.GetIpFromName(Dns.GetHostName()), 12168);
 Console.WriteLine($"Listening on endpoint: {endpoint}");
@@ -45,12 +56,35 @@ void HandleSocket(Socket sock)
     switch (list?[0] as string)
     {
         case "UpdateScore":
-            UpdateScores(list[1] as string ?? throw new InvalidOperationException(), (int) list[2]);
+            UpdateScores(list[1] as string ?? throw new InvalidOperationException(), (int)list[2]);
+            break;
+        case "UpdateHeight":
+            UpdateHeights(list[1] as string ?? throw new InvalidOperationException(), (double)list[2]);
             break;
         case "GetScores":
             GetScores(sock);
             break;
+        case "GetTimes":
+            GetHeights(sock);
+            break;
     }
+}
+
+async void GetHeights(Socket sock)
+{
+    var str = "(";
+
+    await using var cmd = connection.CreateCommand();
+
+    cmd.CommandText = "SELECT Name, Height FROM Heights ORDER BY Height DESC LIMIT 10";
+
+    await using var reader = cmd.ExecuteReader();
+
+    while (await reader.ReadAsync()) str += $"(\"{reader.GetString("Name")}\" {reader.GetDouble("Height")})";
+
+    str += ")";
+
+    sock.Send(Encoding.UTF8.GetBytes(str));
 }
 
 async void GetScores(Socket sock)
@@ -82,11 +116,27 @@ async void UpdateScores(string name, int time)
     cmd.Prepare();
 
     cmd.ExecuteNonQuery();
+    Console.WriteLine("Updated Scores");
+}
+
+async void UpdateHeights(string name, double height)
+{
+    await using var cmd = connection.CreateCommand();
+
+    cmd.CommandText = "INSERT INTO Heights VALUES (NULL, @name, @height)";
+
+    cmd.Parameters.Add("@name", DbType.String).Value = name;
+    cmd.Parameters.Add("@height", DbType.Double).Value = height;
+
+    cmd.Prepare();
+
+    cmd.ExecuteNonQuery();
+    Console.WriteLine("Updated Heights");
 }
 
 string GetStringFromSocket(Socket sock)
 {
     Span<byte> buffer = stackalloc byte[4096];
-    sock.Receive(buffer);
-    return Encoding.UTF8.GetString(buffer);
+    var byteCount = sock.Receive(buffer);
+    return Encoding.UTF8.GetString(buffer[..byteCount]);
 }

@@ -22,7 +22,7 @@ unsafe
     for (var i = char.MinValue; i < 255; i++)
     {
         var renderedSurface =
-            SDL_ttf.TTF_RenderText_Blended(font, $"{i}", new SDL.SDL_Color {r = 255, g = 255, b = 255, a = 255});
+            SDL_ttf.TTF_RenderText_Blended(font, $"{i}", new SDL.SDL_Color { r = 255, g = 255, b = 255, a = 255 });
 
         if (renderedSurface == IntPtr.Zero) continue;
 
@@ -32,8 +32,8 @@ unsafe
 
 
         var convertedSurface =
-            (SDL.SDL_Surface*) SDL.SDL_ConvertSurfaceFormat(renderedSurface, SDL.SDL_PIXELFORMAT_RGBA8888, 0);
-        var span = new Span<byte>((void*) convertedSurface->pixels, convertedSurface->w * convertedSurface->h * 4);
+            (SDL.SDL_Surface*)SDL.SDL_ConvertSurfaceFormat(renderedSurface, SDL.SDL_PIXELFORMAT_RGBA8888, 0);
+        var span = new Span<byte>((void*)convertedSurface->pixels, convertedSurface->w * convertedSurface->h * 4);
 
         var data = span.ToArray();
 
@@ -41,7 +41,7 @@ unsafe
 
         image.SaveAsPng(entryStream);
         SDL.SDL_FreeSurface(renderedSurface);
-        SDL.SDL_FreeSurface((IntPtr) convertedSurface);
+        SDL.SDL_FreeSurface((IntPtr)convertedSurface);
     }
 
     SDL_ttf.TTF_CloseFont(font);

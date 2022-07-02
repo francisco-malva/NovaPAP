@@ -26,7 +26,7 @@ internal static class ScoreWork
 
     public static void DrawMe()
     {
-        if (Match.Info.ScoreCount <= 0) return;
+        if (Match.Info.ScoreCount <= 0 || (Match.Info.GameFlags & GameInfo.Flags.EndlessClimber) != 0) return;
 
         for (var i = 0; i < Match.PlayerCount; i++)
         for (var j = 0; j < Match.Info.ScoreCount; j++)
@@ -63,7 +63,7 @@ internal static class ScoreWork
         {
             if (Scores[i] < Match.Info.ScoreCount) continue;
 
-            winner = (MatchWinner) i;
+            winner = (MatchWinner)i;
             return true;
         }
 

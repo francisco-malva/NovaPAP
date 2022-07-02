@@ -32,12 +32,14 @@ internal static class PlayerWork
 
     public static void UpdateUs(Span<GameInput> inputs)
     {
-        for (var i = 0; i < Match.PlayerCount; i++) Get(i).Update(inputs[i]);
+        var count = (Match.Info.GameFlags & GameInfo.Flags.EndlessClimber) != 0 ? 1 : Match.PlayerCount;
+
+        for (var i = 0; i < count; i++) Get(i).Update(inputs[i]);
 
         if (Match.State != Match.MatchState.InGame) return;
-        for (var i = 0; i < Match.PlayerCount; i++) Get(i).ApplySpeed();
+        for (var i = 0; i < count; i++) Get(i).ApplySpeed();
 
-        if (!Match.Info.ComInfo.HasAi) ApplyPushback();
+        if ((Match.Info.GameFlags & GameInfo.Flags.EndlessClimber) == 0) ApplyPushback();
         ClampPositions();
     }
 
@@ -67,10 +69,12 @@ internal static class PlayerWork
 
     public static void DrawUs()
     {
-        for (var i = 0; i < Match.PlayerCount; i++)
+        var count = (Match.Info.GameFlags & GameInfo.Flags.EndlessClimber) != 0 ? 1 : Match.PlayerCount;
+
+        for (var i = 0; i < count; i++)
             if (Match.State == Match.MatchState.Winner)
             {
-                if (Match.RoundWinner == (MatchWinner) i)
+                if (Match.RoundWinner == (MatchWinner)i)
                     Get(i).DrawMe();
             }
             else

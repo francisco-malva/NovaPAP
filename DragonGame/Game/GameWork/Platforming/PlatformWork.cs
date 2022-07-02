@@ -28,7 +28,7 @@ internal static class PlatformWork
         var spawnY = Graphics.LogicalSize.Height - Platform.Extents.Height - 60.0f;
         for (var i = 0; i < Match.Info.PlatformCount; i++)
         {
-            var progression = (float) i / Match.Info.PlatformCount;
+            var progression = (float)i / Match.Info.PlatformCount;
 
             var yStep = RandomWork.Next(MinimumStep, MinimumStep + StepRange * progression);
 
@@ -43,7 +43,7 @@ internal static class PlatformWork
             Platform.BehaviorType newType;
             do
             {
-                newType = (Platform.BehaviorType) RandomWork.Next(0, (int) Platform.BehaviorType.Max);
+                newType = (Platform.BehaviorType)RandomWork.Next(0, (int)Platform.BehaviorType.Max);
             } while (i > 0 && newType == lastType);
 
             lastType = newType;

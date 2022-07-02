@@ -104,7 +104,7 @@ internal class Player
 
     public short LastJumpedPlatform => _lastJumpedPlatform;
 
-    private bool NoTick => HasFreeze() || HasSlowdown() && Match.UpdateFrameCount % 2 == 0;
+    private bool NoTick => HasFreeze() || (HasSlowdown() && Match.UpdateFrameCount % 2 == 0);
 
     public bool IsCom => MyComLevel > 0;
     private byte MyComLevel => Match.Info.ComInfo.Levels[_myPlayerIndex];
@@ -255,7 +255,7 @@ internal class Player
 
         var transformedY = newTarget.Position.Y - Graphics.Midpoint.Y * 1.5f;
         if (transformedY < CameraWork.Target.Y)
-            CameraWork.Target = CameraWork.Target with {Y = transformedY};
+            CameraWork.Target = CameraWork.Target with { Y = transformedY };
     }
 
     private Vector2 GetTargetPosition(short targetIndex)
@@ -314,9 +314,10 @@ internal class Player
             color = Color.DarkGray;
         else
             color = Color.White;
-        if (IsCom) color = Color.FromArgb(128, color);
 
-        Graphics.Draw(MatchAssets.Texture(MatchAssets.TextureIndex.Player), null,
+        var humanSprite = _myPlayerIndex == 0 ? MatchAssets.TextureIndex.Player : MatchAssets.TextureIndex.Player2;
+        var comSprite = _myPlayerIndex == 0 ? MatchAssets.TextureIndex.PlayerAi : MatchAssets.TextureIndex.PlayerAi2;
+        Graphics.Draw(MatchAssets.Texture(IsCom ? comSprite : humanSprite), null,
             Matrix3x2.CreateTranslation(Position), color);
 
         if (HasUmbrella())
@@ -339,8 +340,8 @@ internal class Player
             offset = (offset + 1) % MyComData.BehaviorTable[offset];
 
             var nextPlatform =
-                (short) (currentProgress +
-                         next);
+                (short)(currentProgress +
+                        next);
             //InsertIntoPath(currentProgress);
             InsertIntoPath(nextPlatform);
             currentProgress = nextPlatform;

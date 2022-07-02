@@ -40,7 +40,7 @@ public static class BackgroundWork
             return;
 
         _target = newTarget;
-        _progressTarget = Math.Clamp((float) _target / Match.Info.PlatformCount, 0.0f, 1.0f);
+        _progressTarget = Math.Clamp((float)_target / Match.Info.PlatformCount, 0.0f, 1.0f);
     }
 
     public static void DrawMe()

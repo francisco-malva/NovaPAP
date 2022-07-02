@@ -142,7 +142,7 @@ internal static class ItemWork
 
                 itemBox.InvisibleTimer = 60 * 3;
                 SoundEffectWork.Queue(MatchAssets.SfxIndex.ItemPop, 0.5f);
-                PlayerItems[i] = (ItemType) RandomWork.Next((byte) ItemType.DoubleJump, (byte) ItemType.All);
+                PlayerItems[i] = (ItemType)RandomWork.Next((byte)ItemType.DoubleJump, (byte)ItemType.All);
             }
         }
     }
@@ -174,7 +174,7 @@ internal static class ItemWork
             if (Match.State != Match.MatchState.InGame || PlayerItems[i] == ItemType.None) continue;
 
             var playerItem = PlayerItems[i];
-            Graphics.Draw(MatchAssets.Texture(UiItemTextures[(int) playerItem]), null, uiTransform, Color.White);
+            Graphics.Draw(MatchAssets.Texture(UiItemTextures[(int)playerItem]), null, uiTransform, Color.White);
         }
     }
 

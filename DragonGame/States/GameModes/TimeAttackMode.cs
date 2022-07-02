@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
 using DuckDuckJump.Engine.Assets;
+using DuckDuckJump.Engine.Selector;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
@@ -20,20 +21,58 @@ using SDL2;
 
 namespace DuckDuckJump.States.GameModes;
 
+
 public class TimeAttackMode : IGameState
 {
+    private enum ContinueSelectorAction : byte
+    {
+        None,
+        TryAgain,
+        Quit
+    }
+    
+    private class ContinueSelector : TextSelector
+    {
+        public ContinueSelectorAction Action;
+        public ContinueSelector(Font font) : base(font)
+        {
+        }
+
+        public override void Update()
+        {
+            Begin();
+            
+            Break(20.0f);
+            Label("YOU LOST!");
+            Break(20.0f);
+
+            if (Button("TRY AGAIN"))
+            {
+                Action = ContinueSelectorAction.TryAgain;
+            }
+
+            if (Button("QUIT"))
+            {
+                Action = ContinueSelectorAction.Quit;
+            }
+            
+            End();
+            base.Update();
+        }
+    }
+    
     private const byte StageCount = 8;
 
     private static readonly GameInfo[] StageSettingTable =
     {
-        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.TimeAttackStart, GameInfo.Flags.NoItems),
-        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
-        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
-        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
-        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
-        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
-        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems),
-        new(new ComInfo(), 50, 0, 1, 60 * 60, BannerWork.MessageIndex.NoBanner, GameInfo.Flags.NoItems)
+        new(new ComInfo(), 10, 0, 2, 60 * 60, BannerWork.MessageIndex.S1, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 15, 0, 2, 60 * 60, BannerWork.MessageIndex.S2, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 20, 0, 2, 60 * 60, BannerWork.MessageIndex.S3, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 25, 0, 2, 60 * 60, BannerWork.MessageIndex.S4, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 30, 0, 2, 60 * 60, BannerWork.MessageIndex.S5, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 35, 0, 2, 60 * 60, BannerWork.MessageIndex.S6, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 40, 0, 2, 60 * 60, BannerWork.MessageIndex.S7, GameInfo.Flags.NoItems),
+        new(new ComInfo(), 50, 0, 2, 60 * 60, BannerWork.MessageIndex.S8, GameInfo.Flags.NoItems)
     };
 
     private byte _comLevel = 1;
@@ -49,12 +88,19 @@ public class TimeAttackMode : IGameState
 
     private uint _timer;
 
+    private ContinueSelector _selector;
+    private Font _selectorFont;
+    
     public void Initialize()
     {
         _gameMusic = new AudioClip("gameplay", true);
         _timer = 0;
         _stageFont = new Font("terminator-two-20");
+        _selectorFont = new Font("public-pixel-30");
+        
         _pauseMenu = new PauseMenu();
+
+        _selector = new ContinueSelector(_selectorFont);
         Audio.PlayMusic(_gameMusic);
 
         AdvanceStage();
@@ -65,24 +111,51 @@ public class TimeAttackMode : IGameState
         _gameMusic.Dispose();
         _pauseMenu.Dispose();
         _stageFont.Dispose();
+        _selectorFont.Dispose();
     }
 
     public void OnEvent(ref SDL.SDL_Event sdlEvent)
     {
     }
 
+    private bool _lost;
+    
     public void Update()
     {
+        if (_lost)
+        {
+            
+            _selector.Update();
+
+
+            switch (_selector.Action)
+            {
+                case ContinueSelectorAction.None:
+                    break;
+                case ContinueSelectorAction.TryAgain:
+                    _selector.Action = ContinueSelectorAction.None;
+                    _lost = false;
+                    --_stage;
+                    _comLevel = (byte)Math.Clamp(_comLevel - 1, 1, 8);
+                    AdvanceStage();
+                    break;
+                case ContinueSelectorAction.Quit:
+                    GameFlow.Set(new MainMenuState());
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            return;
+        }
+        
         if (Match.IsOver)
         {
             if (Match.SetWinner == MatchWinner.P1)
             {
-                _comLevel = (byte) Math.Clamp(_comLevel + 1, 1, 8);
+                _comLevel = (byte)Math.Clamp(_comLevel + 1, 1, 8);
 
                 if (_stage == StageCount)
                 {
-                    GameFlow.Set(new MainMenuState());
-
                     Socket socket = null;
                     try
                     {
@@ -99,6 +172,8 @@ public class TimeAttackMode : IGameState
                     {
                         socket?.Close();
                     }
+
+                    GameFlow.Set(new MainMenuState());
                 }
                 else
                 {
@@ -107,9 +182,8 @@ public class TimeAttackMode : IGameState
             }
             else
             {
-                --_stage;
-                _comLevel = (byte) Math.Clamp(_comLevel - 1, 1, 8);
-                AdvanceStage();
+                _lost = true;
+                return;
             }
         }
         else
@@ -148,9 +222,17 @@ public class TimeAttackMode : IGameState
 
     public void Draw()
     {
-        Match.Draw();
-        DrawTimeAttackInfo();
-        _pauseMenu.Draw();
+        if (_lost)
+        {
+            _selector.Draw();
+        }
+        else
+        {
+            Match.Draw();
+            DrawTimeAttackInfo();
+            _pauseMenu.Draw(); 
+        }
+           
     }
 
     private void AdvanceStage()
@@ -167,6 +249,8 @@ public class TimeAttackMode : IGameState
 
     private void DrawTimeAttackInfo()
     {
+        if (Match.State != Match.MatchState.InGame)
+            return;
         _stageFont.Draw(_stageString,
             Matrix3x2.CreateTranslation(Graphics.LogicalSize.Width - _stageStringSize.Width - 10.0f,
                 Graphics.LogicalSize.Height - _stageStringSize.Height - 10.0f), Color.DarkGoldenrod);
@@ -184,7 +268,7 @@ public class TimeAttackMode : IGameState
 
     private void SetStageLabel()
     {
-        _stageString = $"STAGE {_stage}";
+        _stageString = $"STAGE {_stage}/{StageCount}";
         _stageStringSize = _stageFont.MeasureString(_stageString);
     }
 }

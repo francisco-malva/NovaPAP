@@ -23,7 +23,14 @@ internal static class BannerWork
         Draw,
         GameSet,
         TimeUp,
-        TimeAttackStart,
+        S1,
+        S2,
+        S3,
+        S4,
+        S5,
+        S6,
+        S7,
+        S8,
         WatchModeStart,
         NoBanner = byte.MaxValue
     }
@@ -37,7 +44,14 @@ internal static class BannerWork
         new("DRAW!", Color.DodgerBlue, 1.0f),
         new("GAME SET!", Color.DarkRed, 2.0f),
         new("TIME'S UP!", Color.Chocolate, 1.0f),
-        new("TIME ATTACK!", Color.DarkGoldenrod, 1.0f),
+        new("STAGE 1!", Color.DarkGoldenrod, 1.0f),
+        new("STAGE 2!", Color.DarkGoldenrod, 1.0f),
+        new("STAGE 3!", Color.DarkGoldenrod, 1.0f),
+        new("STAGE 4!", Color.DarkGoldenrod, 1.0f),
+        new("STAGE 5!", Color.DarkGoldenrod, 1.0f),
+        new("STAGE 6!", Color.DarkGoldenrod, 1.0f),
+        new("STAGE 7!", Color.DarkGoldenrod, 1.0f),
+        new("STAGE 8!", Color.DarkGoldenrod, 1.0f),
         new("WATCH MODE!", Color.DarkGoldenrod, 1.0f)
     };
 
@@ -66,10 +80,10 @@ internal static class BannerWork
     public static void SetMessage(MessageIndex index)
     {
         _currentMessage = index;
-        _message = Messages[(int) index].Message.Replace("%r", Match.CurrentRound.ToString())
+        _message = Messages[(int)index].Message.Replace("%r", Match.CurrentRound.ToString())
             .Replace("%w", Match.RoundWinner.ToString()).Replace("%n", Settings.MyData.Nickname.ToString());
-        _color = Messages[(int) index].Color;
-        _time = Messages[(int) index].Time;
+        _color = Messages[(int)index].Color;
+        _time = Messages[(int)index].Time;
         _size = MatchAssets.Font(MatchAssets.FontIndex.BannerFont).MeasureString(_message);
     }
 

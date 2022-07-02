@@ -86,7 +86,7 @@ public abstract class NetworkMode : IGameState
                 _size = _font.MeasureString(_pingString);
 
                 _inputs[MyInputIndex] = _mine;
-                _inputs[OtherInputIndex] = (GameInput) buffer[0];
+                _inputs[OtherInputIndex] = (GameInput)buffer[0];
 
                 KickoffLockstep(_stopwatch.ElapsedMilliseconds / 16);
             }
@@ -142,7 +142,7 @@ public abstract class NetworkMode : IGameState
         _mine = Settings.MyData.GetInput(0);
 
         Span<byte> buffer = stackalloc byte[1];
-        buffer[0] = (byte) _mine;
+        buffer[0] = (byte)_mine;
 
         lock (SocketLock)
         {

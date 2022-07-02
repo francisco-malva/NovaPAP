@@ -35,7 +35,10 @@ public static class MatchAssets
         FreezeItem,
         SlowdownItem,
         ReviveItem,
-        UmbrellaItem
+        UmbrellaItem,
+        PlayerAi,
+        Player2,
+        PlayerAi2
     }
 
     private static readonly FontData[] FontDatum =
@@ -57,7 +60,10 @@ public static class MatchAssets
         "Game/Items/freeze",
         "Game/Items/slowdown",
         "Game/Items/revive",
-        "Game/Items/umbrella"
+        "Game/Items/umbrella",
+        "Game/Field/player-ai",
+        "Game/Field/player-2",
+        "Game/Field/player-ai-2"
     };
 
     private static readonly string[] SfxPaths =
@@ -87,17 +93,17 @@ public static class MatchAssets
 
     public static Texture Texture(TextureIndex textureIndex)
     {
-        return Textures[(int) textureIndex];
+        return Textures[(int)textureIndex];
     }
 
     public static Font Font(FontIndex fontIndex)
     {
-        return Fonts[(int) fontIndex];
+        return Fonts[(int)fontIndex];
     }
 
     public static AudioClip SoundEffect(SfxIndex sfxIndex)
     {
-        return SoundEffects[(int) sfxIndex];
+        return SoundEffects[(int)sfxIndex];
     }
 
     public static void Unload()

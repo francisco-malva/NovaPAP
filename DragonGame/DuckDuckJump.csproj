@@ -131,7 +131,7 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\Game\Field\player.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="Assets\Textures\Game\Field\finish-line.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -238,6 +238,15 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Remove="ip.txt" />
+        <None Update="Assets\Textures\Game\Field\player-ai.png">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Field\player-2.png">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Assets\Textures\Game\Field\player-ai-2.png">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>

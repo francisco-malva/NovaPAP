@@ -11,3 +11,15 @@ internal record Score
         Time = time;
     }
 }
+
+internal record Height
+{
+    public double Amount;
+    public string Name;
+
+    public Height(string name, double height)
+    {
+        Name = name;
+        Amount = height;
+    }
+}

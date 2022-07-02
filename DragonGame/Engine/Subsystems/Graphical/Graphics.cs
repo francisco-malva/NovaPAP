@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using DuckDuckJump.Engine.Subsystems.Output;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
+using DuckDuckJump.Game.Configuration;
 using SDL2;
 
 #endregion
@@ -20,7 +21,7 @@ internal static class Graphics
     public static readonly Vector2 Midpoint = new(LogicalSize.Width / 2.0f, LogicalSize.Height / 2.0f);
 
     private static readonly SDL.SDL_Vertex[] Vertices = new SDL.SDL_Vertex[4];
-    private static readonly int[] Indices = {0, 1, 2, 1, 3, 2};
+    private static readonly int[] Indices = { 0, 1, 2, 1, 3, 2 };
 
     public static IntPtr Window { get; private set; }
 
@@ -40,7 +41,7 @@ internal static class Graphics
                 else
                 {
                     var rect = new SDL.SDL_Rect
-                        {x = value.Value.X, y = value.Value.Y, w = value.Value.Width, h = value.Value.Height};
+                        { x = value.Value.X, y = value.Value.Y, w = value.Value.Width, h = value.Value.Height };
                     result = SDL_RenderSetViewport(Renderer, &rect);
                 }
 
@@ -51,11 +52,18 @@ internal static class Graphics
         }
     }
 
+    public static void SetFullscreen()
+    {
+        SDL.SDL_SetWindowFullscreen(Window, (uint)(Settings.MyData.Fullscreen ? SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0));
+    }
+
     public static void Initialize()
     {
         Window = SDL.SDL_CreateWindow("Duck Duck Jump!", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, 640,
             480, 0);
 
+       
+        
         if (Window == IntPtr.Zero)
             Error.RaiseMessage("Could not create window.");
 
@@ -67,6 +75,8 @@ internal static class Graphics
 
         if (SDL.SDL_SetRenderDrawBlendMode(Renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND) != 0)
             Error.RaiseMessage($"Could not set correct blending mode. SDL Error: {SDL.SDL_GetError()}");
+        
+        SetFullscreen();
     }
 
     public static void Quit()
@@ -133,7 +143,7 @@ internal static class Graphics
         Vertices[3].tex_coord.x = textureRectangle.Right;
         Vertices[3].tex_coord.y = textureRectangle.Bottom;
 
-        var sdlColor = new SDL.SDL_Color {r = color.R, g = color.G, b = color.B, a = color.A};
+        var sdlColor = new SDL.SDL_Color { r = color.R, g = color.G, b = color.B, a = color.A };
 
         for (var i = 0; i < Vertices.Length; i++)
             Vertices[i].color = sdlColor;

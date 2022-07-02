@@ -28,7 +28,7 @@ public static class StreamExtensions
 
         fixed (byte* internalPtr = span)
         {
-            return *(T*) internalPtr;
+            return *(T*)internalPtr;
         }
     }
 
@@ -61,7 +61,7 @@ public static class StreamExtensions
 
             fixed (byte* ptr = str)
             {
-                return new string((char*) ptr);
+                return new string((char*)ptr);
             }
         }
     }
