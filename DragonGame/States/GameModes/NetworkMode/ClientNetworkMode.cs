@@ -3,7 +3,6 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.GameWork.Banner;
 
@@ -22,7 +21,7 @@ public class ClientNetworkMode : NetworkMode
         _address = address;
     }
 
-    protected override async Task EstablishConnection()
+    protected override void EstablishConnection()
     {
         var localEndPoint = new IPEndPoint(_address, 11000);
 
@@ -42,6 +41,11 @@ public class ClientNetworkMode : NetworkMode
 
             Match.Initialize(new GameInfo(new ComInfo(0, 0), 50, BitConverter.ToInt32(buffer), 3, 60 * 60,
                 BannerWork.MessageIndex.NoBanner, GameInfo.Flags.None));
+
+            buffer[0] = byte.MaxValue;
+            for (var i = 1; i < buffer.Length; i++) buffer[i] = 0;
+
+            OtherSocket.Send(buffer);
         }
     }
 }

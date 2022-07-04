@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
 using Common.Utilities;
@@ -20,7 +21,6 @@ namespace DuckDuckJump.Game.GameWork.Players;
 
 internal class Player
 {
-    private const short MaxPathSize = 2048;
     private const float YDamping = 0.45f;
     private const float MaxXVelocity = 15.0f;
     private const float JumpVelocity = -16.25f;
@@ -46,10 +46,9 @@ internal class Player
         new(2, 2, 2, 3, 3)
     };
 
-    private readonly short[] _comPath;
-    private readonly float[] _randomOffsets;
+    private readonly List<ComPathPoint> _comPath = new();
+
     private short _comPathIndex;
-    private short _comPathLength;
     private float _comProgress;
     private byte _freezeFrames;
 
@@ -73,8 +72,6 @@ internal class Player
 
     public Player()
     {
-        _comPath = new short[MaxPathSize];
-        _randomOffsets = new float[MaxPathSize];
         Position = default;
         Lost = false;
         _myPlayerIndex = 0;
@@ -85,7 +82,6 @@ internal class Player
         _yPosDelta = 0;
         _comPathIndex = 0;
         _comProgress = 0;
-        _comPathLength = 0;
         _velocity = default;
         _xVelocity = 0;
         _targetXVelocity = 0;
@@ -327,8 +323,7 @@ internal class Player
 
     private void GenerateComPath()
     {
-        _comPathLength = 0;
-
+        _comPath.Clear();
         InsertIntoPath(-1);
         InsertIntoPath(0);
         short currentProgress = 0;
@@ -337,22 +332,20 @@ internal class Player
         while (currentProgress < Match.Info.PlatformCount)
         {
             var next = MyComData.BehaviorTable[offset];
-            offset = (offset + 1) % MyComData.BehaviorTable[offset];
+            offset = RandomWork.Next(0, MyComData.BehaviorTable.Length);
 
             var nextPlatform =
                 (short)(currentProgress +
                         next);
-            //InsertIntoPath(currentProgress);
+
             InsertIntoPath(nextPlatform);
             currentProgress = nextPlatform;
         }
-
-        for (var i = 0; i < _comPathLength; i++) _randomOffsets[i] = RandomWork.Next(-20.0f, 20.0f);
     }
 
     private void InsertIntoPath(short position)
     {
-        _comPath[_comPathLength++] = position;
+        _comPath.Add(new ComPathPoint(position, RandomWork.Next(-20.0f, 20.0f)));
     }
 
     private void ResetComFields()
@@ -372,7 +365,7 @@ internal class Player
         JumpSfx();
         _comProgress %= 1.0f;
         ++_comPathIndex;
-        _lastJumpedPlatform = _comPath[_comPathIndex];
+        _lastJumpedPlatform = _comPath[_comPathIndex].Index;
 
         if (_lastJumpedPlatform >= 0)
             CorrectCameraHeight(_lastJumpedPlatform);
@@ -402,13 +395,15 @@ internal class Player
     {
         var progress = Math.Clamp(_comProgress, 0.0f, 1.0f);
 
-        var begin = GetTargetPosition(_comPath[_comPathIndex]);
-        begin.X += _randomOffsets[_comPathIndex];
+        var beginIndex = Math.Clamp(_comPathIndex, -1, _comPath.Count - 1);
 
-        var endIndex = Math.Clamp(_comPathIndex + 1, 0, _comPathLength - 1);
+        var begin = GetTargetPosition(_comPath[beginIndex].Index);
+        begin.X += _comPath[beginIndex].Offset;
 
-        var end = GetTargetPosition(_comPath[endIndex]);
-        end.X += _randomOffsets[endIndex];
+        var endIndex = Math.Clamp(_comPathIndex + 1, 0, _comPath.Count - 1);
+
+        var end = GetTargetPosition(_comPath[endIndex].Index);
+        end.X += _comPath[endIndex].Offset;
 
         var p2 = begin - JumpMaxPoint;
         var p3 = end - JumpMaxPoint;
@@ -432,5 +427,17 @@ internal class Player
         {
             BehaviorTable = behaviorTable;
         }
+    }
+}
+
+internal struct ComPathPoint
+{
+    public readonly short Index;
+    public readonly float Offset;
+
+    public ComPathPoint(short index, float offset)
+    {
+        Index = index;
+        Offset = offset;
     }
 }

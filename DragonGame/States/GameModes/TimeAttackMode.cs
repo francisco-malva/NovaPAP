@@ -21,46 +21,8 @@ using SDL2;
 
 namespace DuckDuckJump.States.GameModes;
 
-
 public class TimeAttackMode : IGameState
 {
-    private enum ContinueSelectorAction : byte
-    {
-        None,
-        TryAgain,
-        Quit
-    }
-    
-    private class ContinueSelector : TextSelector
-    {
-        public ContinueSelectorAction Action;
-        public ContinueSelector(Font font) : base(font)
-        {
-        }
-
-        public override void Update()
-        {
-            Begin();
-            
-            Break(20.0f);
-            Label("YOU LOST!");
-            Break(20.0f);
-
-            if (Button("TRY AGAIN"))
-            {
-                Action = ContinueSelectorAction.TryAgain;
-            }
-
-            if (Button("QUIT"))
-            {
-                Action = ContinueSelectorAction.Quit;
-            }
-            
-            End();
-            base.Update();
-        }
-    }
-    
     private const byte StageCount = 8;
 
     private static readonly GameInfo[] StageSettingTable =
@@ -79,7 +41,12 @@ public class TimeAttackMode : IGameState
 
     private AudioClip _gameMusic;
 
+    private bool _lost;
+
     private PauseMenu _pauseMenu;
+
+    private ContinueSelector _selector;
+    private Font _selectorFont;
     private byte _stage;
     private Font _stageFont;
 
@@ -88,16 +55,13 @@ public class TimeAttackMode : IGameState
 
     private uint _timer;
 
-    private ContinueSelector _selector;
-    private Font _selectorFont;
-    
     public void Initialize()
     {
         _gameMusic = new AudioClip("gameplay", true);
         _timer = 0;
         _stageFont = new Font("terminator-two-20");
         _selectorFont = new Font("public-pixel-30");
-        
+
         _pauseMenu = new PauseMenu();
 
         _selector = new ContinueSelector(_selectorFont);
@@ -118,13 +82,10 @@ public class TimeAttackMode : IGameState
     {
     }
 
-    private bool _lost;
-    
     public void Update()
     {
         if (_lost)
         {
-            
             _selector.Update();
 
 
@@ -145,9 +106,10 @@ public class TimeAttackMode : IGameState
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
             return;
         }
-        
+
         if (Match.IsOver)
         {
             if (Match.SetWinner == MatchWinner.P1)
@@ -183,7 +145,6 @@ public class TimeAttackMode : IGameState
             else
             {
                 _lost = true;
-                return;
             }
         }
         else
@@ -230,9 +191,8 @@ public class TimeAttackMode : IGameState
         {
             Match.Draw();
             DrawTimeAttackInfo();
-            _pauseMenu.Draw(); 
+            _pauseMenu.Draw();
         }
-           
     }
 
     private void AdvanceStage()
@@ -270,5 +230,37 @@ public class TimeAttackMode : IGameState
     {
         _stageString = $"STAGE {_stage}/{StageCount}";
         _stageStringSize = _stageFont.MeasureString(_stageString);
+    }
+
+    private enum ContinueSelectorAction : byte
+    {
+        None,
+        TryAgain,
+        Quit
+    }
+
+    private class ContinueSelector : TextSelector
+    {
+        public ContinueSelectorAction Action;
+
+        public ContinueSelector(Font font) : base(font)
+        {
+        }
+
+        public override void Update()
+        {
+            Begin();
+
+            Break(20.0f);
+            Label("YOU LOST!");
+            Break(20.0f);
+
+            if (Button("TRY AGAIN")) Action = ContinueSelectorAction.TryAgain;
+
+            if (Button("QUIT")) Action = ContinueSelectorAction.Quit;
+
+            End();
+            base.Update();
+        }
     }
 }

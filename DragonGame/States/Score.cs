@@ -14,10 +14,10 @@ internal record Score
 
 internal record Height
 {
-    public double Amount;
+    public int Amount;
     public string Name;
 
-    public Height(string name, double height)
+    public Height(string name, int height)
     {
         Name = name;
         Amount = height;

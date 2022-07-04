@@ -24,9 +24,11 @@ internal class VersusSettingsSelector : TextSelector
         Quit
     }
 
+    private readonly bool _isHeight;
+
     private readonly byte[] _scores = new byte[Match.PlayerCount];
 
-    private readonly bool _isHeight;
+    private float _height;
 
     public VersusAction Action;
 
@@ -35,12 +37,11 @@ internal class VersusSettingsSelector : TextSelector
         _isHeight = isHeight;
     }
 
-    private float _height;
     public void SetHeight(float height)
     {
         _height = height;
     }
-    
+
     public void IncreaseScore(byte playerId)
     {
         _scores[playerId] = (byte)Math.Clamp(_scores[playerId] + 1, 0, 99);

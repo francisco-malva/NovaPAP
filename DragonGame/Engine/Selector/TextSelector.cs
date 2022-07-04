@@ -7,7 +7,6 @@ using System.Text;
 using DuckDuckJump.Engine.Assets;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Engine.Subsystems.Graphical;
-using DuckDuckJump.Game.Configuration;
 using SDL2;
 
 #endregion
@@ -107,7 +106,7 @@ public abstract class TextSelector
 
         var x = Graphics.LogicalSize.Width / 2.0f - size.Width / 2.0f;
         var y = _currentYStride;
-        var rect = new RectangleF(x, y ,
+        var rect = new RectangleF(x, y,
             size.Width, size.Height);
 
         var inMouseRange = rect.Contains(_mouseX, _mouseY);

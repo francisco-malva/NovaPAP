@@ -1,7 +1,6 @@
 ﻿#region
 
 using System;
-using System.Drawing;
 using System.IO;
 using DuckDuckJump.Engine.Input;
 using DuckDuckJump.Game.Input;
@@ -73,8 +72,8 @@ internal static class Settings
 
         public bool NicknameDefined;
         public Nickname Nickname;
-        
-        
+
+
         public bool Fullscreen;
 
         public int GetInputStartingOffset(int player)

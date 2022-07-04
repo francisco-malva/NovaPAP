@@ -54,7 +54,8 @@ internal static class Graphics
 
     public static void SetFullscreen()
     {
-        SDL.SDL_SetWindowFullscreen(Window, (uint)(Settings.MyData.Fullscreen ? SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0));
+        SDL.SDL_SetWindowFullscreen(Window,
+            (uint)(Settings.MyData.Fullscreen ? SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0));
     }
 
     public static void Initialize()
@@ -62,8 +63,7 @@ internal static class Graphics
         Window = SDL.SDL_CreateWindow("Duck Duck Jump!", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, 640,
             480, 0);
 
-       
-        
+
         if (Window == IntPtr.Zero)
             Error.RaiseMessage("Could not create window.");
 
@@ -75,7 +75,7 @@ internal static class Graphics
 
         if (SDL.SDL_SetRenderDrawBlendMode(Renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND) != 0)
             Error.RaiseMessage($"Could not set correct blending mode. SDL Error: {SDL.SDL_GetError()}");
-        
+
         SetFullscreen();
     }
 

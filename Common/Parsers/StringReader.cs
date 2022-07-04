@@ -1,4 +1,6 @@
-﻿namespace Common.Parsers;
+﻿using System;
+
+namespace Common.Parsers;
 
 internal class StringReader
 {

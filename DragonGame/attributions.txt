@@ -1,0 +1,5 @@
+﻿Arcade fast flow -> https://opengameart.org/content/arcade-fast-flow-sound
+    - Used in most game modes (Time Attack, Online, Offline)
+
+Gone fishin' -> https://opengameart.org/content/gone-fishin
+    - Song played in the game's title screen

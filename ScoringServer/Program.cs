@@ -1,10 +1,14 @@
 ﻿#region
 
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using Common.Parsers;
 using Common.Web;
 
@@ -64,7 +68,7 @@ void HandleSocket(Socket sock)
         case "GetScores":
             GetScores(sock);
             break;
-        case "GetTimes":
+        case "GetHeights":
             GetHeights(sock);
             break;
     }
@@ -80,7 +84,8 @@ async void GetHeights(Socket sock)
 
     await using var reader = cmd.ExecuteReader();
 
-    while (await reader.ReadAsync()) str += $"(\"{reader.GetString("Name")}\" {reader.GetDouble("Height")})";
+    while (await reader.ReadAsync())
+        str += $"(\"{reader.GetString("Name")}\" {Math.Truncate(reader.GetDouble("Height"))})";
 
     str += ")";
 
@@ -130,7 +135,7 @@ async void UpdateHeights(string name, double height)
 
     cmd.Prepare();
 
-    cmd.ExecuteNonQuery();
+    await cmd.ExecuteNonQueryAsync();
     Console.WriteLine("Updated Heights");
 }
 

@@ -1,5 +1,7 @@
 ﻿#region
 
+using System;
+using System.IO;
 using System.IO.Compression;
 using SDL2;
 using SixLabors.ImageSharp;

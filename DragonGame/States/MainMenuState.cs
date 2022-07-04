@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 using Common.Parsers;
 using DuckDuckJump.Engine.Assets;
 using DuckDuckJump.Engine.Input;
@@ -15,7 +14,6 @@ using DuckDuckJump.Engine.Selector;
 using DuckDuckJump.Engine.Subsystems.Auditory;
 using DuckDuckJump.Engine.Subsystems.Flow;
 using DuckDuckJump.Engine.Subsystems.Graphical;
-using DuckDuckJump.Engine.Subsystems.Output;
 using DuckDuckJump.Engine.Wrappers.SDL2.Graphics.Textures;
 using DuckDuckJump.Game;
 using DuckDuckJump.Game.Assets;
@@ -62,6 +60,8 @@ public class MainMenuSelector : TextSelector
 
     private byte _difficulty;
     private List<Height> _heights;
+
+    private int _input;
     private bool _items;
     private float _musicVolume;
     private sbyte _rounds = 1;
@@ -79,7 +79,26 @@ public class MainMenuSelector : TextSelector
         if (!Settings.MyData.NicknameDefined) _state = State.NicknameSetup;
     }
 
-    private void GetServerData()
+    private void GetHeightsServerData()
+    {
+        Socket socket = null;
+        try
+        {
+            socket = ScoringServer.ConnectToScoringServer();
+
+            GetHeights(socket);
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+        finally
+        {
+            socket?.Close();
+        }
+    }
+
+    private void GetScoreServerData()
     {
         Socket socket = null;
         try
@@ -87,11 +106,10 @@ public class MainMenuSelector : TextSelector
             socket = ScoringServer.ConnectToScoringServer();
 
             GetScores(socket);
-            GetHeights(socket);
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            Error.RaiseMessage(e.Message);
+            // ignored
         }
         finally
         {
@@ -117,12 +135,12 @@ public class MainMenuSelector : TextSelector
         socket.Send(Encoding.UTF8.GetBytes("(\"GetHeights\")"));
 
         Span<byte> buffer = stackalloc byte[4096];
-        var recv = socket.Receive(buffer);
+        socket.Receive(buffer);
 
         _heights = new List<Height>();
 
         if (SExpressionParser.Parse(Encoding.UTF8.GetString(buffer)) is not List<object> list) return;
-        foreach (List<object> height in list) _heights.Add(new Height(height[0] as string, (double)height[1]));
+        foreach (List<object> height in list) _heights.Add(new Height(height[0] as string, (int)height[1]));
     }
 
     public override void Update()
@@ -261,7 +279,7 @@ public class MainMenuSelector : TextSelector
 
         if (Button($"BEST OF {_rounds}"))
         {
-            _rounds = (sbyte)(_rounds + 1 % 5);
+            _rounds = (sbyte)((_rounds + 1) % 6);
 
             if (_rounds == 0) _rounds = 1;
         }
@@ -283,7 +301,7 @@ public class MainMenuSelector : TextSelector
         var place = 1;
         if (_heights != null)
             foreach (var height in _heights)
-                Label($"{place++}. {height.Name} {Math.Truncate(height.Amount)}m");
+                Label($"{place++}. {height.Name} {Math.Truncate((double)height.Amount)}M");
 
         if (Button("BACK"))
             _state = State.ScoreboardSelection;
@@ -307,8 +325,6 @@ public class MainMenuSelector : TextSelector
             _state = State.ScoreboardSelection;
     }
 
-    private int _input;
-    
     private void UpdateInput()
     {
         unsafe
@@ -318,7 +334,7 @@ public class MainMenuSelector : TextSelector
             Break(30.0f);
 
             var player = _input < 3 ? "P1" : "P2";
-        
+
             Label($"KEY FOR {player} {ActionNames[_input % 3]}", Color.White);
             Label($"{SDL.SDL_GetScancodeName((SDL.SDL_Scancode)Settings.MyData.InputProfiles[_input])}",
                 Color.White);
@@ -344,11 +360,7 @@ public class MainMenuSelector : TextSelector
             }
 
 
-            if (Keyboard.AnyDown(out var newBinding))
-                unsafe
-                {
-                    Settings.MyData.InputProfiles[_input] = (int)newBinding;
-                }
+            if (Keyboard.AnyDown(out var newBinding)) Settings.MyData.InputProfiles[_input] = (int)newBinding;
         }
     }
 
@@ -419,15 +431,9 @@ public class MainMenuSelector : TextSelector
         Break(30.0f);
 
         if (Button("AUDIO")) _state = State.AudioSettings;
-        if (Button("INPUT"))
-        {
-            _state = State.InputSettings;
-        }
+        if (Button("INPUT")) _state = State.InputSettings;
 
-        if (Button("SCREEN"))
-        {
-            _state = State.ScreenSettings;
-        }
+        if (Button("SCREEN")) _state = State.ScreenSettings;
 
         Break(10.0f);
 
@@ -500,7 +506,8 @@ public class MainMenuSelector : TextSelector
         if (Button("SCOREBOARDS"))
         {
             _state = State.ScoreboardSelection;
-            Task.Run(GetServerData);
+            GetScoreServerData();
+            GetHeightsServerData();
         }
 
         if (Button("SETTINGS")) _state = State.Settings;
@@ -565,6 +572,12 @@ public class MainMenuState : IGameState
 
     public void Update()
     {
+        if (Keyboard.KeyDown(SDL.SDL_Scancode.SDL_SCANCODE_T))
+        {
+            GameFlow.Set(new TrainingMode());
+            return;
+        }
+
         Span<GameInput> inputs = stackalloc GameInput[Match.PlayerCount];
         Match.Update(inputs);
         _selector?.Update();

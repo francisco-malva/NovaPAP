@@ -3,7 +3,6 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using Common.Web;
 using DuckDuckJump.Engine.Subsystems.Output;
 using DuckDuckJump.Game;
@@ -21,7 +20,7 @@ public class HostNetworkMode : NetworkMode
         OtherInputIndex = 1;
     }
 
-    protected override async Task EstablishConnection()
+    protected override void EstablishConnection()
     {
         var localEndPoint = new IPEndPoint(IpUtilities.GetIpFromName(Dns.GetHostName()), 11000);
 
@@ -44,6 +43,14 @@ public class HostNetworkMode : NetworkMode
             BitConverter.TryWriteBytes(buffer, seed);
 
             OtherSocket.Send(buffer);
+
+            recvLoop:
+            while (OtherSocket.Receive(buffer) < sizeof(int))
+            {
+            }
+
+
+            if (buffer[0] != byte.MaxValue) goto recvLoop;
         }
     }
 }

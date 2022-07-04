@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Drawing;
 using System.Numerics;
 
@@ -9,11 +10,6 @@ namespace Common.Utilities;
 
 public static class Mathematics
 {
-    public static float Next(this Random random, float minimum, float maximum)
-    {
-        return Lerp(minimum, maximum, random.NextSingle());
-    }
-
     // Gradually changes a value towards a desired goal over time.
     public static float SmoothDamp(float current, float target, ref float currentVelocity, float smoothTime,
         float deltaTime, float maxSpeed = float.PositiveInfinity)
