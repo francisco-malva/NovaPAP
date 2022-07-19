@@ -555,7 +555,7 @@ public class MainMenuState : IGameState
         Audio.PlayMusic(_music);
 
         MatchAssets.Load();
-        Match.Initialize(new GameInfo(new ComInfo(8, 8), 100, Environment.TickCount, 0, ushort.MaxValue,
+        Match.Initialize(new GameInfo(new ComInfo(8, 8), 10, Environment.TickCount, 0, ushort.MaxValue,
             BannerWork.MessageIndex.NoBanner, GameInfo.Flags.Exhibition | GameInfo.Flags.NoItems));
     }
 

@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.IO;
 using Common.Utilities;
 
@@ -1049,10 +1050,7 @@ internal static class RandomWork
         _pointer = stream.Read<ushort>();
     }
 
-    public static void Reset()
-    {
-        _pointer = (ushort)(Match.Info.RandomSeed % Entropy.Length);
-    }
+    public static void Reset() => _pointer = (ushort) (Math.Abs(Match.Info.RandomSeed) % Entropy.Length);
 
 
     private static byte RandomByte()
